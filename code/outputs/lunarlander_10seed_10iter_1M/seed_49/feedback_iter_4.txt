@@ -1,0 +1,24 @@
+Training diagnostic report:
+- Mean evaluation score: -124.054
+- Success rate: 0.000
+- Mean episode length: 72.0
+- Trend: needs_improvement
+- Converged: False
+- Main failure mode: reward is weak or misaligned; search denser generic transition signals from the unmasked step context
+- Interrupted: False
+- Reward runtime errors: 0
+Please improve only the reward code. Use no hidden environment semantics or masked official reward; rely on scalar evaluation, runtime stability, transition-level signals, and HRDC stage weights.
+Autonomous search diagnostic policy:
+- Do not use environment-specific human rules or manually named state semantics.
+- Treat the task as a black-box MDP: only scalar evaluation, episode length, reward errors, transition changes, action values, unmasked step context, and training_progress are available.
+- If score is low, search for denser generic transition signals from the unmasked step context.
+- If reward runtime errors appear, simplify the program and remove unsafe indexing or undefined variables.
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+- If mean episode length is very short, treat it as early termination evidence and search for a safer reward structure.
+- If the latest iteration is worse than the previous best but the best score is still poor, prefer structural restart over rollback.
+
+Conservative rollback instruction:
+- The latest reward is worse than the previous best reward. Start from previous_best_code, not from the latest code.
+- Keep the same non-leaking reward-reference policy and make only one small targeted change.
+- Do not introduce a new large bonus, a new hard clamp, or a new global multiplier.

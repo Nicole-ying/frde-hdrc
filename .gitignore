@@ -1,0 +1,20 @@
+# Logs
+*.log
+output_*.log
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Models (too large)
+model_*.zip
+
+# Smoke / temp experiments
+outputs/lunarlander_smoke*/
+outputs/lunarlander_3seed_10iter_300k/
+outputs/run_3seed_1M.log
+
+# Temp / cache
+.claude/
+nohup.out

@@ -1,0 +1,12 @@
+[
+  {
+    "iteration": 0,
+    "score": 225.679495150618,
+    "success_rate": 0.85,
+    "mean_episode_length": 396.95,
+    "verdict": "success",
+    "lesson": "Keep this reward structure as a successful candidate; future edits should be conservative.",
+    "code_path": "outputs\\lunarlander_10seed_10iter_1M\\seed_50\\reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation arrays\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement toward center - encourage reducing absolute position\n    # Use generic dimension-agnostic feature: sum of absolute differences\n    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(2))  # First 2 dims are position\n    move_reward = pos_change * 0.5\n    \n    # Component 2: Velocity damping - encourage reducing velocity magnitude\n    vel_change = sum(o[i]**2 - n[i]**2 for i in range(2, 4))  # Dims 2-3 are velocity\n    vel_reward = vel_change * 0.3\n    \n    # Component 3: Stability - encourage upright orientation and low angular velocity\n    angle_change = abs(o[4]) - abs(n[4])  # Dim 4 is angle\n    angvel_change = abs(o[5]) - abs(n[5])  # Dim 5 is angular velocity\n    stability_reward = (angle_change * 0.2 + angvel_change * 0.1)\n    \n    # Component 4: Ground contact bonus - encourage landing\n    ground_contact = sum(n[6:8])  # Dims 6-7 are ground contact flags\n    contact_reward = ground_contact * 0.5\n    \n    # Component 5: Action penalty - small cost for using engines\n    action_cost = -0.01 * (1.0 if action != 0 else 0.0)\n    \n    # Stage weights based on training progress\n    # Early: focus on movement and velocity\n    # Middle: add stability\n    # Late: emphasize ground contact\n    if training_progress < 0.3:\n        w_move = 1.0\n        w_vel = 1.0\n        w_stability = 0.3\n        w_contact = 0.1\n        w_action = 0.5\n    elif training_progress < 0.7:\n        w_move = 0.7\n        w_vel = 0.7\n        w_stability = 0.8\n        w_contact = 0.5\n        w_action = 0.3\n    else:\n        w_move = 0.3\n        w_vel = 0.3\n        w_stability = 0.5\n        w_contact = 1.0\n        w_action = 0.1\n    \n    # Combine components\n    reward = (w_move * move_reward + \n              w_vel * vel_reward + \n              w_stability * stability_reward + \n              w_contact * contact_reward + \n              w_action * action_cost)\n    \n    return reward"
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "iteration": 0,
+    "score": 142.68150886644477,
+    "success_rate": 0.45,
+    "mean_episode_length": 324.7,
+    "converged": false,
+    "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+    "reward_code_path": "outputs\\lunarlander_10seed_10iter_1M\\seed_46\\reward_iter_0.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  },
+  {
+    "iteration": 1,
+    "score": 115.36592254736993,
+    "success_rate": 0.5,
+    "mean_episode_length": 391.85,
+    "converged": false,
+    "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+    "reward_code_path": "outputs\\lunarlander_10seed_10iter_1M\\seed_46\\reward_iter_1.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  },
+  {
+    "iteration": 2,
+    "score": 86.88115154908013,
+    "success_rate": 0.4,
+    "mean_episode_length": 247.75,
+    "converged": false,
+    "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+    "reward_code_path": "outputs\\lunarlander_10seed_10iter_1M\\seed_46\\reward_iter_2.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  },
+  {
+    "iteration": 3,
+    "score": 39.8699942420294,
+    "success_rate": 0.15,
+    "mean_episode_length": 369,
+    "converged": false,
+    "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+    "reward_code_path": "outputs\\lunarlander_10seed_10iter_1M\\seed_46\\reward_iter_3.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  },
+  {
+    "iteration": 4,
+    "score": 176.16123798123022,
+    "success_rate": 0.65,
+    "mean_episode_length": 323.25,
+    "converged": false,
+    "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+    "reward_code_path": "outputs\\lunarlander_10seed_10iter_1M\\seed_46\\reward_iter_4.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  },
+  {
+    "iteration": 5,
+    "score": 250.7150338761123,
+    "success_rate": 0.9,
+    "mean_episode_length": 319.35,
+    "converged": true,
+    "failure_mode": "task solved; no obvious failure mode",
+    "reward_code_path": "outputs\\lunarlander_10seed_10iter_1M\\seed_46\\reward_iter_5.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  }
+]

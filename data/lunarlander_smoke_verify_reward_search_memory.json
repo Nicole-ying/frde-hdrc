@@ -1,0 +1,11 @@
+[
+  {
+    "iteration": 0,
+    "score": -368.9944243895821,
+    "success_rate": 0.0,
+    "mean_episode_length": 50.0,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs\\lunarlander_smoke_verify\\reward_iter_0.py"
+  }
+]

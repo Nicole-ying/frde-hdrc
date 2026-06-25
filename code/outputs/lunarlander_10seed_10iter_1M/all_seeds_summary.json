@@ -1,0 +1,752 @@
+{
+  "42": [
+    {
+      "iteration": 0,
+      "score": -257.3244255074823,
+      "success_rate": 0.0,
+      "mean_episode_length": 121.8,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -96.14392534242623,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": 215.98107948731942,
+      "success_rate": 0.6,
+      "mean_episode_length": 565.75,
+      "converged": true,
+      "failure_mode": "task solved; no obvious failure mode",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "43": [
+    {
+      "iteration": 0,
+      "score": 127.66472956278622,
+      "success_rate": 0.4,
+      "mean_episode_length": 384.9,
+      "converged": false,
+      "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -114.80060797133923,
+      "success_rate": 0.0,
+      "mean_episode_length": 67.9,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": -138.3628815972267,
+      "success_rate": 0.0,
+      "mean_episode_length": 70.55,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": -111.37210174960337,
+      "success_rate": 0.0,
+      "mean_episode_length": 66.6,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": 160.9349642448606,
+      "success_rate": 0.3,
+      "mean_episode_length": 628.35,
+      "converged": false,
+      "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": 158.74730592367732,
+      "success_rate": 0.65,
+      "mean_episode_length": 539.05,
+      "converged": false,
+      "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 6,
+      "score": 229.51916910047706,
+      "success_rate": 0.85,
+      "mean_episode_length": 418.15,
+      "converged": true,
+      "failure_mode": "task solved; no obvious failure mode",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "44": [
+    {
+      "iteration": 0,
+      "score": -136.78914148877195,
+      "success_rate": 0.0,
+      "mean_episode_length": 69.05,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -136.44907705125985,
+      "success_rate": 0.0,
+      "mean_episode_length": 68.65,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": -127.40946812411367,
+      "success_rate": 0.0,
+      "mean_episode_length": 66.8,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": -128.38852852201967,
+      "success_rate": 0.0,
+      "mean_episode_length": 67.9,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": -127.34513803893105,
+      "success_rate": 0.0,
+      "mean_episode_length": 69.25,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": -14.074133964695498,
+      "success_rate": 0.0,
+      "mean_episode_length": 982.3,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 6,
+      "score": -267.4954712715827,
+      "success_rate": 0.0,
+      "mean_episode_length": 108.5,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 7,
+      "score": -121.33651696820722,
+      "success_rate": 0.0,
+      "mean_episode_length": 653,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 8,
+      "score": -121.36038926556516,
+      "success_rate": 0.0,
+      "mean_episode_length": 72.1,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 9,
+      "score": -203.99904547493452,
+      "success_rate": 0.0,
+      "mean_episode_length": 295.1,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "45": [
+    {
+      "iteration": 0,
+      "score": -246.80640921702548,
+      "success_rate": 0.0,
+      "mean_episode_length": 142.45,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -183.62904322655197,
+      "success_rate": 0.0,
+      "mean_episode_length": 972.75,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": -11.155488856414337,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": -251.5441080042357,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": -128.28562031999732,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": -126.48207563561142,
+      "success_rate": 0.0,
+      "mean_episode_length": 69.2,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 6,
+      "score": -128.48127262169635,
+      "success_rate": 0.0,
+      "mean_episode_length": 72.05,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 7,
+      "score": -218.95852669909442,
+      "success_rate": 0.0,
+      "mean_episode_length": 87.3,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 8,
+      "score": 56.23758871182793,
+      "success_rate": 0.1,
+      "mean_episode_length": 516.3,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 9,
+      "score": 69.30741432729653,
+      "success_rate": 0.05,
+      "mean_episode_length": 651.2,
+      "converged": false,
+      "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "46": [
+    {
+      "iteration": 0,
+      "score": 142.68150886644477,
+      "success_rate": 0.45,
+      "mean_episode_length": 324.7,
+      "converged": false,
+      "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": 115.36592254736993,
+      "success_rate": 0.5,
+      "mean_episode_length": 391.85,
+      "converged": false,
+      "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": 86.88115154908013,
+      "success_rate": 0.4,
+      "mean_episode_length": 247.75,
+      "converged": false,
+      "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": 39.8699942420294,
+      "success_rate": 0.15,
+      "mean_episode_length": 369,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": 176.16123798123022,
+      "success_rate": 0.65,
+      "mean_episode_length": 323.25,
+      "converged": false,
+      "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": 250.7150338761123,
+      "success_rate": 0.9,
+      "mean_episode_length": 319.35,
+      "converged": true,
+      "failure_mode": "task solved; no obvious failure mode",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "47": [
+    {
+      "iteration": 0,
+      "score": -202.70700790493854,
+      "success_rate": 0.0,
+      "mean_episode_length": 71.75,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -113.56614197391562,
+      "success_rate": 0.0,
+      "mean_episode_length": 69.05,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": -113.96522079918647,
+      "success_rate": 0.0,
+      "mean_episode_length": 68.95,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": 29.95892879514549,
+      "success_rate": 0.05,
+      "mean_episode_length": 786.35,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": 16.27017883389503,
+      "success_rate": 0.0,
+      "mean_episode_length": 887.95,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": 215.8516556183951,
+      "success_rate": 0.65,
+      "mean_episode_length": 361,
+      "converged": true,
+      "failure_mode": "task solved; no obvious failure mode",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "48": [
+    {
+      "iteration": 0,
+      "score": -4.05369760575153,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -5.86410347306675,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": -5.613147348333799,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": -7.5258275876211185,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": -11.219655978249527,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": -279.6728371887425,
+      "success_rate": 0.0,
+      "mean_episode_length": 153.2,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 6,
+      "score": -182.02619371119764,
+      "success_rate": 0.0,
+      "mean_episode_length": 143,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 7,
+      "score": -132.906599846857,
+      "success_rate": 0.0,
+      "mean_episode_length": 216.8,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 8,
+      "score": 118.13353489798345,
+      "success_rate": 0.4,
+      "mean_episode_length": 409.5,
+      "converged": false,
+      "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 9,
+      "score": 3.0635722588729335,
+      "success_rate": 0.0,
+      "mean_episode_length": 982.6,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "49": [
+    {
+      "iteration": 0,
+      "score": 27.52801275404678,
+      "success_rate": 0.0,
+      "mean_episode_length": 163.8,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -108.95344932944542,
+      "success_rate": 0.0,
+      "mean_episode_length": 68.9,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": -124.8382480520356,
+      "success_rate": 0.0,
+      "mean_episode_length": 70.25,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": -123.35958252788328,
+      "success_rate": 0.0,
+      "mean_episode_length": 72,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": -124.05424347841233,
+      "success_rate": 0.0,
+      "mean_episode_length": 72.05,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": -123.50043185008583,
+      "success_rate": 0.0,
+      "mean_episode_length": 71.95,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 6,
+      "score": -63.27038341156662,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 7,
+      "score": -150.44907438092156,
+      "success_rate": 0.0,
+      "mean_episode_length": 206.8,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 8,
+      "score": -238.97113018496043,
+      "success_rate": 0.0,
+      "mean_episode_length": 71.95,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 9,
+      "score": 86.85101737090325,
+      "success_rate": 0.3,
+      "mean_episode_length": 136.6,
+      "converged": false,
+      "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "50": [
+    {
+      "iteration": 0,
+      "score": 225.679495150618,
+      "success_rate": 0.85,
+      "mean_episode_length": 396.95,
+      "converged": true,
+      "failure_mode": "task solved; no obvious failure mode",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "51": [
+    {
+      "iteration": 0,
+      "score": -124.8382480520356,
+      "success_rate": 0.0,
+      "mean_episode_length": 70.25,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -122.95811543128865,
+      "success_rate": 0.0,
+      "mean_episode_length": 72.3,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": -123.96107492430203,
+      "success_rate": 0.0,
+      "mean_episode_length": 72.05,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": -125.49937986596126,
+      "success_rate": 0.0,
+      "mean_episode_length": 73.4,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": -120.1347062549335,
+      "success_rate": 0.0,
+      "mean_episode_length": 72.65,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": 21.218690307718116,
+      "success_rate": 0.0,
+      "mean_episode_length": 887.35,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 6,
+      "score": -119.41981872878854,
+      "success_rate": 0.0,
+      "mean_episode_length": 72.4,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 7,
+      "score": -127.97068002510083,
+      "success_rate": 0.0,
+      "mean_episode_length": 70.7,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 8,
+      "score": -120.26872365065728,
+      "success_rate": 0.0,
+      "mean_episode_length": 71.8,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 9,
+      "score": 20.915878320739456,
+      "success_rate": 0.1,
+      "mean_episode_length": 821.25,
+      "converged": false,
+      "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ]
+}
