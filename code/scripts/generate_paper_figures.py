@@ -261,22 +261,117 @@ def fig_c2_iteration_comparison():
 
 # ═══════════════════════════════════════════════════
 
+# ═══════════════════════════════════════════════════
+#  SET D: Ablation — HRDC vs Flat reward structure
+# ═══════════════════════════════════════════════════
+EXP_ABL = "lunar_lander_ablation_flat"
+EXP_HRDC = "lunarlander_10seed_1M_final"
+
+def fig_d1_ablation_scores():
+    """D1: Side-by-side scores: HRDC vs Flat ablation"""
+    hrdc_best = {s: load_best(EXP_HRDC, s) for s in range(42,52) if load_best(EXP_HRDC, s) is not None}
+    flat_best = {s: load_best(EXP_ABL, s) for s in range(42,52) if load_best(EXP_ABL, s) is not None}
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
+
+    for ax, data, name, col_good in [(ax1, hrdc_best, 'HRDC', GREEN), (ax2, flat_best, 'Flat (w/o HRDC)', ORANGE)]:
+        seeds = sorted(data.keys())
+        scores = [data[s] for s in seeds]
+        colors = [col_good if v >= SOLVED else RED for v in scores]
+        bars = ax.bar([f'{s}' for s in seeds], scores, color=colors, width=0.6)
+        ax.axhline(SOLVED, color=RED, ls='--', lw=1.5)
+        solved_n = sum(1 for v in scores if v >= SOLVED)
+        ax.set_title(f'{name}: {solved_n}/{len(scores)} solved')
+        ax.set_xlabel('Seed'); ax.set_ylabel('Best Score')
+        for b, v in zip(bars, scores):
+            y = v+8 if v>=0 else v-20
+            ax.text(b.get_x()+b.get_width()/2, y, f'{v:.0f}', ha='center', fontsize=7)
+
+    fig.suptitle('Ablation: HRDC vs Flat Reward Structure', fontsize=15, y=1.02)
+    fig.tight_layout(); fig.savefig(OUT/"D1_ablation_scores.png", bbox_inches='tight'); plt.close(fig)
+
+def fig_d2_ablation_success_rate():
+    """D2: Success rate comparison HRDC vs Flat"""
+    hrdc_solved = sum(1 for s in range(42,52) if load_best(EXP_HRDC, s) and load_best(EXP_HRDC, s) >= SOLVED)
+    flat_solved = sum(1 for s in range(42,52) if load_best(EXP_ABL, s) and load_best(EXP_ABL, s) >= SOLVED)
+
+    fig, ax = plt.subplots(figsize=(5.5, 5))
+    x = [0, 1]
+    bars = ax.bar(['HRDC', 'Flat (w/o HRDC)'], [hrdc_solved, flat_solved],
+                  color=[BLUE, ORANGE], width=0.5)
+    ax.set_ylabel('Seeds Solved (out of 10)')
+    ax.set_title('Ablation: Success Rate')
+    ax.set_ylim(0, 10)
+    for b, v in zip(bars, [hrdc_solved, flat_solved]):
+        ax.text(b.get_x()+b.get_width()/2, v+0.2, f'{v}/10', ha='center', fontsize=16, fontweight='bold')
+    fig.tight_layout(); fig.savefig(OUT/"D2_ablation_success.png", bbox_inches='tight'); plt.close(fig)
+
+def fig_d3_ablation_trajectories():
+    """D3: Trajectory comparison — all seeds both experiments"""
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.5))
+
+    for ax, exp, title in [(ax1, EXP_HRDC, 'HRDC'), (ax2, EXP_ABL, 'Flat (w/o HRDC)')]:
+        for s in range(42, 52):
+            d = load(exp, s)
+            if not d: continue
+            scores = [r['score'] for r in d]
+            best_v = max(scores)
+            color = GREEN if best_v >= SOLVED else RED
+            alpha = 0.9 if best_v >= SOLVED else 0.3
+            lw = 2 if best_v >= SOLVED else 1
+            ax.plot(range(len(scores)), scores, color=color, alpha=alpha, lw=lw,
+                    marker='o' if best_v >= SOLVED else '.', ms=4)
+        ax.axhline(SOLVED, color=RED, ls='--', lw=1)
+        ax.axhline(0, color=GRAY, ls='-', lw=0.5)
+        ax.set_title(title); ax.set_xlabel('Iteration'); ax.set_ylabel('Score')
+
+    fig.suptitle('Ablation: All Iteration Trajectories (green=solved, red=unsolved)', fontsize=15, y=1.02)
+    fig.tight_layout(); fig.savefig(OUT/"D3_ablation_trajectories.png", bbox_inches='tight'); plt.close(fig)
+
+def fig_d4_ablation_boxplot():
+    """D4: Box plot comparison"""
+    hrdc_scores = [load_best(EXP_HRDC, s) for s in range(42,52) if load_best(EXP_HRDC, s) is not None]
+    flat_scores = [load_best(EXP_ABL, s) for s in range(42,52) if load_best(EXP_ABL, s) is not None]
+
+    fig, ax = plt.subplots(figsize=(6, 5))
+    bp = ax.boxplot([hrdc_scores, flat_scores], labels=['HRDC', 'Flat (w/o HRDC)'],
+                    patch_artist=True, widths=0.5)
+    bp['boxes'][0].set_facecolor(BLUE); bp['boxes'][0].set_alpha(0.6)
+    bp['boxes'][1].set_facecolor(ORANGE); bp['boxes'][1].set_alpha(0.6)
+
+    # scatter individual points
+    for i, scores in enumerate([hrdc_scores, flat_scores]):
+        jitter = np.random.normal(i+1, 0.05, len(scores))
+        ax.scatter(jitter, scores, alpha=0.7, s=30, zorder=3)
+
+    ax.axhline(SOLVED, color=RED, ls='--', lw=1.5, label=f'Solved ({SOLVED})')
+    ax.set_ylabel('Best Score per Seed')
+    ax.set_title('Ablation: Score Distribution (HRDC vs Flat)')
+    ax.legend(frameon=False)
+    fig.tight_layout(); fig.savefig(OUT/"D4_ablation_boxplot.png", bbox_inches='tight'); plt.close(fig)
+
+
 if __name__ == "__main__":
-    # Set A
+    # Set A: v2 3-seed
     fig_a1_scores()
     fig_a2_trajectories()
     fig_a3_convergence()
     fig_a4_detail()
-    # Set B
+    # Set B: 10-seed final
     fig_b1_scores()
     fig_b2_trajectories()
     fig_b3_success_rate()
     fig_b4_solved_detail()
     fig_b5_unsolved_detail()
     fig_b6_convergence()
-    # Set C
+    # Set C: Cross-experiment
     fig_c1_evidence_chain()
     fig_c2_iteration_comparison()
+    # Set D: Ablation
+    fig_d1_ablation_scores()
+    fig_d2_ablation_success_rate()
+    fig_d3_ablation_trajectories()
+    fig_d4_ablation_boxplot()
 
     pngs = sorted(OUT.glob("*.png"))
     print(f"Generated {len(pngs)} figures:")
