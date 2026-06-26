@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "The current skeleton is fundamentally broken. Score is -136.4 with episode length only 69 and per-step reward -1.982, indicating the reward is too punishing and the agent dies quickly. The skeleton has only 3 components (movement, smoothness, action cost) but is missing critical signals: a survival bonus to keep the agent alive longer, a stability signal to prevent tumbling/spinning (angle/angular velocity), and a contact/landing signal. The movement_reward uses abs_diff which can be positive or negative but lacks a clear directional signal for the landing task. The smoothness_reward penalizes all changes equally, which is undirected. The action_cost is too aggressive at -0.01 per step. Given the extremely short episode length (69) and deeply negative per-step reward, this skeleton needs a complete rebuild with a simpler, more balanced design that includes survival, stability, and gentle penalties."
+}

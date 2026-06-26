@@ -1,0 +1,32 @@
+[
+  {
+    "iteration": 0,
+    "score": -136.43419822541892,
+    "success_rate": 0.0,
+    "mean_episode_length": 68.85,
+    "verdict": "failure",
+    "lesson": "score=-136.4, survived 69 steps, success_rate=0.00",
+    "code_path": "outputs\\smoke_agent_v1\\reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Create generic arrays for dimension-agnostic processing\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement towards stability (reducing absolute values)\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    movement_reward = abs_diff / len(o)\n    \n    # Component 2: Smoothness of transition (small changes are good)\n    delta = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    smoothness_reward = -delta / len(o)\n    \n    # Component 3: Action cost penalty (encourage efficient actions)\n    action_cost = -0.01 * float(action)\n    \n    # Stage-based weights that evolve with training progress\n    # Early training: focus on movement and exploration\n    # Late training: focus on smoothness and precision\n    stage1_weight = 1.0 - training_progress  # Decreases over time\n    stage2_weight = training_progress  # Increases over time\n    \n    # Combine components with stage weights\n    reward = (\n        stage1_weight * movement_reward +\n        stage2_weight * smoothness_reward +\n        action_cost\n    )\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": -168.73000459736056,
+    "success_rate": 0.0,
+    "mean_episode_length": 69.2,
+    "verdict": "failure",
+    "lesson": "score=-168.7, survived 69 steps, success_rate=0.00",
+    "code_path": "outputs\\smoke_agent_v1\\reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Create generic arrays for dimension-agnostic processing\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement towards stability (reducing absolute values)\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    movement_reward = abs_diff / len(o)\n    \n    # Component 2: Smoothness of transition (small changes are good)\n    delta = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    smoothness_reward = -delta / len(o)\n    \n    # Component 3: Action cost penalty (encourage efficient actions)\n    action_cost = -0.01 * float(action)\n    \n    # Stage-based weights that evolve with training progress\n    # Early training: focus on movement and exploration\n    # Late training: focus on smoothness and precision\n    stage1_weight = 1.0 - training_progress  # Decreases over time\n    stage2_weight = training_progress  # Increases over time\n    \n    # Combine components with stage weights\n    reward = (\n        stage1_weight * movement_reward +\n        stage2_weight * smoothness_reward +\n        action_cost\n    )\n    \n    return reward"
+  },
+  {
+    "iteration": 2,
+    "score": -332.65987678679994,
+    "success_rate": 0.0,
+    "mean_episode_length": 66.9,
+    "verdict": "failure",
+    "lesson": "score=-332.7, survived 67 steps, success_rate=0.00",
+    "code_path": "outputs\\smoke_agent_v1\\reward_iter_2.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Create generic arrays for dimension-agnostic processing\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement towards stability (reducing absolute values)\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    movement_reward = abs_diff / len(o)\n    \n    # Component 2: Smoothness of transition (small changes are good)\n    delta = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    smoothness_reward = -delta / len(o)\n    \n    # Component 3: Action cost penalty (encourage efficient actions)\n    action_cost = -0.01 * float(action)\n    \n    # Stage-based weights that evolve with training progress\n    # Early training: focus on movement and exploration\n    # Late training: focus on smoothness and precision\n    stage1_weight = 1.0 - training_progress  # Decreases over time\n    stage2_weight = training_progress  # Increases over time\n    \n    # Combine components with stage weights\n    reward = (\n        stage1_weight * movement_reward +\n        stage2_weight * smoothness_reward +\n        action_cost\n    )\n    \n    return reward"
+  }
+]

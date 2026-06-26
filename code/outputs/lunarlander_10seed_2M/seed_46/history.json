@@ -76,5 +76,18 @@
     "error_message": "",
     "reward_error_count": 0,
     "reward_last_error": ""
+  },
+  {
+    "iteration": 6,
+    "score": -113.36589499576463,
+    "success_rate": 0.01,
+    "mean_episode_length": 73.97,
+    "converged": false,
+    "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+    "reward_code_path": "outputs\\lunarlander_10seed_2M\\seed_46\\reward_iter_6.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
   }
 ]
