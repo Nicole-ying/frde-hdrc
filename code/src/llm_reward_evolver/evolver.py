@@ -3,15 +3,17 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import json
 import math
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from .agent_core import AgentAction, AgentDecision, AgentMemory, AgentState
 from .config import ExperimentConfig
 from .diagnostics import analyze_original_reward_anchor, detect_forbidden_domain_terms, uses_original_reward
 from .eureka_context import load_eureka_context
 from .feedback import build_feedback, build_scalar_feedback
 from .llm import LLMClient, build_llm_client, extract_code
-from .memory import RewardSearchMemory
+from .memory import RewardSearchMemory  # 保留旧 memory 兼容
 from .prompts import build_initial_prompt, build_refine_prompt
 from .reward import RewardProgram
 from .trainer import inspect_env, make_env, train_agent
@@ -50,6 +52,7 @@ class RewardEvolver:
         )
         eureka_prompt_block = eureka_context.to_prompt_block()
         memory = RewardSearchMemory(self.output_dir / "reward_search_memory.json")
+        agent_memory = AgentMemory(self.output_dir / "agent_memory.json")  # 🆕
         records: List[IterationRecord] = []
         current_code: Optional[str] = None
         best_code: Optional[str] = None
@@ -96,15 +99,19 @@ class RewardEvolver:
                     self.config.reward_structure,
                     self.config.expose_env_name_to_llm,
                     eureka_prompt_block,
-                    memory.to_prompt_block(),
+                    agent_memory.render(),  # 🆕 Agent Memory 替代旧 memory
                     self.config.allow_original_reward_in_reward,
                 )
 
             fallback_code = None if restart and best_score < self.config.rollback_min_score else best_code
             # 保存完整 prompt 便于调试
             self._write_text(f"prompt_iter_{iteration}.txt", prompt)
-            current_code = self._generate_valid_reward(prompt, fallback_code)
+            current_code, llm_response = self._generate_valid_reward(prompt, fallback_code)
             reward_path = self._write_text(f"reward_iter_{iteration}.py", current_code)
+            # 🆕 提取 Agent 决策
+            agent_decision = parse_agent_decision(llm_response, current_code)
+            self._write_text(f"agent_decision_iter_{iteration}.json",
+                json.dumps(agent_decision.to_dict(), ensure_ascii=False, indent=2))
             reward_program = RewardProgram(
                 current_code,
                 reward_clip=self.config.reward_clip,
@@ -165,6 +172,19 @@ class RewardEvolver:
                 failure_mode=record.failure_mode,
                 code=current_code,  # 🆕 将本轮生成的完整代码写入memory
             )
+            # 🆕 Agent Memory 记录
+            agent_memory.record(
+                iteration=iteration,
+                action=agent_decision.action.value,
+                target=agent_decision.target,
+                reasoning=agent_decision.reasoning,
+                score=stats.mean_eval_score,
+                episode_length=stats.mean_episode_length,
+                success_rate=stats.success_rate,
+                code=current_code,
+                code_path=str(reward_path),
+                target_score=self.config.target_score,
+            )
 
             feedback = self._build_feedback(stats, current_code)
             # 🆕 不再做硬编码判断。LLM 自己看全部历史 + 自己决定策略
@@ -200,10 +220,13 @@ class RewardEvolver:
             feedback += f"\n{self._domain_feedback(domain_hits)}"
         return feedback
 
-    def _generate_valid_reward(self, prompt: str, fallback_code: Optional[str]) -> str:
+    def _generate_valid_reward(self, prompt: str, fallback_code: Optional[str]) -> tuple[str, str]:
+        """返回 (code, llm_response)，方便后续提取 Agent 决策。"""
         last_error = ""
+        last_response = ""
         for attempt in range(self.config.reward_repair_attempts + 1):
             response = self.llm_client.complete(prompt if attempt == 0 else self._repair_prompt(prompt, last_error))
+            last_response = response
             code = extract_code(response)
             try:
                 RewardProgram(
@@ -214,7 +237,7 @@ class RewardEvolver:
                 self._validate_reward_reference_policy(code)
                 self._validate_domain_terms(code)
                 self._smoke_test_reward_code(code)
-                return code
+                return code, response
             except Exception as exc:
                 last_error = f"{type(exc).__name__}: {exc}"
 
@@ -222,10 +245,10 @@ class RewardEvolver:
             try:
                 self._validate_reward_reference_policy(fallback_code)
                 self._validate_domain_terms(fallback_code)
-                return fallback_code
+                return fallback_code, last_response
             except ValueError:
                 pass
-        return default_reward_code(self.config.allow_original_reward_in_reward)
+        return default_reward_code(self.config.allow_original_reward_in_reward), last_response
 
     def _validate_reward_reference_policy(self, code: str) -> None:
         if not self.config.allow_original_reward_in_reward:
@@ -402,6 +425,34 @@ class RewardEvolver:
         path = self.output_dir / "history.json"
         data = [asdict(record) for record in records]
         path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def parse_agent_decision(response: str, code: str) -> AgentDecision:
+    """从 LLM 响应中提取 Agent 的 JSON 决策。"""
+    action_map = {
+        "rebuild": AgentAction.REBUILD, "delete": AgentAction.DELETE,
+        "add": AgentAction.ADD, "tune": AgentAction.TUNE,
+    }
+    # 尝试提取 JSON 块
+    json_match = re.search(r'```json\s*(.*?)\s*```', response, re.DOTALL)
+    if json_match:
+        try:
+            data = json.loads(json_match.group(1))
+            return AgentDecision(
+                action=action_map.get(data.get("action", "tune"), AgentAction.TUNE),
+                target=data.get("target", "skeleton"),
+                reasoning=data.get("reasoning", ""),
+                code=code,
+                raw_response=response,
+            )
+        except (json.JSONDecodeError, KeyError):
+            pass
+    # fallback: 从代码内容推断
+    return AgentDecision(
+        action=AgentAction.TUNE, target="unknown",
+        reasoning="Could not parse JSON decision; inferred from code.",
+        code=code, raw_response=response,
+    )
 
 
 def default_reward_code(allow_original_reward: bool = True) -> str:

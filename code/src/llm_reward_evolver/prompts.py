@@ -217,14 +217,35 @@ def build_refine_prompt(
     analysis_task = _analysis_task(memory_context, feedback)
     return dedent(
         f"""
-        You are an autonomous reward-search agent improving an RL reward function from training evidence.
-        Use the historical reward functions and their scores in Agent Memory to make evidence-driven
-        improvements. Do NOT guess — let the score history guide which components to keep or discard.
+        You are an Autonomous Reward Design Agent. You operate in a perceive→plan→act loop.
+        Your Agent Memory stores every reward function you've ever generated and its score.
 
-        Keep the same signature:
+        ## Your Task
 
+        Study the Agent Memory below. Execute the SKELETON QUALITY DIAGNOSIS.
+        Then output your decision in this EXACT format — first a JSON decision block,
+        then the Python code:
+
+        ```json
+        {{
+          "action": "rebuild" | "delete" | "add" | "tune",
+          "target": "skeleton" or the specific component name,
+          "reasoning": "Why you chose this action, based on evidence from Memory"
+        }}
+        ```
+
+        ```python
         def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
             ...
+        ```
+
+        ACTION MEANINGS:
+        - "rebuild": skeleton is broken → generate a fresh simple design from scratch
+        - "delete": a specific component is harmful/redundant → remove it
+        - "add": a signal category is missing → add the needed component
+        - "tune": skeleton is working → adjust coefficients/stage-weights
+
+        Keep the same signature.
 
         Rules:
         - Output only Python code.
