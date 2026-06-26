@@ -1,0 +1,42 @@
+[
+  {
+    "iteration": 0,
+    "score": -127.35269263299512,
+    "success_rate": 0.0,
+    "mean_episode_length": 585.65,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_47/reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n    \n    # Movement penalty - encourage staying still (small velocity changes)\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(4))\n    \n    # Stability reward - encourage smooth transitions\n    stability = sum((n[i] - o[i]) ** 2 for i in range(8))\n    \n    # Ground contact bonus - encourage landing\n    ground_contact = n[6] + n[7]\n    \n    # Angle penalty - encourage upright landing\n    angle_penalty = abs(n[4])\n    \n    # Action penalty - encourage efficient fuel use\n    action_cost = 0.0\n    if action == 2:\n        action_cost = 0.1\n    elif action in [1, 3]:\n        action_cost = 0.05\n    \n    reward = (\n        0.5 * movement\n        - 0.1 * stability\n        + 2.0 * ground_contact\n        - 0.5 * angle_penalty\n        - 0.2 * action_cost\n    )\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": -109.7621510215357,
+    "success_rate": 0.0,
+    "mean_episode_length": 69.0,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_47/reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # Transition progress: reward moving toward zero velocity and center position\n    # Use directional signal: abs(o) - abs(n) for position (indices 0,1) and velocity (indices 2,3)\n    progress_pos = (abs(o[0]) - abs(n[0])) + (abs(o[1]) - abs(n[1]))\n    progress_vel = (abs(o[2]) - abs(n[2])) + (abs(o[3]) - abs(n[3]))\n    transition_progress = progress_pos + progress_vel\n\n    # Smoothness penalty: penalize large changes in any state component\n    smoothness = sum(abs(n[i] - o[i]) for i in range(8))\n\n    # Landing reward: reward both legs contacting ground\n    ground_contact = n[6] + n[7]\n\n    # Angle penalty: penalize deviation from upright (angle index 4)\n    angle_penalty = abs(n[4])\n\n    # Angular velocity penalty: penalize spinning (index 5)\n    angular_vel_penalty = abs(n[5])\n\n    # Action cost: penalize engine use\n    action_cost = 0.0\n    if action == 2:\n        action_cost = 1.0\n    elif action in [1, 3]:\n        action_cost = 0.5\n\n    reward = (\n        1.0 * transition_progress\n        - 0.2 * smoothness\n        + 3.0 * ground_contact\n        - 1.0 * angle_penalty\n        - 0.5 * angular_vel_penalty\n        - 0.3 * action_cost\n    )\n\n    return reward"
+  },
+  {
+    "iteration": 2,
+    "score": -109.6254653144257,
+    "success_rate": 0.0,
+    "mean_episode_length": 68.95,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_47/reward_iter_2.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # Transition progress: reward moving toward zero velocity and center position\n    # Use directional signal: abs(o) - abs(n) for position (indices 0,1) and velocity (indices 2,3)\n    progress_pos = (abs(o[0]) - abs(n[0])) + (abs(o[1]) - abs(n[1]))\n    progress_vel = (abs(o[2]) - abs(n[2])) + (abs(o[3]) - abs(n[3]))\n    transition_progress = progress_pos + progress_vel\n\n    # Smoothness penalty: penalize large changes in any state component\n    smoothness = sum(abs(n[i] - o[i]) for i in range(8))\n\n    # Landing reward: reward both legs contacting ground\n    ground_contact = n[6] + n[7]\n\n    # Angle penalty: penalize deviation from upright (angle index 4)\n    angle_penalty = abs(n[4])\n\n    # Angular velocity penalty: penalize spinning (index 5)\n    angular_vel_penalty = abs(n[5])\n\n    # Action cost: penalize engine use\n    action_cost = 0.0\n    if action == 2:\n        action_cost = 1.0\n    elif action in [1, 3]:\n        action_cost = 0.5\n\n    # Survival bonus: encourage staying alive longer\n    survival_bonus = 0.1\n\n    reward = (\n        2.0 * transition_progress\n        - 0.1 * smoothness\n        + 5.0 * ground_contact\n        - 2.0 * angle_penalty\n        - 1.0 * angular_vel_penalty\n        - 0.5 * action_cost\n        + survival_bonus\n    )\n\n    return reward"
+  },
+  {
+    "iteration": 3,
+    "score": -108.91125675172962,
+    "success_rate": 0.0,
+    "mean_episode_length": 68.9,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_47/reward_iter_3.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # Transition progress: reward moving toward zero velocity and center position\n    progress_pos = (abs(o[0]) - abs(n[0])) + (abs(o[1]) - abs(n[1]))\n    progress_vel = (abs(o[2]) - abs(n[2])) + (abs(o[3]) - abs(n[3]))\n    transition_progress = progress_pos + progress_vel\n\n    # Smoothness penalty: penalize large changes in any state component\n    smoothness = sum(abs(n[i] - o[i]) for i in range(8))\n\n    # Landing reward: reward both legs contacting ground\n    ground_contact = n[6] + n[7]\n\n    # Angle penalty: penalize deviation from upright (angle index 4)\n    angle_penalty = abs(n[4])\n\n    # Angular velocity penalty: penalize spinning (index 5)\n    angular_vel_penalty = abs(n[5])\n\n    # Action cost: penalize engine use\n    action_cost = 0.0\n    if action == 2:\n        action_cost = 1.0\n    elif action in [1, 3]:\n        action_cost = 0.5\n\n    # Survival bonus: encourage staying alive longer\n    survival_bonus = 0.1\n\n    reward = (\n        2.0 * transition_progress\n        - 0.1 * smoothness\n        + 5.0 * ground_contact\n        - 2.0 * angle_penalty\n        - 1.0 * angular_vel_penalty\n        - 0.5 * action_cost\n        + survival_bonus\n    )\n\n    return reward"
+  }
+]

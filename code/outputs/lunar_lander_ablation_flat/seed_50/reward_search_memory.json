@@ -1,0 +1,32 @@
+[
+  {
+    "iteration": 0,
+    "score": 94.28725482505436,
+    "success_rate": 0.3,
+    "mean_episode_length": 614.35,
+    "verdict": "failure",
+    "lesson": "Failure experience: no severe failure, but reward search can improve efficiency and stability; adjust generic transition features or stage weights.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_50/reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n    \n    # Movement penalty - encourage moving towards landing (positive y direction)\n    movement_penalty = sum(abs(o[i]) - abs(n[i]) for i in range(4))\n    \n    # Velocity change - encourage reducing velocity\n    velocity_change = sum((n[i] - o[i]) ** 2 for i in range(2, 4))\n    \n    # Angle penalty - encourage upright position\n    angle_penalty = abs(n[4]) * 0.5\n    \n    # Ground contact bonus\n    ground_bonus = n[6] + n[7]\n    \n    # Action penalty - small cost for using engines\n    action_cost = 0.01 * (1 if action == 2 else 0.5 if action in [1, 3] else 0.0)\n    \n    # Height penalty - encourage being closer to ground\n    height_penalty = abs(n[1]) * 0.1\n    \n    reward = movement_penalty * 0.5 - velocity_change * 0.3 - angle_penalty + ground_bonus * 2.0 - action_cost - height_penalty\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": 34.256337124631656,
+    "success_rate": 0.0,
+    "mean_episode_length": 660.65,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_50/reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # Transition progress: reward moving toward zero in x position and velocity\n    # Directional: abs(o[i]) - abs(n[i]) is positive when moving toward zero\n    progress_x = abs(o[0]) - abs(n[0])\n    progress_vx = abs(o[2]) - abs(n[2])\n\n    # Reward reducing vertical speed (negative y velocity means moving down)\n    # Directional: if n[3] is negative (moving down), we want it to become less negative\n    progress_vy = abs(o[3]) - abs(n[3])\n\n    # Reward reducing angular velocity magnitude\n    progress_angvel = abs(o[5]) - abs(n[5])\n\n    # Combined transition progress signal\n    transition_progress = progress_x + progress_vx + progress_vy + progress_angvel\n\n    # Angle penalty: reward being upright (angle near zero)\n    angle_penalty = abs(n[4]) * 0.5\n\n    # Ground contact bonus: reward both legs touching ground\n    ground_bonus = n[6] + n[7]\n\n    # Action cost: small penalty for using engines\n    action_cost = 0.01 * (1 if action == 2 else 0.5 if action in [1, 3] else 0.0)\n\n    # Height penalty: reward being closer to ground (y position near zero)\n    height_penalty = abs(n[1]) * 0.1\n\n    # Survival bonus: small constant to encourage longer episodes\n    survival_bonus = 0.1\n\n    reward = (\n        transition_progress * 0.5\n        - angle_penalty\n        + ground_bonus * 2.0\n        - action_cost\n        - height_penalty\n        + survival_bonus\n    )\n\n    return reward"
+  },
+  {
+    "iteration": 2,
+    "score": 11.702736001277378,
+    "success_rate": 0.05,
+    "mean_episode_length": 863.85,
+    "verdict": "failure",
+    "lesson": "Failure experience: reward is weak or misaligned; search denser generic transition signals from the unmasked step context; adjust generic transition features or stage weights.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_50/reward_iter_2.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # Transition progress: reward moving toward zero in x position and velocity\n    progress_x = abs(o[0]) - abs(n[0])\n    progress_vx = abs(o[2]) - abs(n[2])\n\n    # Reward reducing vertical speed\n    progress_vy = abs(o[3]) - abs(n[3])\n\n    # Reward reducing angular velocity magnitude\n    progress_angvel = abs(o[5]) - abs(n[5])\n\n    # Combined transition progress signal\n    transition_progress = progress_x + progress_vx + progress_vy + progress_angvel\n\n    # Angle penalty: reward being upright (angle near zero)\n    angle_penalty = abs(n[4]) * 0.5\n\n    # Ground contact bonus: reward both legs touching ground\n    ground_bonus = n[6] + n[7]\n\n    # Action cost: small penalty for using engines\n    action_cost = 0.01 * (1 if action == 2 else 0.5 if action in [1, 3] else 0.0)\n\n    # Height penalty: reward being closer to ground (y position near zero)\n    height_penalty = abs(n[1]) * 0.1\n\n    # Survival bonus: small constant to encourage longer episodes\n    survival_bonus = 0.1\n\n    reward = (\n        transition_progress * 0.5\n        - angle_penalty\n        + ground_bonus * 2.0\n        - action_cost\n        - height_penalty\n        + survival_bonus\n    )\n\n    return reward"
+  }
+]

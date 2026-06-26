@@ -1,0 +1,22 @@
+[
+  {
+    "iteration": 0,
+    "score": 100.27661510531439,
+    "success_rate": 0.15,
+    "mean_episode_length": 564.75,
+    "verdict": "failure",
+    "lesson": "Failure experience: no severe failure, but reward search can improve efficiency and stability; adjust generic transition features or stage weights.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_49/reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n    \n    # Extract position and velocity components (indices 0-3)\n    pos_diff = abs(o[0]) - abs(n[0]) + abs(o[1]) - abs(n[1])\n    vel_diff = abs(o[2]) - abs(n[2]) + abs(o[3]) - abs(n[3])\n    \n    # Extract angle and angular velocity (indices 4-5)\n    angle_diff = abs(o[4]) - abs(n[4])\n    angvel_diff = abs(o[5]) - abs(n[5])\n    \n    # Ground contact signals (indices 6-7)\n    contact_gain = n[6] + n[7]\n    \n    # Movement penalty (squared velocity change)\n    vel_change = (n[2] - o[2]) ** 2 + (n[3] - o[3]) ** 2\n    \n    # Action penalty (encourage efficient control)\n    action_cost = 0.01 * (action == 2) + 0.005 * (action in [1, 3])\n    \n    # Reward components with fixed coefficients\n    position_reward = 0.5 * pos_diff\n    velocity_reward = 0.3 * vel_diff\n    angle_reward = 0.2 * angle_diff\n    angvel_reward = 0.1 * angvel_diff\n    contact_bonus = 1.0 * contact_gain\n    movement_penalty = -0.1 * vel_change\n    \n    reward = (position_reward + velocity_reward + angle_reward + \n              angvel_reward + contact_bonus + movement_penalty - action_cost)\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": 206.75684264824315,
+    "success_rate": 0.65,
+    "mean_episode_length": 580.6,
+    "verdict": "success",
+    "lesson": "Keep this reward structure as a successful candidate; future edits should be conservative.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_49/reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # Position toward center (directional: reducing absolute position)\n    pos_x_progress = abs(o[0]) - abs(n[0])\n    pos_y_progress = abs(o[1]) - abs(n[1])\n    position_reward = 0.5 * (pos_x_progress + pos_y_progress)\n\n    # Velocity toward zero (directional: reducing absolute velocity)\n    vel_x_progress = abs(o[2]) - abs(n[2])\n    vel_y_progress = abs(o[3]) - abs(n[3])\n    velocity_reward = 0.3 * (vel_x_progress + vel_y_progress)\n\n    # Angle toward zero (directional: reducing absolute angle)\n    angle_progress = abs(o[4]) - abs(n[4])\n    angle_reward = 0.2 * angle_progress\n\n    # Angular velocity toward zero (directional: reducing absolute angular velocity)\n    angvel_progress = abs(o[5]) - abs(n[5])\n    angvel_reward = 0.1 * angvel_progress\n\n    # Ground contact bonus (both legs)\n    contact_bonus = 0.5 * (n[6] + n[7])\n\n    # Penalize large velocity changes (smoothness)\n    vel_change_x = (n[2] - o[2]) ** 2\n    vel_change_y = (n[3] - o[3]) ** 2\n    smoothness_penalty = -0.05 * (vel_change_x + vel_change_y)\n\n    # Action cost for main engine and side engines\n    action_cost = 0.01 * (action == 2) + 0.005 * (action in [1, 3])\n\n    reward = (position_reward + velocity_reward + angle_reward + \n              angvel_reward + contact_bonus + smoothness_penalty - action_cost)\n\n    return reward"
+  }
+]

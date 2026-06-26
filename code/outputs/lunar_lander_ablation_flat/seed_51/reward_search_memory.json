@@ -1,0 +1,32 @@
+[
+  {
+    "iteration": 0,
+    "score": -117.36895578414365,
+    "success_rate": 0.0,
+    "mean_episode_length": 70.05,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_51/reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n    \n    # Position and velocity changes (dimensions 0-3)\n    pos_vel_change = sum((n[i] - o[i]) ** 2 for i in range(4))\n    \n    # Angular velocity change (dimension 4-5)\n    angle_change = abs(n[4] - o[4]) + abs(n[5] - o[5])\n    \n    # Ground contact signals (dimensions 6-7)\n    ground_contact_next = n[6] + n[7]\n    ground_contact_prev = o[6] + o[7]\n    new_contacts = max(0.0, ground_contact_next - ground_contact_prev)\n    \n    # Action penalty (discrete 0-3)\n    action_cost = 0.0\n    if action == 2:  # main engine\n        action_cost = 0.5\n    elif action in [1, 3]:  # side engines\n        action_cost = 0.2\n    \n    # Reward components\n    reward = (\n        -0.5 * pos_vel_change\n        -0.1 * angle_change\n        +2.0 * new_contacts\n        -0.3 * action_cost\n        +0.1 * (1.0 - abs(n[4]))  # encourage upright orientation\n        -0.2 * abs(n[1])  # penalize distance from landing pad height\n    )\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": -118.4923783091211,
+    "success_rate": 0.0,
+    "mean_episode_length": 71.55,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_51/reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # Transition progress: reward moving toward zero position and velocity (directional)\n    # Use signed change toward zero for position (dim 0-1) and velocity (dim 2-3)\n    pos_vel_progress = 0.0\n    for i in range(4):\n        pos_vel_progress += abs(o[i]) - abs(n[i])\n\n    # Angular stability: reward reducing angle and angular velocity (dim 4-5)\n    angle_progress = abs(o[4]) - abs(n[4])\n    angvel_progress = abs(o[5]) - abs(n[5])\n\n    # Ground contact bonus: reward new contacts (dim 6-7)\n    ground_contact_next = n[6] + n[7]\n    ground_contact_prev = o[6] + o[7]\n    new_contacts = max(0.0, ground_contact_next - ground_contact_prev)\n\n    # Action penalty (discrete 0-3)\n    action_cost = 0.0\n    if action == 2:  # main engine\n        action_cost = 0.5\n    elif action in [1, 3]:  # side engines\n        action_cost = 0.2\n\n    # Survival bonus: reward staying alive (longer episodes)\n    survival_bonus = 0.01\n\n    # Reward components with balanced scales\n    reward = (\n        +1.0 * pos_vel_progress\n        +0.5 * angle_progress\n        +0.3 * angvel_progress\n        +2.0 * new_contacts\n        -0.3 * action_cost\n        +0.1 * (1.0 - abs(n[4]))  # encourage upright orientation\n        -0.2 * abs(n[1])  # penalize distance from landing pad height\n        + survival_bonus\n    )\n\n    return reward"
+  },
+  {
+    "iteration": 2,
+    "score": -123.45139015385304,
+    "success_rate": 0.0,
+    "mean_episode_length": 71.8,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_51/reward_iter_2.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # Transition progress: reward moving toward zero position and velocity (directional)\n    pos_vel_progress = 0.0\n    for i in range(4):\n        pos_vel_progress += abs(o[i]) - abs(n[i])\n\n    # Angular stability: reward reducing angle and angular velocity\n    angle_progress = abs(o[4]) - abs(n[4])\n    angvel_progress = abs(o[5]) - abs(n[5])\n\n    # Ground contact bonus: reward new contacts\n    ground_contact_next = n[6] + n[7]\n    ground_contact_prev = o[6] + o[7]\n    new_contacts = max(0.0, ground_contact_next - ground_contact_prev)\n\n    # Action penalty (discrete 0-3)\n    action_cost = 0.0\n    if action == 2:  # main engine\n        action_cost = 0.5\n    elif action in [1, 3]:  # side engines\n        action_cost = 0.2\n\n    # Survival bonus: reward staying alive\n    survival_bonus = 0.01\n\n    # Reward components with balanced scales - simplified to avoid conflicting signals\n    reward = (\n        +2.0 * pos_vel_progress\n        +1.0 * angle_progress\n        +0.5 * angvel_progress\n        +3.0 * new_contacts\n        -0.3 * action_cost\n        + survival_bonus\n    )\n\n    return reward"
+  }
+]

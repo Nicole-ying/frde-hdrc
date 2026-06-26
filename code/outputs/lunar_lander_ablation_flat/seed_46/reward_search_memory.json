@@ -1,0 +1,52 @@
+[
+  {
+    "iteration": 0,
+    "score": -119.0724400799357,
+    "success_rate": 0.0,
+    "mean_episode_length": 66.7,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_46/reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n    \n    # Position change (indices 0,1 are position)\n    pos_change = abs(n[0]) - abs(o[0]) + abs(n[1]) - abs(o[1])\n    \n    # Velocity change (indices 2,3 are velocity)\n    vel_change = abs(n[2]) - abs(o[2]) + abs(n[3]) - abs(o[3])\n    \n    # Angle change (index 4 is angle)\n    angle_change = abs(n[4]) - abs(o[4])\n    \n    # Angular velocity change (index 5)\n    angvel_change = abs(n[5]) - abs(o[5])\n    \n    # Ground contact (indices 6,7)\n    contact_gain = (n[6] - o[6]) + (n[7] - o[7])\n    \n    # Action penalty (discrete 0-3)\n    action_cost = 0.01 * (action if action < 4 else 0)\n    \n    # Reward components with fixed coefficients\n    reward = (\n        -0.5 * pos_change\n        -0.3 * vel_change\n        -0.2 * angle_change\n        -0.1 * angvel_change\n        + 2.0 * contact_gain\n        - action_cost\n    )\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": -138.40496994281713,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_46/reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # --- Transition signals (directional toward zero) ---\n    # Position: reward moving toward origin (landing pad)\n    pos_change = abs(n[0]) - abs(o[0]) + abs(n[1]) - abs(o[1])\n    # Velocity: reward reducing speed (toward zero)\n    vel_change = abs(n[2]) - abs(o[2]) + abs(n[3]) - abs(o[3])\n    # Angle: reward upright (angle toward zero)\n    angle_change = abs(n[4]) - abs(o[4])\n    # Angular velocity: reward stability (toward zero)\n    angvel_change = abs(n[5]) - abs(o[5])\n\n    # --- Ground contact signal ---\n    contact_gain = (n[6] - o[6]) + (n[7] - o[7])\n\n    # --- Action penalty (discrete 0-3) ---\n    action_cost = 0.01 * (action if action < 4 else 0)\n\n    # --- Survival bonus to encourage longer episodes ---\n    survival_bonus = 0.1\n\n    # --- Combined reward with balanced coefficients ---\n    reward = (\n        -0.5 * pos_change\n        -0.3 * vel_change\n        -0.2 * angle_change\n        -0.1 * angvel_change\n        + 2.0 * contact_gain\n        - action_cost\n        + survival_bonus\n    )\n\n    return reward"
+  },
+  {
+    "iteration": 2,
+    "score": -122.64509258571482,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_46/reward_iter_2.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # --- Transition signals (directional toward zero) ---\n    # Position: reward moving toward origin (landing pad)\n    pos_change = abs(n[0]) - abs(o[0]) + abs(n[1]) - abs(o[1])\n    # Velocity: reward reducing speed (toward zero)\n    vel_change = abs(n[2]) - abs(o[2]) + abs(n[3]) - abs(o[3])\n    # Angle: reward upright (angle toward zero)\n    angle_change = abs(n[4]) - abs(o[4])\n    # Angular velocity: reward stability (toward zero)\n    angvel_change = abs(n[5]) - abs(o[5])\n\n    # --- Ground contact signal ---\n    contact_gain = (n[6] - o[6]) + (n[7] - o[7])\n\n    # --- Action penalty (discrete 0-3) ---\n    action_cost = 0.01 * (action if action < 4 else 0)\n\n    # --- Survival bonus to encourage longer episodes ---\n    survival_bonus = 0.1\n\n    # --- Combined reward with balanced coefficients ---\n    reward = (\n        -0.5 * pos_change\n        -0.3 * vel_change\n        -0.2 * angle_change\n        -0.1 * angvel_change\n        + 2.0 * contact_gain\n        - action_cost\n        + survival_bonus\n    )\n\n    return reward"
+  },
+  {
+    "iteration": 3,
+    "score": -123.41906270011117,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_46/reward_iter_3.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # --- Transition signals (directional toward zero) ---\n    # Position: reward moving toward origin (landing pad)\n    pos_change = abs(n[0]) - abs(o[0]) + abs(n[1]) - abs(o[1])\n    # Velocity: reward reducing speed (toward zero)\n    vel_change = abs(n[2]) - abs(o[2]) + abs(n[3]) - abs(o[3])\n    # Angle: reward upright (angle toward zero)\n    angle_change = abs(n[4]) - abs(o[4])\n    # Angular velocity: reward stability (toward zero)\n    angvel_change = abs(n[5]) - abs(o[5])\n\n    # --- Ground contact signal ---\n    contact_gain = (n[6] - o[6]) + (n[7] - o[7])\n\n    # --- Action penalty (discrete 0-3) ---\n    action_cost = 0.01 * (action if action < 4 else 0)\n\n    # --- Survival bonus to encourage longer episodes ---\n    survival_bonus = 0.1\n\n    # --- Combined reward with balanced coefficients ---\n    # Increased magnitude of transition signals to make them more impactful\n    # Reduced contact_gain coefficient as it was dominating and causing wrong behavior\n    reward = (\n        -1.0 * pos_change\n        -0.6 * vel_change\n        -0.4 * angle_change\n        -0.2 * angvel_change\n        + 0.5 * contact_gain\n        - action_cost\n        + survival_bonus\n    )\n\n    return reward"
+  },
+  {
+    "iteration": 4,
+    "score": -124.55128491412415,
+    "success_rate": 0.0,
+    "mean_episode_length": 68.8,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_46/reward_iter_4.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation components\n    o = obs\n    n = next_obs\n    \n    # Position error: encourage moving toward center (x=0) and landing pad height\n    # obs[0] is normalized x position, obs[1] is normalized y position relative to helipad\n    pos_error = abs(o[0]) - abs(n[0]) + abs(o[1]) - abs(n[1])\n    \n    # Velocity reduction: encourage slowing down\n    # obs[2] is x velocity, obs[3] is y velocity\n    vel_penalty = abs(o[2]) - abs(n[2]) + abs(o[3]) - abs(n[3])\n    \n    # Angle stabilization: encourage upright orientation\n    # obs[4] is angle, obs[5] is angular velocity\n    angle_improvement = abs(o[4]) - abs(n[4])\n    ang_vel_improvement = abs(o[5]) - abs(n[5])\n    \n    # Ground contact bonus: encourage landing\n    # obs[6] and obs[7] are leg contact indicators\n    contact_bonus = (n[6] + n[7]) - (o[6] + o[7])\n    \n    # Action penalty: discourage unnecessary engine use\n    # action 2 is main engine, action 1 and 3 are side engines\n    action_cost = 0.0\n    if action == 2:\n        action_cost = -0.1\n    elif action == 1 or action == 3:\n        action_cost = -0.05\n    \n    # Smoothness penalty: discourage large changes in state\n    smoothness = -sum((n[i] - o[i]) ** 2 for i in range(6)) * 0.01\n    \n    # Combine rewards with fixed coefficients\n    reward = (\n        2.0 * pos_error +\n        1.5 * vel_penalty +\n        1.0 * angle_improvement +\n        0.5 * ang_vel_improvement +\n        3.0 * contact_bonus +\n        action_cost +\n        smoothness\n    )\n    \n    return reward"
+  }
+]

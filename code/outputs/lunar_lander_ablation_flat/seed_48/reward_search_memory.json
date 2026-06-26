@@ -1,0 +1,32 @@
+[
+  {
+    "iteration": 0,
+    "score": 10.574038119812139,
+    "success_rate": 0.1,
+    "mean_episode_length": 792.7,
+    "verdict": "failure",
+    "lesson": "Failure experience: reward is weak or misaligned; search denser generic transition signals from the unmasked step context; adjust generic transition features or stage weights.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_48/reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation components\n    o = obs\n    n = next_obs\n    \n    # Position components (indices 0,1)\n    pos_diff = abs(n[0]) - abs(o[0]) + abs(n[1]) - abs(o[1])\n    \n    # Velocity components (indices 2,3) - penalize velocity\n    vel_penalty = (n[2] ** 2 + n[3] ** 2) * 0.1\n    \n    # Angle and angular velocity (indices 4,5) - penalize angle deviation and angular velocity\n    angle_penalty = abs(n[4]) * 0.5 + abs(n[5]) * 0.2\n    \n    # Ground contact bonus (indices 6,7)\n    contact_bonus = (n[6] + n[7]) * 0.5\n    \n    # Action penalty - small cost for using engines\n    action_cost = 0.01 if action == 2 else 0.005 if action in [1, 3] else 0.0\n    \n    # Movement towards center\n    movement_reward = (abs(o[0]) - abs(n[0])) * 0.3 + (abs(o[1]) - abs(n[1])) * 0.3\n    \n    # Stability bonus - penalize changes in velocity and angle\n    stability_penalty = ((n[2] - o[2]) ** 2 + (n[3] - o[3]) ** 2) * 0.05 + (n[4] - o[4]) ** 2 * 0.1\n    \n    # Combine rewards\n    reward = (\n        movement_reward\n        - vel_penalty\n        - angle_penalty\n        + contact_bonus\n        - action_cost\n        - stability_penalty\n        + pos_diff * 0.1\n    )\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": 55.12048225194762,
+    "success_rate": 0.1,
+    "mean_episode_length": 737.0,
+    "verdict": "failure",
+    "lesson": "Failure experience: reward is weak or misaligned; search denser generic transition signals from the unmasked step context; adjust generic transition features or stage weights.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_48/reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # Movement toward center (directional: positive when moving toward zero)\n    move_x = abs(o[0]) - abs(n[0])\n    move_y = abs(o[1]) - abs(n[1])\n    movement_reward = move_x * 0.5 + move_y * 0.5\n\n    # Penalize high velocity (squared for smooth gradient)\n    vel_penalty = (n[2] ** 2 + n[3] ** 2) * 0.2\n\n    # Penalize angle deviation and angular velocity\n    angle_penalty = abs(n[4]) * 0.8 + abs(n[5]) * 0.3\n\n    # Reward ground contact (both legs)\n    contact_bonus = (n[6] + n[7]) * 1.0\n\n    # Penalize action usage (main engine costlier)\n    if action == 2:\n        action_cost = 0.02\n    elif action in [1, 3]:\n        action_cost = 0.01\n    else:\n        action_cost = 0.0\n\n    # Penalize sudden changes in velocity and angle (smoothness)\n    vel_change = ((n[2] - o[2]) ** 2 + (n[3] - o[3]) ** 2) * 0.1\n    angle_change = (n[4] - o[4]) ** 2 * 0.15\n    smoothness_penalty = vel_change + angle_change\n\n    # Reward being close to center (position bonus)\n    pos_bonus = (1.0 - abs(n[0])) * 0.2 + (1.0 - abs(n[1])) * 0.2\n\n    # Combine all components\n    reward = (\n        movement_reward\n        - vel_penalty\n        - angle_penalty\n        + contact_bonus\n        - action_cost\n        - smoothness_penalty\n        + pos_bonus\n    )\n\n    return reward"
+  },
+  {
+    "iteration": 2,
+    "score": 214.05170422889518,
+    "success_rate": 0.8,
+    "mean_episode_length": 431.0,
+    "verdict": "success",
+    "lesson": "Keep this reward structure as a successful candidate; future edits should be conservative.",
+    "code_path": "outputs/lunar_lander_ablation_flat/seed_48/reward_iter_2.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # Movement toward center (directional: positive when moving toward zero)\n    move_x = abs(o[0]) - abs(n[0])\n    move_y = abs(o[1]) - abs(n[1])\n    movement_reward = move_x * 0.5 + move_y * 0.5\n\n    # Penalize high velocity (squared for smooth gradient)\n    vel_penalty = (n[2] ** 2 + n[3] ** 2) * 0.2\n\n    # Penalize angle deviation and angular velocity\n    angle_penalty = abs(n[4]) * 0.8 + abs(n[5]) * 0.3\n\n    # Reward ground contact (both legs)\n    contact_bonus = (n[6] + n[7]) * 1.0\n\n    # Penalize action usage (main engine costlier)\n    if action == 2:\n        action_cost = 0.02\n    elif action in [1, 3]:\n        action_cost = 0.01\n    else:\n        action_cost = 0.0\n\n    # Penalize sudden changes in velocity and angle (smoothness)\n    vel_change = ((n[2] - o[2]) ** 2 + (n[3] - o[3]) ** 2) * 0.1\n    angle_change = (n[4] - o[4]) ** 2 * 0.15\n    smoothness_penalty = vel_change + angle_change\n\n    # Reward being close to center (position bonus)\n    pos_bonus = (1.0 - abs(n[0])) * 0.2 + (1.0 - abs(n[1])) * 0.2\n\n    # Combine all components\n    reward = (\n        movement_reward\n        - vel_penalty\n        - angle_penalty\n        + contact_bonus\n        - action_cost\n        - smoothness_penalty\n        + pos_bonus\n    )\n\n    return reward"
+  }
+]
