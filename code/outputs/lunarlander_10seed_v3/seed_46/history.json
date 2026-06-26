@@ -1,0 +1,15 @@
+[
+  {
+    "iteration": 0,
+    "score": 252.21860399147096,
+    "success_rate": 0.95,
+    "mean_episode_length": 346,
+    "converged": true,
+    "failure_mode": "task solved; no obvious failure mode",
+    "reward_code_path": "outputs\\lunarlander_10seed_v3\\seed_46\\reward_iter_0.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  }
+]

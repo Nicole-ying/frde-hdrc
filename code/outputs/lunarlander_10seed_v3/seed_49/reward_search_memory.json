@@ -1,0 +1,102 @@
+[
+  {
+    "iteration": 0,
+    "score": -143.81840855059477,
+    "success_rate": 0.0,
+    "mean_episode_length": 232.65,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs\\lunarlander_10seed_v3\\seed_49\\reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features (dimension-agnostic)\n    # Feature 1: Change in absolute values (encourages movement toward zero)\n    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Feature 2: Squared change (penalizes large jumps, rewards smooth transitions)\n    squared_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 3: Action penalty (small action cost to encourage efficiency)\n    action_cost = 0.01 * float(action)\n    \n    # Stage weights based on training progress\n    # Early stage: focus on reducing absolute values (stabilization)\n    # Middle stage: balance between stabilization and smoothness\n    # Late stage: fine-tuning with small action cost\n    w1 = 1.0 - 0.5 * training_progress  # weight for abs_change\n    w2 = 0.1 + 0.4 * training_progress   # weight for squared_change\n    w3 = 0.01 * (1.0 - training_progress)  # weight for action_cost\n    \n    # Combine components\n    reward = w1 * abs_change - w2 * squared_change - w3 * action_cost\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": -85.60381626627444,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs\\lunarlander_10seed_v3\\seed_49\\reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n    \n    # Feature 1: Movement toward zero (directional - rewards reducing absolute values)\n    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Feature 2: Smoothness penalty (penalizes large state changes)\n    squared_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 3: Action cost (penalizes large actions)\n    action_cost = float(action) ** 2\n    \n    # Feature 4: Survival bonus (rewards staying alive)\n    survival_bonus = 1.0\n    \n    # Stage weights based on training progress\n    w1 = 1.0 - 0.3 * training_progress  # abs_change weight\n    w2 = 0.1 + 0.3 * training_progress   # squared_change weight\n    w3 = 0.01 * (1.0 - training_progress)  # action_cost weight\n    w4 = 0.5 + 0.5 * training_progress  # survival bonus weight\n    \n    reward = w1 * abs_change - w2 * squared_change - w3 * action_cost + w4 * survival_bonus\n    \n    return reward"
+  },
+  {
+    "iteration": 2,
+    "score": -112.96191587022061,
+    "success_rate": 0.0,
+    "mean_episode_length": 69.85,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs\\lunarlander_10seed_v3\\seed_49\\reward_iter_2.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n    \n    # Feature 1: Movement toward zero (directional - rewards reducing absolute values)\n    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Feature 2: Velocity penalty (penalizes high speeds - prevents crashing)\n    # obs[2] = x velocity, obs[3] = y velocity\n    vel_penalty = abs(o[2]) + abs(o[3])\n    \n    # Feature 3: Angular stability (penalizes spinning)\n    # obs[4] = angle, obs[5] = angular velocity\n    angle_penalty = abs(o[4]) + abs(o[5])\n    \n    # Feature 4: Landing encouragement (reward ground contact)\n    # obs[6] and obs[7] are leg contact indicators\n    contact_bonus = o[6] + o[7]\n    \n    # Feature 5: Action cost (penalizes large actions)\n    action_cost = float(action) ** 2\n    \n    # Stage weights based on training progress\n    # Early: focus on stability and reducing absolute values\n    # Late: focus on landing and fine control\n    w1 = 1.0 - 0.5 * training_progress  # abs_change weight\n    w2 = 0.5 + 0.5 * training_progress   # velocity penalty weight (increase over time)\n    w3 = 0.5 + 0.5 * training_progress   # angle penalty weight (increase over time)\n    w4 = 0.0 + 1.0 * training_progress   # contact bonus weight (only late)\n    w5 = 0.01 * (1.0 - training_progress)  # action cost weight\n    \n    reward = (w1 * abs_change \n              - w2 * vel_penalty \n              - w3 * angle_penalty \n              + w4 * contact_bonus \n              - w5 * action_cost)\n    \n    return reward"
+  },
+  {
+    "iteration": 3,
+    "score": -234.51808475791938,
+    "success_rate": 0.0,
+    "mean_episode_length": 478.2,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs\\lunarlander_10seed_v3\\seed_49\\reward_iter_3.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # Feature 1: Movement toward zero (directional - rewards reducing absolute values)\n    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n\n    # Feature 2: Smoothness penalty (penalizes large state changes)\n    squared_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n\n    # Feature 3: Action cost (penalizes large actions)\n    action_cost = float(action) ** 2\n\n    # Feature 4: Survival bonus (rewards staying alive)\n    survival_bonus = 1.0\n\n    # Stage weights based on training progress\n    w1 = 1.0 - 0.3 * training_progress  # abs_change weight\n    w2 = 0.1 + 0.3 * training_progress   # squared_change weight\n    w3 = 0.01 * (1.0 - training_progress)  # action_cost weight\n    w4 = 0.5 + 0.5 * training_progress  # survival bonus weight\n\n    reward = w1 * abs_change - w2 * squared_change - w3 * action_cost + w4 * survival_bonus\n\n    return reward"
+  },
+  {
+    "iteration": 4,
+    "score": -112.13336547120332,
+    "success_rate": 0.0,
+    "mean_episode_length": 71.55,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs\\lunarlander_10seed_v3\\seed_49\\reward_iter_4.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n\n    # Feature 1: Movement toward zero (directional - rewards reducing absolute values)\n    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n\n    # Feature 2: Velocity penalty (penalizes high speeds - prevents crashing)\n    # obs[2] = x velocity, obs[3] = y velocity\n    vel_penalty = abs(o[2]) + abs(o[3])\n\n    # Feature 3: Angular stability (penalizes spinning)\n    # obs[4] = angle, obs[5] = angular velocity\n    angle_penalty = abs(o[4]) + abs(o[5])\n\n    # Feature 4: Landing encouragement (reward ground contact)\n    # obs[6] and obs[7] are leg contact indicators\n    contact_bonus = o[6] + o[7]\n\n    # Feature 5: Action cost (penalizes large actions)\n    action_cost = float(action) ** 2\n\n    # Stage weights based on training progress\n    # Early: focus on stability and reducing absolute values\n    # Late: focus on landing and fine control\n    w1 = 1.0 - 0.5 * training_progress  # abs_change weight\n    w2 = 0.5 + 0.5 * training_progress   # velocity penalty weight (increase over time)\n    w3 = 0.5 + 0.5 * training_progress   # angle penalty weight (increase over time)\n    w4 = 0.0 + 1.0 * training_progress   # contact bonus weight (only late)\n    w5 = 0.01 * (1.0 - training_progress)  # action cost weight\n\n    reward = (w1 * abs_change \n              - w2 * vel_penalty \n              - w3 * angle_penalty \n              + w4 * contact_bonus \n              - w5 * action_cost)\n\n    return reward"
+  },
+  {
+    "iteration": 5,
+    "score": -122.70129860980232,
+    "success_rate": 0.0,
+    "mean_episode_length": 71.95,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs\\lunarlander_10seed_v3\\seed_49\\reward_iter_5.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # 1. Movement magnitude (change in absolute values)\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # 2. Squared change (captures large deviations)\n    squared_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # 3. Action penalty (encourage efficiency)\n    action_cost = 0.0\n    if action == 2:  # Main engine\n        action_cost = 0.5\n    elif action in [1, 3]:  # Side engines\n        action_cost = 0.2\n    \n    # Stage weights based on training progress\n    # Early: focus on movement and exploration\n    # Middle: balance movement and stability\n    # Late: emphasize fine control and efficiency\n    if training_progress < 0.3:\n        w_movement = 1.0\n        w_squared = 0.1\n        w_action = 0.3\n    elif training_progress < 0.7:\n        w_movement = 0.5\n        w_squared = 0.5\n        w_action = 0.5\n    else:\n        w_movement = 0.2\n        w_squared = 1.0\n        w_action = 0.8\n    \n    # Combine components\n    reward = (\n        w_movement * movement\n        - w_squared * squared_change\n        - w_action * action_cost\n    )\n    \n    return reward"
+  },
+  {
+    "iteration": 6,
+    "score": -129.08330604747374,
+    "success_rate": 0.0,
+    "mean_episode_length": 227.85,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs\\lunarlander_10seed_v3\\seed_49\\reward_iter_6.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features - dimension agnostic\n    # Feature 1: Sum of absolute differences (movement magnitude)\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Feature 2: Sum of squared differences (smoothness/change)\n    sq_diff = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 3: Action penalty (encourage efficient actions)\n    # Action is discrete (0-3), normalize to small cost\n    action_cost = 0.01 * action\n    \n    # Feature 4: Contact bonus from info (if available)\n    contact_bonus = 0.0\n    if info and isinstance(info, dict):\n        # Generic contact signal from info\n        contact_bonus = info.get('contact', 0.0) * 0.1\n    \n    # Stage weights based on training_progress (0.0 to 1.0)\n    # Early stage: focus on exploration and movement\n    # Middle stage: balance movement and stability\n    # Late stage: focus on precision and efficiency\n    \n    # Weight for movement reward (abs_diff)\n    w_movement = 0.5 * (1.0 - training_progress * 0.3)\n    \n    # Weight for smoothness (negative sq_diff - penalize large changes)\n    w_smooth = -0.2 * (0.5 + training_progress * 0.5)\n    \n    # Weight for action efficiency (negative cost)\n    w_action = -0.1 * (0.3 + training_progress * 0.7)\n    \n    # Weight for contact bonus\n    w_contact = 0.3 * (training_progress * 0.8)\n    \n    # Combine components\n    reward = (\n        w_movement * abs_diff +\n        w_smooth * sq_diff +\n        w_action * action_cost +\n        w_contact * contact_bonus\n    )\n    \n    # Ensure numerical stability by bounding extreme values\n    # Use tanh-like scaling via division by large number\n    reward = reward / (1.0 + abs(reward) * 0.01)\n    \n    return float(reward)"
+  },
+  {
+    "iteration": 7,
+    "score": 133.29305612423929,
+    "success_rate": 0.35,
+    "mean_episode_length": 671.1,
+    "verdict": "failure",
+    "lesson": "Failure experience: no severe failure, but reward search can improve efficiency and stability; adjust generic transition features or stage weights.",
+    "code_path": "outputs\\lunarlander_10seed_v3\\seed_49\\reward_iter_7.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement towards stability - penalize large changes\n    delta = n - o\n    movement_cost = sum(delta * delta) * 0.01\n    \n    # Component 2: Encourage convergence - reward when absolute values decrease\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    convergence_bonus = abs_diff * 0.1\n    \n    # Component 3: Action penalty - discourage excessive action usage\n    action_cost = 0.0\n    if action == 2:  # Main engine\n        action_cost = 0.5\n    elif action in [1, 3]:  # Side engines\n        action_cost = 0.25\n    \n    # Component 4: Contact bonus from info\n    contact_bonus = 0.0\n    if info and 'ground_contact' in info:\n        contact_bonus = info['ground_contact'] * 0.5\n    \n    # Stage-based weighting\n    stage1_weight = max(0.0, 1.0 - training_progress * 2.0)  # Early: focus on movement\n    stage2_weight = min(1.0, training_progress * 2.0)  # Late: focus on convergence\n    \n    # Combine components\n    reward = (\n        stage1_weight * (-movement_cost + action_cost) +\n        stage2_weight * (convergence_bonus + contact_bonus)\n    )\n    \n    return float(reward)"
+  },
+  {
+    "iteration": 8,
+    "score": -113.00855029038668,
+    "success_rate": 0.0,
+    "mean_episode_length": 72.1,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs\\lunarlander_10seed_v3\\seed_49\\reward_iter_8.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n\n    # Component 1: Velocity penalty - penalize high speeds (prevents crashing)\n    # obs[2] = x velocity, obs[3] = y velocity\n    vel_penalty = abs(o[2]) + abs(o[3])\n\n    # Component 2: Angular stability - penalize spinning and tilting\n    # obs[4] = angle, obs[5] = angular velocity\n    angle_penalty = abs(o[4]) + abs(o[5])\n\n    # Component 3: Landing encouragement - reward ground contact\n    # obs[6] and obs[7] are leg contact indicators\n    contact_bonus = o[6] + o[7]\n\n    # Component 4: Action penalty - discourage excessive engine use\n    action_cost = 0.0\n    if action == 2:  # Main engine\n        action_cost = 0.3\n    elif action in [1, 3]:  # Side engines\n        action_cost = 0.15\n\n    # Stage-based weighting\n    # Early stage: focus on stability (velocity + angle penalties)\n    # Late stage: focus on landing (contact bonus) and fine control\n    w_stability = 1.0 - 0.5 * training_progress  # Decrease over time\n    w_landing = 0.5 * training_progress  # Increase over time\n    w_action = 0.2 * (1.0 - 0.5 * training_progress)  # Decrease over time\n\n    # Combine components\n    reward = (\n        -w_stability * vel_penalty\n        -w_stability * angle_penalty\n        +w_landing * contact_bonus\n        -w_action * action_cost\n    )\n\n    return float(reward)"
+  },
+  {
+    "iteration": 9,
+    "score": -110.95494398751138,
+    "success_rate": 0.0,
+    "mean_episode_length": 70.85,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs\\lunarlander_10seed_v3\\seed_49\\reward_iter_9.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n\n    # Component 1: Movement toward stability - reward when absolute values decrease\n    # This is the most consistently effective signal across iterations\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    convergence_bonus = abs_diff * 0.1\n\n    # Component 2: Velocity penalty - penalize high speeds (prevents crashing)\n    # obs[2] = x velocity, obs[3] = y velocity\n    vel_penalty = abs(o[2]) + abs(o[3])\n\n    # Component 3: Angular stability - penalize spinning and tilting\n    # obs[4] = angle, obs[5] = angular velocity\n    angle_penalty = abs(o[4]) + abs(o[5])\n\n    # Component 4: Landing encouragement - reward ground contact\n    # obs[6] and obs[7] are leg contact indicators\n    contact_bonus = o[6] + o[7]\n\n    # Component 5: Action penalty - discourage excessive engine use\n    action_cost = 0.0\n    if action == 2:  # Main engine\n        action_cost = 0.3\n    elif action in [1, 3]:  # Side engines\n        action_cost = 0.15\n\n    # Stage-based weighting\n    # Early stage: focus on stability (velocity + angle penalties) and convergence\n    # Late stage: focus on landing (contact bonus) and fine control\n    w_convergence = 1.0 - 0.3 * training_progress  # Decrease slightly over time\n    w_stability = 0.8 - 0.4 * training_progress  # Decrease over time\n    w_landing = 0.8 * training_progress  # Increase over time\n    w_action = 0.2 * (1.0 - 0.5 * training_progress)  # Decrease over time\n\n    # Combine components\n    reward = (\n        w_convergence * convergence_bonus\n        - w_stability * vel_penalty\n        - w_stability * angle_penalty\n        + w_landing * contact_bonus\n        - w_action * action_cost\n    )\n\n    return float(reward)"
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "iteration": 0,
+    "score": -21.465768569688883,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs\\lunarlander_3seed_8iter_1M\\seed_44\\reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Dimension-agnostic transition features\n    # Feature 1: Movement towards target (reducing absolute values)\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Feature 2: Smoothness (penalize large changes)\n    smoothness = -sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 3: Action cost (penalize engine usage)\n    action_cost = -0.01 * float(action)\n    \n    # Stage weights based on training_progress\n    # Early: focus on movement and exploration\n    # Late: focus on smoothness and precision\n    w_movement = 1.0 - 0.5 * training_progress\n    w_smoothness = 0.5 * training_progress\n    w_action = 0.01\n    \n    # Combine components\n    reward = w_movement * movement + w_smoothness * smoothness + w_action * action_cost\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": -136.41955758631894,
+    "success_rate": 0.0,
+    "mean_episode_length": 348.4,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs\\lunarlander_3seed_8iter_1M\\seed_44\\reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Dimension-agnostic transition features\n    \n    # Feature 1: Movement towards target (reducing absolute values)\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Feature 2: Smoothness (penalize large changes)\n    smoothness = -sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 3: Action cost (penalize engine usage)\n    action_cost = -0.01 * float(action)\n    \n    # Feature 4: Velocity change signal - penalize large velocity changes for stability\n    # This adds a denser signal about the dynamics of the system\n    vel_change = -sum(abs(n[i] - o[i]) for i in range(len(o)))\n    \n    # Feature 5: Progress towards zero - reward being closer to origin in state space\n    # This is a more direct measure of task progress\n    current_dist = sum(abs(o[i]) for i in range(len(o)))\n    next_dist = sum(abs(n[i]) for i in range(len(o)))\n    dist_progress = current_dist - next_dist\n    \n    # Stage weights based on training_progress\n    # Early: focus on movement and exploration\n    # Late: focus on smoothness and precision\n    w_movement = 1.0 - 0.5 * training_progress\n    w_smoothness = 0.3 * training_progress\n    w_action = 0.01\n    w_vel = 0.2 * (1.0 - training_progress)  # More important early for learning dynamics\n    w_dist = 0.5  # Consistent weight for distance progress\n    \n    # Combine components\n    reward = (w_movement * movement + \n              w_smoothness * smoothness + \n              w_action * action_cost + \n              w_vel * vel_change +\n              w_dist * dist_progress)\n    \n    return reward"
+  },
+  {
+    "iteration": 2,
+    "score": -125.59337708521056,
+    "success_rate": 0.0,
+    "mean_episode_length": 550.3,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs\\lunarlander_3seed_8iter_1M\\seed_44\\reward_iter_2.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n\n    # Dimension-agnostic transition features\n\n    # Feature 1: Movement towards target (reducing absolute values)\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n\n    # Feature 2: Smoothness (penalize large changes)\n    smoothness = -sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n\n    # Feature 3: Action cost (penalize engine usage)\n    action_cost = -0.01 * float(action)\n\n    # Feature 4: Progress towards zero - reward being closer to origin in state space\n    # This is a more direct measure of task progress\n    current_dist = sum(abs(o[i]) for i in range(len(o)))\n    next_dist = sum(abs(n[i]) for i in range(len(o)))\n    dist_progress = current_dist - next_dist\n\n    # Stage weights based on training_progress\n    # Early: focus on movement and exploration\n    # Late: focus on smoothness and precision\n    w_movement = 1.0 - 0.5 * training_progress\n    w_smoothness = 0.5 * training_progress\n    w_action = 0.01\n    w_dist = 0.5  # Consistent weight for distance progress\n\n    # Combine components (removed vel_change which hurt performance)\n    reward = (w_movement * movement + \n              w_smoothness * smoothness + \n              w_action * action_cost + \n              w_dist * dist_progress)\n\n    return reward"
+  },
+  {
+    "iteration": 3,
+    "score": -132.4705496450035,
+    "success_rate": 0.0,
+    "mean_episode_length": 585.0,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs\\lunarlander_3seed_8iter_1M\\seed_44\\reward_iter_3.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n\n    # Dimension-agnostic transition features\n\n    # Feature 1: Movement towards target (reducing absolute values)\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n\n    # Feature 2: Smoothness (penalize large changes)\n    smoothness = -sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n\n    # Feature 3: Action cost (penalize engine usage)\n    action_cost = -0.01 * float(action)\n\n    # Feature 4: Progress towards zero - reward being closer to origin in state space\n    current_dist = sum(abs(o[i]) for i in range(len(o)))\n    next_dist = sum(abs(n[i]) for i in range(len(o)))\n    dist_progress = current_dist - next_dist\n\n    # Feature 5: Dense transition signal - reward for small absolute values in next state\n    # This adds a denser signal that directly rewards being near zero\n    near_zero_bonus = -sum(abs(n[i]) for i in range(len(o))) * 0.1\n\n    # Stage weights based on training_progress\n    # Early: focus on movement and exploration\n    # Late: focus on smoothness and precision\n    w_movement = 1.0 - 0.5 * training_progress\n    w_smoothness = 0.5 * training_progress\n    w_action = 0.01\n    w_dist = 0.5\n    w_near_zero = 0.3 * (1.0 - training_progress)  # Dense signal more important early\n\n    # Combine components\n    reward = (w_movement * movement + \n              w_smoothness * smoothness + \n              w_action * action_cost + \n              w_dist * dist_progress +\n              w_near_zero * near_zero_bonus)\n\n    return reward"
+  },
+  {
+    "iteration": 4,
+    "score": 3.5006624482674833,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs\\lunarlander_3seed_8iter_1M\\seed_44\\reward_iter_4.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n\n    # Dimension-agnostic transition features\n    # Feature 1: Movement towards target (reducing absolute values) - amplified\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n\n    # Feature 2: Smoothness (penalize large changes) - reduced to avoid over-penalizing\n    smoothness = -0.5 * sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n\n    # Feature 3: Action cost (penalize engine usage) - reduced\n    action_cost = -0.005 * float(action)\n\n    # Stage weights based on training_progress\n    # Early: focus on movement and exploration\n    # Late: focus on smoothness and precision\n    w_movement = 2.0 - 1.0 * training_progress  # Increased movement weight\n    w_smoothness = 0.3 * training_progress  # Reduced smoothness weight\n    w_action = 0.01\n\n    # Combine components\n    reward = w_movement * movement + w_smoothness * smoothness + w_action * action_cost\n\n    return reward"
+  },
+  {
+    "iteration": 5,
+    "score": -11.667098269165816,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs\\lunarlander_3seed_8iter_1M\\seed_44\\reward_iter_5.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n\n    # Dimension-agnostic transition features\n    # Feature 1: Movement towards target (reducing absolute values) - amplified\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n\n    # Feature 2: Smoothness (penalize large changes) - reduced to avoid over-penalizing\n    smoothness = -0.5 * sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n\n    # Feature 3: Action cost (penalize engine usage) - reduced\n    action_cost = -0.005 * float(action)\n\n    # Feature 4: Distance progress (reward being closer to origin) - added back from iteration 2 which had best structure\n    current_dist = sum(abs(o[i]) for i in range(len(o)))\n    next_dist = sum(abs(n[i]) for i in range(len(o)))\n    dist_progress = current_dist - next_dist\n\n    # Stage weights based on training_progress\n    # Early: focus on movement and exploration\n    # Late: focus on smoothness and precision\n    w_movement = 2.0 - 1.0 * training_progress  # Increased movement weight\n    w_smoothness = 0.3 * training_progress  # Reduced smoothness weight\n    w_action = 0.01\n    w_dist = 0.5  # Consistent weight for distance progress\n\n    # Combine components\n    reward = w_movement * movement + w_smoothness * smoothness + w_action * action_cost + w_dist * dist_progress\n\n    return reward"
+  },
+  {
+    "iteration": 6,
+    "score": -16.51835018421802,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs\\lunarlander_3seed_8iter_1M\\seed_44\\reward_iter_6.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n\n    # Dimension-agnostic transition features\n    # Feature 1: Movement towards target (reducing absolute values) - amplified\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n\n    # Feature 2: Smoothness (penalize large changes) - reduced to avoid over-penalizing\n    smoothness = -0.5 * sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n\n    # Feature 3: Action cost (penalize engine usage) - reduced\n    action_cost = -0.005 * float(action)\n\n    # Stage weights based on training_progress\n    # Early: focus on movement and exploration\n    # Late: focus on smoothness and precision\n    w_movement = 2.5 - 1.5 * training_progress  # Slightly increased movement weight\n    w_smoothness = 0.3 * training_progress  # Reduced smoothness weight\n    w_action = 0.01\n\n    # Combine components\n    reward = w_movement * movement + w_smoothness * smoothness + w_action * action_cost\n\n    return reward"
+  },
+  {
+    "iteration": 7,
+    "score": -12.753649061300932,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits.",
+    "code_path": "outputs\\lunarlander_3seed_8iter_1M\\seed_44\\reward_iter_7.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n\n    # Dimension-agnostic transition features\n    # Feature 1: Movement towards target (reducing absolute values) - amplified\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n\n    # Feature 2: Smoothness (penalize large changes) - reduced to avoid over-penalizing\n    smoothness = -0.5 * sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n\n    # Feature 3: Action cost (penalize engine usage) - reduced\n    action_cost = -0.005 * float(action)\n\n    # Feature 4: Distance progress (reward being closer to origin) - added back from iteration 5 which had best structure\n    current_dist = sum(abs(o[i]) for i in range(len(o)))\n    next_dist = sum(abs(n[i]) for i in range(len(o)))\n    dist_progress = current_dist - next_dist\n\n    # Stage weights based on training_progress\n    # Early: focus on movement and exploration\n    # Late: focus on smoothness and precision\n    w_movement = 2.0 - 1.0 * training_progress  # Reverted to iteration 4/5 values\n    w_smoothness = 0.3 * training_progress  # Reduced smoothness weight\n    w_action = 0.01\n    w_dist = 0.5  # Consistent weight for distance progress\n\n    # Combine components\n    reward = w_movement * movement + w_smoothness * smoothness + w_action * action_cost + w_dist * dist_progress\n\n    return reward"
+  }
+]

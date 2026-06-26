@@ -1,0 +1,12 @@
+[
+  {
+    "iteration": 0,
+    "score": -136.05467685908658,
+    "success_rate": 0.0,
+    "mean_episode_length": 69.05,
+    "verdict": "failure",
+    "lesson": "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior.",
+    "code_path": "outputs\\lunarlander_3seed_10iter_300k\\seed_42\\reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observations as arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition signals\n    # Movement magnitude (change in position/velocity)\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(min(4, len(o))))\n    \n    # Smoothness penalty (acceleration/jerk)\n    smoothness = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Action penalty (encourage efficient control)\n    action_cost = 0.0\n    if action == 0:\n        action_cost = 0.0\n    elif action == 1 or action == 3:\n        action_cost = 0.1\n    elif action == 2:\n        action_cost = 0.2\n    \n    # Contact bonus (ground contact signals)\n    contact_bonus = 0.0\n    if len(o) >= 8:\n        contact_bonus = (n[6] + n[7]) * 0.5  # leg contact signals\n    \n    # Stage weights based on training progress\n    early_weight = 1.0 - training_progress\n    late_weight = training_progress\n    \n    # Combine components with stage weighting\n    reward = (\n        early_weight * (movement * 0.1 - smoothness * 0.01 - action_cost) +\n        late_weight * (contact_bonus * 2.0 - smoothness * 0.005) +\n        contact_bonus * 0.5  # Always reward contact\n    )\n    \n    return reward"
+  }
+]

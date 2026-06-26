@@ -18,3 +18,4 @@ outputs/run_3seed_1M.log
 # Temp / cache
 .claude/
 nohup.out
+model_*

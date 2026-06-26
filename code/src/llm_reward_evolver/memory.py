@@ -126,10 +126,7 @@ def _lesson_from_metrics(
     target_score: float,
     failure_mode: str,
 ) -> str:
+    """记录事实，不替代 LLM 做分析判断。"""
     if score >= target_score:
-        return "Keep this reward structure as a successful candidate; future edits should be conservative."
-    if mean_episode_length < 100:
-        return "Failure experience: episodes terminate very early; avoid reward structures that create unsafe behavior."
-    if success_rate == 0.0:
-        return "Failure experience: no solved episodes; a structural reward rewrite is preferred over small coefficient edits."
-    return f"Failure experience: {failure_mode}; adjust generic transition features or stage weights."
+        return f"solved (score={score:.1f} >= {target_score:.0f})"
+    return f"score={score:.1f}, survived {mean_episode_length:.0f} steps, success_rate={success_rate:.2f}"

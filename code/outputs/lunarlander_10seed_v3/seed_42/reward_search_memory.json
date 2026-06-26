@@ -1,0 +1,12 @@
+[
+  {
+    "iteration": 0,
+    "score": 215.7949822663978,
+    "success_rate": 0.65,
+    "mean_episode_length": 538.55,
+    "verdict": "success",
+    "lesson": "Keep this reward structure as a successful candidate; future edits should be conservative.",
+    "code_path": "outputs\\lunarlander_10seed_v3\\seed_42\\reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Generic transition signals from observation arrays\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement toward stability - penalize large changes in absolute values\n    # This encourages smooth transitions and reaching stable states\n    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    movement_reward = abs_change * 0.1\n    \n    # Component 2: Velocity/change penalty - penalize large squared differences\n    # This discourages erratic movements and encourages precision\n    squared_diff = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    change_penalty = -squared_diff * 0.05\n    \n    # Component 3: Action cost - penalize taking actions to encourage efficiency\n    # Normalize action to [0,1] range for discrete actions\n    action_cost = -0.01 * (action / 3.0)\n    \n    # Component 4: Terminal state bonus - check if legs are in contact (indices 6,7)\n    # This encourages reaching ground contact states\n    leg_contact_bonus = 0.0\n    if len(o) >= 8:\n        leg_contact_bonus = (n[6] + n[7]) * 0.5\n    \n    # Stage-based weighting using training_progress\n    # Early training: focus on exploration and movement\n    # Mid training: balance movement and stability\n    # Late training: focus on precision and terminal states\n    stage_weight_1 = 1.0 - 0.5 * training_progress  # Movement weight decreases\n    stage_weight_2 = 0.3 + 0.7 * training_progress   # Change penalty increases\n    stage_weight_3 = 1.0 - 0.8 * training_progress   # Action cost decreases\n    stage_weight_4 = 0.0 + 1.0 * training_progress   # Leg contact bonus increases\n    \n    # Combine components with stage weights\n    reward = (\n        stage_weight_1 * movement_reward +\n        stage_weight_2 * change_penalty +\n        stage_weight_3 * action_cost +\n        stage_weight_4 * leg_contact_bonus\n    )\n    \n    return reward"
+  }
+]

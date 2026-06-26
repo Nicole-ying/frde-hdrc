@@ -1,0 +1,15 @@
+[
+  {
+    "iteration": 0,
+    "score": -136.05467685908658,
+    "success_rate": 0.0,
+    "mean_episode_length": 69.05,
+    "converged": false,
+    "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+    "reward_code_path": "outputs\\lunarlander_3seed_10iter_300k\\seed_42\\reward_iter_0.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  }
+]

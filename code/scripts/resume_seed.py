@@ -73,19 +73,7 @@ def resume_seed(config_path: str, seed: int, start_iter: int, llm_provider: str,
         })()
 
         feedback = evolver._build_feedback(stats_obj, current_code)
-
-        # 🆕 结构性重启：连续N轮低于阈值 → 推倒重建
-        restart = evolver._should_restart(records)
-        if restart:
-            current_code = None
-            if best_score < config.rollback_min_score:
-                best_code = None
-            feedback = (
-                "Structural restart triggered: recent iterations stayed below the failure "
-                "threshold. Generate a FRESH reward structure from scratch. Do NOT reuse any "
-                "previous code — the old skeleton is proven insufficient. Start over with "
-                "at least 5-6 signal categories and a proper 3-stage HRDC weight structure.\n"
-            )
+        pass  # 分析引导由 prompts.py 的骨架诊断负责
 
         # 保守回退逻辑
         if not restart and best_code and best_score > last.score and best_score >= config.rollback_min_score:

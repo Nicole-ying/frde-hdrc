@@ -101,6 +101,8 @@ class RewardEvolver:
                 )
 
             fallback_code = None if restart and best_score < self.config.rollback_min_score else best_code
+            # 保存完整 prompt 便于调试
+            self._write_text(f"prompt_iter_{iteration}.txt", prompt)
             current_code = self._generate_valid_reward(prompt, fallback_code)
             reward_path = self._write_text(f"reward_iter_{iteration}.py", current_code)
             reward_program = RewardProgram(
@@ -165,18 +167,8 @@ class RewardEvolver:
             )
 
             feedback = self._build_feedback(stats, current_code)
-            if (
-                best_code
-                and best_score > stats.mean_eval_score
-                and best_score >= self.config.rollback_min_score
-            ):
-                feedback += (
-                    "\nConservative rollback instruction:\n"
-                    "- The latest reward is worse than the previous best reward. Start from previous_best_code, "
-                    "not from the latest code.\n"
-                    "- Keep the same non-leaking reward-reference policy and make only one small targeted change.\n"
-                    "- Do not introduce a new large bonus, a new hard clamp, or a new global multiplier.\n"
-                )
+            # 🆕 不再做硬编码判断。LLM 自己看全部历史 + 自己决定策略
+            pass  # 分析引导由 prompts.py 的骨架诊断负责，不在此重复
             self._write_text(f"feedback_iter_{iteration}.txt", feedback)
 
             stop, _reason = self._should_stop(records)
@@ -189,26 +181,23 @@ class RewardEvolver:
         if self.config.feedback_mode == "scalar":
             return build_scalar_feedback(stats)
         feedback = build_feedback(stats)
-        anchor_report = analyze_original_reward_anchor(
-            current_code,
-            min_multiplier=self.config.min_original_reward_anchor,
-        ) if self.config.allow_original_reward_in_reward else None
-        domain_hits = detect_forbidden_domain_terms(
-            current_code,
-            self.config.forbidden_reward_terms,
-        ) if self.config.domain_knowledge_guard else []
         feedback += (
-            "\nAutonomous search diagnostic policy:\n"
-            "- Do not use environment-specific human rules or manually named state semantics.\n"
-            "- Treat the task as a black-box MDP: only scalar evaluation, episode length, reward errors, "
-            "transition changes, action values, unmasked step context, and training_progress are available.\n"
-            "- If score is low, search for denser generic transition signals from the unmasked step context.\n"
-            "- If reward runtime errors appear, simplify the program and remove unsafe indexing or undefined variables.\n"
-            f"{self._reward_leakage_feedback(current_code, anchor_report)}\n"
-            f"{self._domain_feedback(domain_hits)}\n"
-            "- If mean episode length is very short, treat it as early termination evidence and search for a safer reward structure.\n"
-            "- If the latest iteration is worse than the previous best but the best score is still poor, prefer structural restart over rollback.\n"
+            "\nRules reminder:\n"
+            "- No environment-specific semantics. Black-box MDP only.\n"
+            "- Search for generic transition signals from the visible physics code.\n"
+            "- If episode length is very short, the reward is unsafe.\n"
+            "- If latest is worse than best but best is still poor, prefer structural restart.\n"
         )
+        # 守卫检查
+        if self.config.allow_original_reward_in_reward:
+            anchor_report = analyze_original_reward_anchor(
+                current_code, min_multiplier=self.config.min_original_reward_anchor)
+            feedback += f"\n{anchor_report.to_feedback(self.config.min_original_reward_anchor)}"
+        else:
+            feedback += f"\n{self._reward_leakage_feedback(current_code, None)}"
+        if self.config.domain_knowledge_guard:
+            domain_hits = detect_forbidden_domain_terms(current_code, self.config.forbidden_reward_terms)
+            feedback += f"\n{self._domain_feedback(domain_hits)}"
         return feedback
 
     def _generate_valid_reward(self, prompt: str, fallback_code: Optional[str]) -> str:

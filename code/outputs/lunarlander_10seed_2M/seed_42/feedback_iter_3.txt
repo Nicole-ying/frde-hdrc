@@ -1,0 +1,32 @@
+Training diagnostic report:
+- Mean evaluation score: 154.391
+- Success rate: 0.040
+- Mean episode length: 962.0
+- Trend: needs_improvement
+- Converged: False
+- Main failure mode: no severe failure, but reward search can improve efficiency and stability
+- Interrupted: False
+- Reward runtime errors: 0
+Please improve only the reward code. Use no hidden environment semantics or masked official reward; rely on scalar evaluation, runtime stability, transition-level signals, and HRDC stage weights.
+Autonomous search diagnostic policy:
+- Do not use environment-specific human rules or manually named state semantics.
+- Treat the task as a black-box MDP: only scalar evaluation, episode length, reward errors, transition changes, action values, unmasked step context, and training_progress are available.
+- If score is low, search for denser generic transition signals from the visible physics/state-construction code (NOT the masked reward formula).
+- If reward runtime errors appear, simplify the program and remove unsafe indexing or undefined variables.
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+- If mean episode length is very short, treat it as early termination evidence and search for a safer reward structure.
+- If the latest iteration is worse than the previous best but the best score is still poor, prefer structural restart over rollback.
+
+
+FAILURE ANALYSIS REQUIRED:
+- Latest=154.4, best=241.3.
+- Compare BEST+LATEST code. What components were ADDED/REMOVED? What coefficients changed?
+- Mark each difference as KEEP, DELETE, or TUNE with a reason.
+- If all scores are negative: your reward SIGNALS are wrong, not just poorly tuned. Consider flipping signs, changing weight structure (early=low penalties, late=high penalties), or REBUILDing from scratch.
+- Generate the next function based on this analysis.
+
+Rollback guidance:
+- The latest reward scored WORSE than the previous best. Start from previous_best_code as your base, not from the latest code.
+- However, do NOT limit yourself to small tweaks. If the skeleton diagnosis says REBUILD or ADD components, do so — but build on the best code, not the broken latest code.
+- Avoid introducing a single dominating term (e.g. a survival_bonus over 0.2, or a contact_bonus coefficient over 5.0) that would drown other signals.

@@ -1,0 +1,54 @@
+[
+  {
+    "iteration": 0,
+    "score": -1388.0079831492326,
+    "success_rate": 0.0,
+    "mean_episode_length": 156.2,
+    "converged": false,
+    "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+    "reward_code_path": "outputs\\lunarlander_10seed_v3\\seed_43\\reward_iter_0.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  },
+  {
+    "iteration": 1,
+    "score": -115.25803443353233,
+    "success_rate": 0.0,
+    "mean_episode_length": 67.9,
+    "converged": false,
+    "failure_mode": "reward is weak or misaligned; search denser generic transition signals from the unmasked step context",
+    "reward_code_path": "outputs\\lunarlander_10seed_v3\\seed_43\\reward_iter_1.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  },
+  {
+    "iteration": 2,
+    "score": 199.61114807546713,
+    "success_rate": 0.65,
+    "mean_episode_length": 544.35,
+    "converged": false,
+    "failure_mode": "no severe failure, but reward search can improve efficiency and stability",
+    "reward_code_path": "outputs\\lunarlander_10seed_v3\\seed_43\\reward_iter_2.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  },
+  {
+    "iteration": 3,
+    "score": 250.06935500261372,
+    "success_rate": 0.9,
+    "mean_episode_length": 360.05,
+    "converged": true,
+    "failure_mode": "task solved; no obvious failure mode",
+    "reward_code_path": "outputs\\lunarlander_10seed_v3\\seed_43\\reward_iter_3.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  }
+]

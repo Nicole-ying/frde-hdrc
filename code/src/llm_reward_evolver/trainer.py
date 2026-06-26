@@ -82,17 +82,20 @@ def train_agent(
             provider = progress_provider or tracker.progress
 
             def _make_env(env_seed: int = seed):
-                """Create a fresh env + CustomRewardWrapper (each copy needs its own state)."""
                 e = make_env(env_name, env_seed)
                 return CustomRewardWrapper(e, reward_program, provider).unwrap()
 
             if n_envs > 1:
-                # 每个并行环境用独立 seed + 独立 CustomRewardWrapper 实例
                 train_env = DummyVecEnv(
                     [lambda s=seed + i: _make_env(s) for i in range(n_envs)]
                 )
             else:
                 train_env = _make_env(seed)
+        elif n_envs > 1:
+            # 🆕 baseline 也支持并行环境
+            train_env = DummyVecEnv(
+                [lambda s=seed + i: make_env(env_name, s) for i in range(n_envs)]
+            )
 
         model = _build_model(training_algorithm, train_env, seed, PPO, DQN, ppo_kwargs)
         model.learn(total_timesteps=total_timesteps, callback=_ProgressCallback())
