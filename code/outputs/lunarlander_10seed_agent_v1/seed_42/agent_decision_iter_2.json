@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "Only 2 iterations exist but both show very poor scores (-82.8, -113.1) with episode lengths under 100. Per-step reward is extremely negative (-1.353). The current skeleton has undirected sq_change, conflicting signals, and lacks essential stability/survival signals. The agent dies quickly indicating the reward is fundamentally punishing. Need a simpler skeleton with survival bonus, stability signals, and moderate action costs."
+}

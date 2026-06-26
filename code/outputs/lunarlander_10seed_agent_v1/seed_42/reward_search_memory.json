@@ -1,0 +1,22 @@
+[
+  {
+    "iteration": 0,
+    "score": -82.84782000730208,
+    "success_rate": 0.0,
+    "mean_episode_length": 76.35,
+    "verdict": "failure",
+    "lesson": "score=-82.8, survived 76 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v1\\seed_42\\reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation components as generic arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Change in absolute values (encourages moving towards zero)\n    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Feature 2: Squared change (penalizes large jumps, encourages smoothness)\n    sq_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 3: Action penalty (discourage excessive action usage)\n    action_cost = 0.0\n    if action == 0:\n        action_cost = 0.0  # no action\n    elif action in [1, 3]:\n        action_cost = 0.1  # side engines\n    else:  # action == 2\n        action_cost = 0.2  # main engine\n    \n    # Stage-based weights that evolve with training\n    # Early stage: focus on reducing absolute values and smooth transitions\n    # Late stage: focus on fine control and minimizing action cost\n    stage1_weight = 1.0 - training_progress  # early stage weight\n    stage2_weight = training_progress  # late stage weight\n    \n    # Component weights\n    w_abs = 0.5 * stage1_weight + 0.1 * stage2_weight\n    w_sq = -0.1 * stage1_weight - 0.3 * stage2_weight\n    w_action = -0.2 * stage1_weight - 0.5 * stage2_weight\n    \n    # Combine components\n    reward = w_abs * abs_change + w_sq * sq_change + w_action * action_cost\n    \n    # Add small exploration bonus in early stages\n    exploration_bonus = 0.01 * (1.0 - training_progress)\n    reward += exploration_bonus\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": -113.06438452795642,
+    "success_rate": 0.0,
+    "mean_episode_length": 83.55,
+    "verdict": "failure",
+    "lesson": "score=-113.1, survived 84 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v1\\seed_42\\reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation components as generic arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Change in absolute values (encourages moving towards zero)\n    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Feature 2: Squared change (penalizes large jumps, encourages smoothness)\n    sq_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 3: Action penalty (discourage excessive action usage)\n    action_cost = 0.0\n    if action == 0:\n        action_cost = 0.0  # no action\n    elif action in [1, 3]:\n        action_cost = 0.1  # side engines\n    else:  # action == 2\n        action_cost = 0.2  # main engine\n    \n    # Stage-based weights that evolve with training\n    # Early stage: focus on reducing absolute values and smooth transitions\n    # Late stage: focus on fine control and minimizing action cost\n    stage1_weight = 1.0 - training_progress  # early stage weight\n    stage2_weight = training_progress  # late stage weight\n    \n    # Component weights\n    w_abs = 0.5 * stage1_weight + 0.1 * stage2_weight\n    w_sq = -0.1 * stage1_weight - 0.3 * stage2_weight\n    w_action = -0.2 * stage1_weight - 0.5 * stage2_weight\n    \n    # Combine components\n    reward = w_abs * abs_change + w_sq * sq_change + w_action * action_cost\n    \n    # Add small exploration bonus in early stages\n    exploration_bonus = 0.01 * (1.0 - training_progress)\n    reward += exploration_bonus\n    \n    return reward"
+  }
+]
