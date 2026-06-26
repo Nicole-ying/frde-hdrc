@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "Evidence from single iteration shows score -190.8 with episode length 72, per-step reward -2.646. The current skeleton uses undirected movement signal (squared differences) which rewards ANY change, not directional progress. The abs_change component uses abs(n[i]) - abs(o[i]) which is directional but the sign may be wrong (rewarding movement away from zero). The agent dies very quickly (72 steps), indicating the reward is fundamentally punishing. With only 1 iteration but clear structural issues (undirected signals, likely wrong direction, high per-step penalty), a rebuild is warranted to create a simpler, directional skeleton with proper survival bonus and stability signals."
+}

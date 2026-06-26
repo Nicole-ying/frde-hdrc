@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "After 2 iterations, scores are -190.8 and -297.9 with very short episode lengths (72, 68) and per-step rewards of -2.646 and -4.400. The skeleton uses undirected movement (squared differences) and a potentially wrong-direction abs_change signal. The agent dies quickly, indicating the reward is fundamentally punishing. With no improvement trend and clear structural issues, a rebuild is warranted."
+}

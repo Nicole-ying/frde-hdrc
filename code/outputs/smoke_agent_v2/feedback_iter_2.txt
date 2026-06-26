@@ -1,0 +1,10 @@
+Score: -273.4 | Success rate: 0.00 | Episode length: 68 | Per-step: -4.033 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: After 2 iterations, scores are -190.8 and -297.9 with very short episode lengths (72, 68) and per-step rewards of -2.646 and -4.400. The skeleton uses undirected movement (squared differences) and a potentially wrong-direction abs_change signal. The agent dies quickly, indicating the reward is fundamentally punishing. With no improvement trend and clear structural issues, a rebuild is warranted.

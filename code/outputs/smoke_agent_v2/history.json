@@ -1,0 +1,41 @@
+[
+  {
+    "iteration": 0,
+    "score": -190.7887730897779,
+    "success_rate": 0.0,
+    "mean_episode_length": 72.1,
+    "converged": false,
+    "failure_mode": "",
+    "reward_code_path": "outputs\\smoke_agent_v2\\reward_iter_0.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  },
+  {
+    "iteration": 1,
+    "score": -297.91179665052573,
+    "success_rate": 0.0,
+    "mean_episode_length": 67.7,
+    "converged": false,
+    "failure_mode": "",
+    "reward_code_path": "outputs\\smoke_agent_v2\\reward_iter_1.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  },
+  {
+    "iteration": 2,
+    "score": -273.42810305999285,
+    "success_rate": 0.0,
+    "mean_episode_length": 67.8,
+    "converged": false,
+    "failure_mode": "",
+    "reward_code_path": "outputs\\smoke_agent_v2\\reward_iter_2.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  }
+]

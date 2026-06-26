@@ -1,0 +1,32 @@
+[
+  {
+    "iteration": 0,
+    "score": -190.7887730897779,
+    "success_rate": 0.0,
+    "mean_episode_length": 72.1,
+    "verdict": "failure",
+    "lesson": "score=-190.8, survived 72 steps, success_rate=0.00",
+    "code_path": "outputs\\smoke_agent_v2\\reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observations as arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Movement magnitude (sum of squared differences)\n    movement = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 2: Absolute value change (sum of absolute differences)\n    abs_change = sum(abs(n[i]) - abs(o[i]) for i in range(len(o)))\n    \n    # Feature 3: Action cost (small penalty for taking actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights\n    # Early stage: encourage exploration (movement)\n    # Middle stage: balance movement and absolute change\n    # Late stage: focus on stability (small absolute changes)\n    if training_progress < 0.3:\n        # Early training - encourage movement and exploration\n        w_movement = 1.0\n        w_abs_change = 0.1\n        w_action = -0.01\n    elif training_progress < 0.7:\n        # Middle training - balance exploration and exploitation\n        w_movement = 0.5\n        w_abs_change = 0.5\n        w_action = -0.02\n    else:\n        # Late training - focus on stability and precision\n        w_movement = 0.1\n        w_abs_change = 1.0\n        w_action = -0.03\n    \n    # Combine components\n    reward = (w_movement * movement + \n              w_abs_change * abs_change + \n              w_action * action_cost)\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": -297.91179665052573,
+    "success_rate": 0.0,
+    "mean_episode_length": 67.7,
+    "verdict": "failure",
+    "lesson": "score=-297.9, survived 68 steps, success_rate=0.00",
+    "code_path": "outputs\\smoke_agent_v2\\reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observations as arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Movement magnitude (sum of squared differences)\n    movement = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 2: Absolute value change (sum of absolute differences)\n    abs_change = sum(abs(n[i]) - abs(o[i]) for i in range(len(o)))\n    \n    # Feature 3: Action cost (small penalty for taking actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights\n    # Early stage: encourage exploration (movement)\n    # Middle stage: balance movement and absolute change\n    # Late stage: focus on stability (small absolute changes)\n    if training_progress < 0.3:\n        # Early training - encourage movement and exploration\n        w_movement = 1.0\n        w_abs_change = 0.1\n        w_action = -0.01\n    elif training_progress < 0.7:\n        # Middle training - balance exploration and exploitation\n        w_movement = 0.5\n        w_abs_change = 0.5\n        w_action = -0.02\n    else:\n        # Late training - focus on stability and precision\n        w_movement = 0.1\n        w_abs_change = 1.0\n        w_action = -0.03\n    \n    # Combine components\n    reward = (w_movement * movement + \n              w_abs_change * abs_change + \n              w_action * action_cost)\n    \n    return reward"
+  },
+  {
+    "iteration": 2,
+    "score": -273.42810305999285,
+    "success_rate": 0.0,
+    "mean_episode_length": 67.8,
+    "verdict": "failure",
+    "lesson": "score=-273.4, survived 68 steps, success_rate=0.00",
+    "code_path": "outputs\\smoke_agent_v2\\reward_iter_2.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observations as arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Movement magnitude (sum of squared differences)\n    movement = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 2: Absolute value change (sum of absolute differences)\n    abs_change = sum(abs(n[i]) - abs(o[i]) for i in range(len(o)))\n    \n    # Feature 3: Action cost (small penalty for taking actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights\n    # Early stage: encourage exploration (movement)\n    # Middle stage: balance movement and absolute change\n    # Late stage: focus on stability (small absolute changes)\n    if training_progress < 0.3:\n        # Early training - encourage movement and exploration\n        w_movement = 1.0\n        w_abs_change = 0.1\n        w_action = -0.01\n    elif training_progress < 0.7:\n        # Middle training - balance exploration and exploitation\n        w_movement = 0.5\n        w_abs_change = 0.5\n        w_action = -0.02\n    else:\n        # Late training - focus on stability and precision\n        w_movement = 0.1\n        w_abs_change = 1.0\n        w_action = -0.03\n    \n    # Combine components\n    reward = (w_movement * movement + \n              w_abs_change * abs_change + \n              w_action * action_cost)\n    \n    return reward"
+  }
+]
