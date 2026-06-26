@@ -127,13 +127,14 @@ class AgentMemory:
             "=== Agent Memory ===",
             "",
             "## Evolution Summary",
-            "| iter | action | target | score | len | verdict |",
-            "|------|--------|--------|-------|-----|---------|",
+            "| iter | action | target | score | len | verdict | diagnosis (LLM-generated) |",
+            "|------|--------|--------|-------|-----|---------|---------------------------|",
         ]
         for e in self.entries:
+            lesson = e.reasoning[:80] + ("..." if len(e.reasoning) > 80 else "")
             lines.append(
                 f"| {e.iteration} | {e.action} | {e.target} | "
-                f"{e.score:.1f} | {e.episode_length:.0f} | {e.verdict} |"
+                f"{e.score:.1f} | {e.episode_length:.0f} | {e.verdict} | {lesson} |"
             )
         lines.append("")
 

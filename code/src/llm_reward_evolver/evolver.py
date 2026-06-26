@@ -187,8 +187,13 @@ class RewardEvolver:
             )
 
             feedback = self._build_feedback(stats, current_code)
-            # 🆕 不再做硬编码判断。LLM 自己看全部历史 + 自己决定策略
-            pass  # 分析引导由 prompts.py 的骨架诊断负责，不在此重复
+            # 🆕 附加上一轮 LLM 的诊断
+            if agent_memory.entries:
+                last_entry = agent_memory.entries[-1]
+                if last_entry.reasoning:
+                    feedback += (
+                        f"\nLast agent diagnosis: {last_entry.reasoning}"
+                    )
             self._write_text(f"feedback_iter_{iteration}.txt", feedback)
 
             stop, _reason = self._should_stop(records)
