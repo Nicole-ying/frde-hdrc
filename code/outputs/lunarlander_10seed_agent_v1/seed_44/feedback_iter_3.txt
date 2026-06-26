@@ -1,0 +1,10 @@
+Score: -543.7 | Success rate: 0.00 | Episode length: 65 | Per-step: -8.333 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 1 (iter 0-2) is complete with 3 data points showing scores -547.5, -535.9, -528.3 — slightly improving but still very poor. Episode length is stuck at ~64-65 steps, meaning the agent dies immediately. The skeleton has been tuned 3 times with no meaningful improvement. The undirected smoothness penalty (sq_diff) is fundamentally flawed — it punishes ANY change equally, not just bad changes. The contact bonus never triggers because episodes are too short. The movement_reward using abs(o)-abs(n) is directional but likely too weak. The per-step reward of -8.223 is catastrophically negative, meaning every step is heavily punished. A complete rebuild is needed with a simpler, more effective design: survival bonus to keep agent alive, velocity penalty to prevent crashes, angle penalty for stability, and directional movement toward zero. This skeleton has failed to produce any positive signal after 3 iterations.

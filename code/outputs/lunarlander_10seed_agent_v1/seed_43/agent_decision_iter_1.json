@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 0) - only one data point. Score 116.9 with per-step 0.358 and episode length 327 is reasonable for a first attempt. The skeleton has basic components (movement, abs_change, action_cost) but has critical issues: (1) movement uses undirected squared difference, (2) abs_change direction is wrong (positive in mid stage rewards moving away from zero), (3) late stage negates abs_change which conflicts with mid stage, (4) action_cost is computed incorrectly for discrete action. Need to fix signal directions and add missing stability/contact signals."
+}

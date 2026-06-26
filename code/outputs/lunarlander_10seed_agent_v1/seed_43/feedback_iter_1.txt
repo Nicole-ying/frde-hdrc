@@ -1,0 +1,10 @@
+Score: -127.6 | Success rate: 0.00 | Episode length: 69 | Per-step: -1.843 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 1 (iter 0) - only one data point. Score 116.9 with per-step 0.358 and episode length 327 is reasonable for a first attempt. The skeleton has basic components (movement, abs_change, action_cost) but has critical issues: (1) movement uses undirected squared difference, (2) abs_change direction is wrong (positive in mid stage rewards moving away from zero), (3) late stage negates abs_change which conflicts with mid stage, (4) action_cost is computed incorrectly for discrete action. Need to fix signal directions and add missing stability/contact signals.

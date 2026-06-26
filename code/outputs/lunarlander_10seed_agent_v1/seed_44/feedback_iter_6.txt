@@ -1,4 +1,4 @@
-Score: 256.1 | Success rate: 1.00 | Episode length: 351 | Per-step: 0.731 | Errors: 0
+Score: 5.9 | Success rate: 0.15 | Episode length: 377 | Per-step: 0.016 | Errors: 0
 Rules reminder:
 - No environment-specific semantics. Black-box MDP only.
 - Search for generic transition signals from the visible physics code.

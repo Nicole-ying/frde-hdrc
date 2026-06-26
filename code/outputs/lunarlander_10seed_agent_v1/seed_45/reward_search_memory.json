@@ -1,0 +1,12 @@
+[
+  {
+    "iteration": 0,
+    "score": -122.29125703013234,
+    "success_rate": 0.0,
+    "mean_episode_length": 116.2,
+    "verdict": "failure",
+    "lesson": "score=-122.3, survived 116 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v1\\seed_45\\reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features - dimension agnostic\n    # Feature 1: Movement toward center (reduction in absolute values)\n    center_progress = sum(abs(o[i]) - abs(n[i]) for i in range(min(4, len(o))))\n    \n    # Feature 2: Smoothness of transition (small changes are better)\n    transition_smoothness = -sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 3: Velocity damping (encourage reducing speed)\n    velocity_damping = -sum(abs(n[i]) for i in range(2, 4)) if len(n) >= 4 else 0.0\n    \n    # Feature 4: Action cost (penalize large actions)\n    action_cost = -0.01 * float(action)\n    \n    # Feature 5: Contact bonus (from info or observation)\n    contact_bonus = 0.0\n    if len(o) >= 8:\n        contact_bonus = sum(n[6:8]) * 0.5\n    \n    # Stage weights based on training_progress\n    stage1_weight = max(0.0, 1.0 - 2.0 * training_progress)\n    stage2_weight = 1.0 - abs(training_progress - 0.5) * 2.0\n    stage3_weight = max(0.0, 2.0 * training_progress - 1.0)\n    \n    # Combine components with stage-adaptive weights\n    reward = (\n        stage1_weight * (center_progress * 0.5 + contact_bonus * 0.3) +\n        stage2_weight * (transition_smoothness * 0.3 + velocity_damping * 0.2) +\n        stage3_weight * (contact_bonus * 0.4 + center_progress * 0.3) +\n        action_cost * (1.0 - training_progress * 0.5)\n    )\n    \n    return reward"
+  }
+]

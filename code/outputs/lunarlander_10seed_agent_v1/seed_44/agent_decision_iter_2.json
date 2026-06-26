@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 1) - only two data points, cannot judge skeleton yet. Scores are poor (-547.5, -535.9) with short episodes (65 steps) but slightly improving. The skeleton has undirected smoothness penalty (sq_diff) and is missing a velocity penalty (agent dies quickly, likely crashing at high speed). Will fix smoothness to be directional and add a velocity penalty to prevent crashes. Also need to add a survival bonus to encourage longer episodes. The contact bonus is likely not triggering since episodes are too short to reach ground."
+}

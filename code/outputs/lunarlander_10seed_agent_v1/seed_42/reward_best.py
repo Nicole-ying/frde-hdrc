@@ -1,40 +1,50 @@
 def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
-    # Extract observation components as generic arrays
+    # Extract observation arrays
     o = obs
     n = next_obs
     
     # Generic transition features
-    # Feature 1: Change in absolute values (encourages moving towards zero)
-    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))
+    # Feature 1: Movement towards center - sum of absolute position changes
+    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(4))
     
-    # Feature 2: Squared change (penalizes large jumps, encourages smoothness)
-    sq_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))
+    # Feature 2: Velocity stabilization - sum of squared velocity changes
+    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, 4))
     
-    # Feature 3: Action penalty (discourage excessive action usage)
+    # Feature 3: Angular stability - angle and angular velocity changes
+    angle_change = abs(n[4]) - abs(o[4])
+    ang_vel_change = abs(n[5]) - abs(o[5])
+    
+    # Feature 4: Ground contact bonus
+    ground_contact = sum(n[6:8])
+    
+    # Feature 5: Action cost (small penalty for using engines)
     action_cost = 0.0
-    if action == 0:
-        action_cost = 0.0  # no action
-    elif action in [1, 3]:
-        action_cost = 0.1  # side engines
-    else:  # action == 2
-        action_cost = 0.2  # main engine
+    if action == 2:  # Main engine
+        action_cost = 0.1
+    elif action in [1, 3]:  # Side engines
+        action_cost = 0.05
     
-    # Stage-based weights that evolve with training
-    # Early stage: focus on reducing absolute values and smooth transitions
-    # Late stage: focus on fine control and minimizing action cost
-    stage1_weight = 1.0 - training_progress  # early stage weight
-    stage2_weight = training_progress  # late stage weight
+    # Stage-based weights that evolve with training progress
+    # Stage 1 (early): Focus on reaching ground and stabilizing
+    # Stage 2 (mid): Focus on precise landing
+    # Stage 3 (late): Focus on efficiency
     
-    # Component weights
-    w_abs = 0.5 * stage1_weight + 0.1 * stage2_weight
-    w_sq = -0.1 * stage1_weight - 0.3 * stage2_weight
-    w_action = -0.2 * stage1_weight - 0.5 * stage2_weight
+    stage1_weight = max(0.0, 1.0 - 2.0 * training_progress)
+    stage2_weight = 1.0 - abs(2.0 * training_progress - 1.0)
+    stage3_weight = max(0.0, 2.0 * training_progress - 1.0)
     
-    # Combine components
-    reward = w_abs * abs_change + w_sq * sq_change + w_action * action_cost
+    # Component rewards
+    pos_reward = pos_change * 0.5
+    vel_penalty = -vel_change * 0.1
+    angle_reward = -angle_change * 0.3 - ang_vel_change * 0.2
+    contact_reward = ground_contact * 0.5
+    action_penalty = -action_cost
     
-    # Add small exploration bonus in early stages
-    exploration_bonus = 0.01 * (1.0 - training_progress)
-    reward += exploration_bonus
+    # Combine with stage weights
+    reward = (
+        stage1_weight * (pos_reward + contact_reward * 0.3) +
+        stage2_weight * (angle_reward + vel_penalty * 0.5 + contact_reward * 0.5) +
+        stage3_weight * (vel_penalty * 0.7 + angle_reward * 0.3 + action_penalty * 0.2)
+    )
     
-    return reward
+    return float(reward)

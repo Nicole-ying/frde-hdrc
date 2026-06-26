@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 0-2) with this skeleton - only 2 data points (score 5.9 -> -41.3, episode length 377 -> 591). The score dropped but episode length improved significantly, indicating the agent is surviving longer but not yet learning the right behavior. The skeleton has the right components but needs: 1) Replace undirected smoothness penalty (squared_diff) with directional form, 2) Fix stage weights so early training isn't dominated by negative components, 3) Add a survival bonus to reward longer episodes, 4) Reduce the dominance of action_cost in early training. The per-step reward of -0.07 is reasonable for early training. Not enough data to rebuild - this skeleton showed promise with score 5.9."
+}

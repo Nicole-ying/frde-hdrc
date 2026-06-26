@@ -1,0 +1,10 @@
+Score: -41.3 | Success rate: 0.00 | Episode length: 591 | Per-step: -0.070 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 1 (iter 0-2) - only 1 data point with this skeleton (score 5.9, episode length 377). The score is positive and improving from -107.3 to 5.9, with episode length increasing from 293 to 377. This is a clear improvement trend. The skeleton has the right components but needs tuning: the undirected smoothness penalty (squared_diff) should be replaced with a directional form, and the stage weights need adjustment to reduce the dominance of the early_weight components which are mostly negative (movement_reward * 0.3 + action_cost * 0.7). The per-step reward of 0.016 is reasonable but could be improved by fixing the undirected smoothness signal and rebalancing stage weights.

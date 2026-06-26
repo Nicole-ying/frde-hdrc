@@ -1,0 +1,10 @@
+Score: -528.3 | Success rate: 0.00 | Episode length: 64 | Per-step: -8.223 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 1 (iter 1) - only two data points, cannot judge skeleton yet. Scores are poor (-547.5, -535.9) with short episodes (65 steps) but slightly improving. The skeleton has undirected smoothness penalty (sq_diff) and is missing a velocity penalty (agent dies quickly, likely crashing at high speed). Will fix smoothness to be directional and add a velocity penalty to prevent crashes. Also need to add a survival bonus to encourage longer episodes. The contact bonus is likely not triggering since episodes are too short to reach ground.

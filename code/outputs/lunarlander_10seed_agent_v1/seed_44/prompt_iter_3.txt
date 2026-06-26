@@ -49,13 +49,15 @@ You are an Autonomous Reward Design Agent. You operate in a perceive→plan→ac
 
 SKELETON QUALITY DIAGNOSIS (do this BEFORE writing code):
 
-Step 0 — Is this skeleton worth fixing? Look at the TREND, not the level:
-  - IMPORTANT: Good rewards often start from very negative scores and climb. A single bad iteration does NOT prove the skeleton is broken. You need at least 2-3 iterations of evidence before judging.
-  - CRITICAL: If there are fewer than 3 iterations in Memory, you DO NOT have enough evidence to rebuild. Even if the score is terrible, you only have ONE data point. The skeleton might be fine but poorly calibrated. Your ONLY allowed actions with <3 iterations are TUNE (adjust coefficients, fix signal directions) or ADD (fill missing signal categories). REBUILD and DELETE are FORBIDDEN until you have 3+ iterations of evidence showing the skeleton is truly stuck.
-  - If scores are IMPROVING across 3+ iterations (even -400→-200→-100): the skeleton is WORKING — keep tuning. Trend matters more than level.
-  - If scores are FLAT or DECLINING across 3+ iterations despite coefficient changes: the skeleton is STUCK. REBUILD.
-  - If the agent NEVER survives past 200 steps across 3+ iterations: the reward is too punishing. REBUILD with lower early-stage penalties.
-  - If there was at least ONE iteration with episode > 500 or score positive: the skeleton CAN work. It just needs calibration.
+AGENT SEARCH STRATEGY — your search has phases, just like HRDC:
+
+  PHASE 1 (Exploration, iter 0-2): You are still EXPLORING the skeleton. Do NOT judge it yet. Many great reward functions started at -400 and climbed. Your job in this phase is to understand the skeleton's potential by making targeted improvements: fix undirected signals, fill missing categories (stability, contact, velocity), tune coefficients. REBUILD is COUNTERPRODUCTIVE in this phase — you would throw away a potentially good skeleton before seeing what it can do. Use TUNE, ADD, or DELETE. Save REBUILD for phase 2.
+
+  PHASE 2 (Judgment, iter 3-5): You now have 3+ data points. You CAN judge the skeleton. If scores are IMPROVING (even -400→-200→-100): the skeleton WORKS — keep tuning. If scores are FLAT or DECLINING despite coefficient changes: REBUILD. If the agent still cannot survive past 200 steps after 3+ iterations of trying: REBUILD.
+
+  PHASE 3 (Decisive, iter 6+): Trust the accumulated evidence. If the skeleton has never produced positive scores or long episodes, REBUILD aggressively. If scores are climbing toward the target, REFINE with small adjustments.
+
+  KEY PRINCIPLE: Never REBUILD in Phase 1. You don't have enough data yet. The score might be terrible, but you've only seen ONE configuration of this skeleton — that's not evidence, that's a single sample. Give every skeleton 3 iterations of genuine tuning before deciding it's broken.
 
 Step 1 — Inventory the skeleton. List EVERY component in the current reward function and what physical signal it captures:
   - Transition signal (e.g. abs_change, movement): does the agent move toward desirable states?
@@ -90,12 +92,10 @@ SIMPLE-FIRST PRINCIPLE:
   - CRITICAL: If the current iteration scored WELL (close to or above the target), make ONLY one small coefficient adjustment. Do NOT add new components, do NOT add new penalties to early training. A score near the target means the skeleton is RIGHT — don't break it.
   - Early training stage (stage 1 / early_weight) MUST keep penalties LOW. The agent needs freedom to explore before precision matters. Never add new penalty terms to the early stage of a working reward.
 
-SKELETON QUALITY — YOU decide whether to REBUILD:
-  - You have access to EVERY iteration's complete code and score in Agent Memory. Look at the score trajectory across all iterations.
-  - Ask yourself: is there a REAL trend of improvement (not just noise)? Real improvement means scores consistently moving in the right direction across multiple iterations, regardless of magnitude. If scores went -200 → -150 → -100 → -50, that IS real improvement — keep tuning. If scores went -100 → -110 → -105 → -115, that's just noise around -110 — the skeleton is stuck, REBUILD.
-  - OBVIOUSLY BROKEN: undirected signals like (n-o)^2, ALL scores deeply negative with episode < 200 across all iterations, penalties heavy in early training. REBUILD immediately — don't waste iterations.
-  - IMPROVING: scores show a genuine upward trend. Keep searching. Don't rebuild just because scores are still negative — progress is progress. Trust the trend.
-  - STUCK: scores oscillate around the same level for multiple iterations with no clear trend. REBUILD with a different structure.
+DECISION AUTHORITY — after completing Steps 0-3, make your choice:
+  - The AGENT SEARCH STRATEGY (Step 0) tells you which phase you're in. Phase 1 (iter 0-2): tune/add/delete only. Phase 2-3 (iter 3+): you may REBUILD if the trend evidence supports it.
+  - In ANY phase: if the code has undirected signals like (n-o)^2, fix them to directional forms (abs(o)-abs(n)) — but don't use that as an excuse to REBUILD. Fixing undirected signals is a TUNE action.
+  - Trend examples: -200→-150→-100 = IMPROVING (keep tuning). -100→-110→-105→-115 = STUCK (REBUILD if in Phase 2+).
 
 Step 5 — Output the improved reward function. Your changes must be justified by the skeleton diagnosis above. If the skeleton is insufficient, ADD components. If it is adequate, TUNE components.
 
@@ -107,90 +107,124 @@ Study the Agent Memory section below. For each past iteration, note its componen
 
         Current reward code:
         def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
-    # Extract observation components as generic arrays
+    # Create generic arrays for dimension-agnostic processing
     o = obs
     n = next_obs
 
-    # Generic transition features
-    # Feature 1: Change in absolute values (encourages moving towards zero)
-    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))
+    # Component 1: Movement toward stability - penalize large absolute changes
+    # Encourages smooth transitions and stable states
+    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))
+    movement_reward = abs_diff / len(o)
 
-    # Feature 2: Squared change (penalizes large jumps, encourages smoothness)
-    sq_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))
+    # Component 2: Smoothness - penalize sudden large changes
+    # Uses squared differences to heavily penalize erratic movements
+    sq_diff = sum((n[i] - o[i]) ** 2 for i in range(len(o)))
+    smoothness_penalty = -sq_diff / (len(o) * 10.0)
 
-    # Feature 3: Action penalty (discourage excessive action usage)
-    action_cost = 0.0
-    if action == 0:
-        action_cost = 0.0  # no action
-    elif action in [1, 3]:
-        action_cost = 0.1  # side engines
-    else:  # action == 2
-        action_cost = 0.2  # main engine
+    # Component 3: Action cost - penalize frequent or aggressive actions
+    # Actions are discrete (0-3), normalize to [-1, 1] range
+    action_value = (action - 1.5) / 1.5
+    action_cost = -abs(action_value) * 0.1
 
-    # Stage-based weights that evolve with training
-    # Early stage: focus on reducing absolute values and smooth transitions
-    # Late stage: focus on fine control and minimizing action cost
-    stage1_weight = 1.0 - training_progress  # early stage weight
-    stage2_weight = training_progress  # late stage weight
+    # Component 4: Contact bonus - reward ground contact signals from info
+    # Generic contact detection from observation indices 6 and 7
+    contact_bonus = 0.0
+    if len(o) >= 8:
+        contact_bonus = (n[6] + n[7]) * 0.5  # Reward both legs contacting
 
-    # Component weights
-    w_abs = 0.5 * stage1_weight + 0.1 * stage2_weight
-    w_sq = -0.1 * stage1_weight - 0.3 * stage2_weight
-    w_action = -0.2 * stage1_weight - 0.5 * stage2_weight
+    # Stage-based weights that evolve with training_progress
+    # Early stage: focus on smoothness and movement
+    # Middle stage: balance all components
+    # Late stage: emphasize stability and contact
 
-    # Combine components
-    reward = w_abs * abs_change + w_sq * sq_change + w_action * action_cost
+    if training_progress < 0.3:
+        # Early exploration phase
+        w_movement = 1.0
+        w_smoothness = 2.0
+        w_action = 0.5
+        w_contact = 0.0
+    elif training_progress < 0.6:
+        # Middle refinement phase
+        w_movement = 0.5
+        w_smoothness = 1.0
+        w_action = 1.0
+        w_contact = 1.0
+    else:
+        # Late optimization phase
+        w_movement = 0.2
+        w_smoothness = 0.5
+        w_action = 1.5
+        w_contact = 2.0
 
-    # Add small exploration bonus in early stages
-    exploration_bonus = 0.01 * (1.0 - training_progress)
-    reward += exploration_bonus
+    # Combine components with stage weights
+    reward = (w_movement * movement_reward + 
+              w_smoothness * smoothness_penalty + 
+              w_action * action_cost + 
+              w_contact * contact_bonus)
 
     return reward
 
 Previous best reward code:
 def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
-    # Extract observation components as generic arrays
+    # Create generic arrays for dimension-agnostic processing
     o = obs
     n = next_obs
 
-    # Generic transition features
-    # Feature 1: Change in absolute values (encourages moving towards zero)
-    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))
+    # Component 1: Movement toward stability - penalize large absolute changes
+    # Encourages smooth transitions and stable states
+    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))
+    movement_reward = abs_diff / len(o)
 
-    # Feature 2: Squared change (penalizes large jumps, encourages smoothness)
-    sq_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))
+    # Component 2: Smoothness - penalize sudden large changes
+    # Uses squared differences to heavily penalize erratic movements
+    sq_diff = sum((n[i] - o[i]) ** 2 for i in range(len(o)))
+    smoothness_penalty = -sq_diff / (len(o) * 10.0)
 
-    # Feature 3: Action penalty (discourage excessive action usage)
-    action_cost = 0.0
-    if action == 0:
-        action_cost = 0.0  # no action
-    elif action in [1, 3]:
-        action_cost = 0.1  # side engines
-    else:  # action == 2
-        action_cost = 0.2  # main engine
+    # Component 3: Action cost - penalize frequent or aggressive actions
+    # Actions are discrete (0-3), normalize to [-1, 1] range
+    action_value = (action - 1.5) / 1.5
+    action_cost = -abs(action_value) * 0.1
 
-    # Stage-based weights that evolve with training
-    # Early stage: focus on reducing absolute values and smooth transitions
-    # Late stage: focus on fine control and minimizing action cost
-    stage1_weight = 1.0 - training_progress  # early stage weight
-    stage2_weight = training_progress  # late stage weight
+    # Component 4: Contact bonus - reward ground contact signals from info
+    # Generic contact detection from observation indices 6 and 7
+    contact_bonus = 0.0
+    if len(o) >= 8:
+        contact_bonus = (n[6] + n[7]) * 0.5  # Reward both legs contacting
 
-    # Component weights
-    w_abs = 0.5 * stage1_weight + 0.1 * stage2_weight
-    w_sq = -0.1 * stage1_weight - 0.3 * stage2_weight
-    w_action = -0.2 * stage1_weight - 0.5 * stage2_weight
+    # Stage-based weights that evolve with training_progress
+    # Early stage: focus on smoothness and movement
+    # Middle stage: balance all components
+    # Late stage: emphasize stability and contact
 
-    # Combine components
-    reward = w_abs * abs_change + w_sq * sq_change + w_action * action_cost
+    if training_progress < 0.3:
+        # Early exploration phase
+        w_movement = 1.0
+        w_smoothness = 2.0
+        w_action = 0.5
+        w_contact = 0.0
+    elif training_progress < 0.6:
+        # Middle refinement phase
+        w_movement = 0.5
+        w_smoothness = 1.0
+        w_action = 1.0
+        w_contact = 1.0
+    else:
+        # Late optimization phase
+        w_movement = 0.2
+        w_smoothness = 0.5
+        w_action = 1.5
+        w_contact = 2.0
 
-    # Add small exploration bonus in early stages
-    exploration_bonus = 0.01 * (1.0 - training_progress)
-    reward += exploration_bonus
+    # Combine components with stage weights
+    reward = (w_movement * movement_reward + 
+              w_smoothness * smoothness_penalty + 
+              w_action * action_cost + 
+              w_contact * contact_bonus)
 
     return reward
 
         FDRE feedback / diagnostic report:
-        Score: -113.1 | Success rate: 0.00 | Episode length: 84 | Per-step: -1.353 | Errors: 0
+        Score: -528.3 | Success rate: 0.00 | Episode length: 64 | Per-step: -8.223 | Errors: 0
 Rules reminder:
 - No environment-specific semantics. Black-box MDP only.
 - Search for generic transition signals from the visible physics code.
@@ -199,7 +233,7 @@ Rules reminder:
 
 - official reward leakage guard: original_reward is not used.
 - domain-knowledge guard: no forbidden task-specific terms detected.
-Last agent diagnosis: Only 1 iteration exists, but the evidence is clear: episode length 76, per-step reward -1.085, score -82.8. The current skeleton has undirected sq_change (rewards ANY change), conflicting signals (abs_change positive but sq_change negative), and action_cost that penalizes main engine too heavily. The agent dies quickly (76 steps) indicating the reward is fundamentally punishing. Per the rules: 'If episode length is very short (< 200): the agent dies quickly. You are likely MISSING a stability signal.' The skeleton lacks a stability/angle signal and a survival bonus. The per-step reward of -1.085 is extremely negative, meaning every step is punishing. Rebuild with a simpler, safer skeleton that includes: survival bonus, velocity penalty, angle penalty, and moderate action cost.
+Last agent diagnosis: Phase 1 (iter 1) - only two data points, cannot judge skeleton yet. Scores are poor (-547.5, -535.9) with short episodes (65 steps) but slightly improving. The skeleton has undirected smoothness penalty (sq_diff) and is missing a velocity penalty (agent dies quickly, likely crashing at high speed). Will fix smoothness to be directional and add a velocity penalty to prevent crashes. Also need to add a survival bonus to encourage longer episodes. The contact bonus is likely not triggering since episodes are too short to reach ground.
 
         Eureka-style context:
         Task description file:
@@ -383,95 +417,192 @@ def step(self, action):
 ## Evolution Summary
 | iter | action | target | score | len | verdict | diagnosis (LLM-generated) |
 |------|--------|--------|-------|-----|---------|---------------------------|
-| 0 | tune | unknown | -82.8 | 76 | failure | Could not parse JSON decision; inferred from code. |
-| 1 | rebuild | skeleton | -113.1 | 84 | failure | Only 1 iteration exists, but the evidence is clear: episode length 76, per-step ... |
+| 0 | tune | unknown | -547.5 | 65 | failure | Could not parse JSON decision; inferred from code. |
+| 1 | tune | skeleton | -535.9 | 65 | failure | Phase 1 (iter 0) - only one data point, cannot judge skeleton yet. Score is poor... |
+| 2 | tune | skeleton | -528.3 | 64 | failure | Phase 1 (iter 1) - only two data points, cannot judge skeleton yet. Scores are p... |
 
-## Iteration 0 — TUNE on unknown (score=-82.8, verdict=failure)
+## Iteration 0 — TUNE on unknown (score=-547.5, verdict=failure)
 Decision reasoning: Could not parse JSON decision; inferred from code.
 ```python
 def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
-    # Extract observation components as generic arrays
+    # Create generic arrays for dimension-agnostic processing
     o = obs
     n = next_obs
 
-    # Generic transition features
-    # Feature 1: Change in absolute values (encourages moving towards zero)
-    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))
+    # Component 1: Movement toward stability - penalize large absolute changes
+    # Encourages smooth transitions and stable states
+    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))
+    movement_reward = abs_diff / len(o)
 
-    # Feature 2: Squared change (penalizes large jumps, encourages smoothness)
-    sq_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))
+    # Component 2: Smoothness - penalize sudden large changes
+    # Uses squared differences to heavily penalize erratic movements
+    sq_diff = sum((n[i] - o[i]) ** 2 for i in range(len(o)))
+    smoothness_penalty = -sq_diff / (len(o) * 10.0)
 
-    # Feature 3: Action penalty (discourage excessive action usage)
-    action_cost = 0.0
-    if action == 0:
-        action_cost = 0.0  # no action
-    elif action in [1, 3]:
-        action_cost = 0.1  # side engines
-    else:  # action == 2
-        action_cost = 0.2  # main engine
+    # Component 3: Action cost - penalize frequent or aggressive actions
+    # Actions are discrete (0-3), normalize to [-1, 1] range
+    action_value = (action - 1.5) / 1.5
+    action_cost = -abs(action_value) * 0.1
 
-    # Stage-based weights that evolve with training
-    # Early stage: focus on reducing absolute values and smooth transitions
-    # Late stage: focus on fine control and minimizing action cost
-    stage1_weight = 1.0 - training_progress  # early stage weight
-    stage2_weight = training_progress  # late stage weight
+    # Component 4: Contact bonus - reward ground contact signals from info
+    # Generic contact detection from observation indices 6 and 7
+    contact_bonus = 0.0
+    if len(o) >= 8:
+        contact_bonus = (n[6] + n[7]) * 0.5  # Reward both legs contacting
 
-    # Component weights
-    w_abs = 0.5 * stage1_weight + 0.1 * stage2_weight
-    w_sq = -0.1 * stage1_weight - 0.3 * stage2_weight
-    w_action = -0.2 * stage1_weight - 0.5 * stage2_weight
+    # Stage-based weights that evolve with training_progress
+    # Early stage: focus on smoothness and movement
+    # Middle stage: balance all components
+    # Late stage: emphasize stability and contact
 
-    # Combine components
-    reward = w_abs * abs_change + w_sq * sq_change + w_action * action_cost
+    if training_progress < 0.3:
+        # Early exploration phase
+        w_movement = 1.0
+        w_smoothness = 2.0
+        w_action = 0.5
+        w_contact = 0.0
+    elif training_progress < 0.6:
+        # Middle refinement phase
+        w_movement = 0.5
+        w_smoothness = 1.0
+        w_action = 1.0
+        w_contact = 1.0
+    else:
+        # Late optimization phase
+        w_movement = 0.2
+        w_smoothness = 0.5
+        w_action = 1.5
+        w_contact = 2.0
 
-    # Add small exploration bonus in early stages
-    exploration_bonus = 0.01 * (1.0 - training_progress)
-    reward += exploration_bonus
+    # Combine components with stage weights
+    reward = (w_movement * movement_reward + 
+              w_smoothness * smoothness_penalty + 
+              w_action * action_cost + 
+              w_contact * contact_bonus)
 
     return reward
 ```
 
-## Iteration 1 — REBUILD on skeleton (score=-113.1, verdict=failure)
-Decision reasoning: Only 1 iteration exists, but the evidence is clear: episode length 76, per-step reward -1.085, score -82.8. The current skeleton has undirected sq_change (rewards ANY change), conflicting signals (abs_change positive but sq_change negative), and action_cost that penalizes main engine too heavily. The agent dies quickly (76 steps) indicating the reward is fundamentally punishing. Per the rules: 'If episode length is very short (< 200): the agent dies quickly. You are likely MISSING a stability signal.' The skeleton lacks a stability/angle signal and a survival bonus. The per-step reward of -1.085 is extremely negative, meaning every step is punishing. Rebuild with a simpler, safer skeleton that includes: survival bonus, velocity penalty, angle penalty, and moderate action cost.
+## Iteration 1 — TUNE on skeleton (score=-535.9, verdict=failure)
+Decision reasoning: Phase 1 (iter 0) - only one data point, cannot judge skeleton yet. Score is poor (-547.5, episode length 65) but this is the first iteration. The skeleton has basic components but is missing a velocity penalty (agent dies quickly, likely crashing at high speed) and has undirected smoothness penalty. Will add velocity penalty and fix smoothness to be directional, while keeping the core structure.
 ```python
 def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
-    # Extract observation components as generic arrays
+    # Create generic arrays for dimension-agnostic processing
     o = obs
     n = next_obs
 
-    # Generic transition features
-    # Feature 1: Change in absolute values (encourages moving towards zero)
-    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))
+    # Component 1: Movement toward stability - penalize large absolute changes
+    # Encourages smooth transitions and stable states
+    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))
+    movement_reward = abs_diff / len(o)
 
-    # Feature 2: Squared change (penalizes large jumps, encourages smoothness)
-    sq_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))
+    # Component 2: Smoothness - penalize sudden large changes
+    # Uses squared differences to heavily penalize erratic movements
+    sq_diff = sum((n[i] - o[i]) ** 2 for i in range(len(o)))
+    smoothness_penalty = -sq_diff / (len(o) * 10.0)
 
-    # Feature 3: Action penalty (discourage excessive action usage)
-    action_cost = 0.0
-    if action == 0:
-        action_cost = 0.0  # no action
-    elif action in [1, 3]:
-        action_cost = 0.1  # side engines
-    else:  # action == 2
-        action_cost = 0.2  # main engine
+    # Component 3: Action cost - penalize frequent or aggressive actions
+    # Actions are discrete (0-3), normalize to [-1, 1] range
+    action_value = (action - 1.5) / 1.5
+    action_cost = -abs(action_value) * 0.1
 
-    # Stage-based weights that evolve with training
-    # Early stage: focus on reducing absolute values and smooth transitions
-    # Late stage: focus on fine control and minimizing action cost
-    stage1_weight = 1.0 - training_progress  # early stage weight
-    stage2_weight = training_progress  # late stage weight
+    # Component 4: Contact bonus - reward ground contact signals from info
+    # Generic contact detection from observation indices 6 and 7
+    contact_bonus = 0.0
+    if len(o) >= 8:
+        contact_bonus = (n[6] + n[7]) * 0.5  # Reward both legs contacting
 
-    # Component weights
-    w_abs = 0.5 * stage1_weight + 0.1 * stage2_weight
-    w_sq = -0.1 * stage1_weight - 0.3 * stage2_weight
-    w_action = -0.2 * stage1_weight - 0.5 * stage2_weight
+    # Stage-based weights that evolve with training_progress
+    # Early stage: focus on smoothness and movement
+    # Middle stage: balance all components
+    # Late stage: emphasize stability and contact
 
-    # Combine components
-    reward = w_abs * abs_change + w_sq * sq_change + w_action * action_cost
+    if training_progress < 0.3:
+        # Early exploration phase
+        w_movement = 1.0
+        w_smoothness = 2.0
+        w_action = 0.5
+        w_contact = 0.0
+    elif training_progress < 0.6:
+        # Middle refinement phase
+        w_movement = 0.5
+        w_smoothness = 1.0
+        w_action = 1.0
+        w_contact = 1.0
+    else:
+        # Late optimization phase
+        w_movement = 0.2
+        w_smoothness = 0.5
+        w_action = 1.5
+        w_contact = 2.0
 
-    # Add small exploration bonus in early stages
-    exploration_bonus = 0.01 * (1.0 - training_progress)
-    reward += exploration_bonus
+    # Combine components with stage weights
+    reward = (w_movement * movement_reward + 
+              w_smoothness * smoothness_penalty + 
+              w_action * action_cost + 
+              w_contact * contact_bonus)
+
+    return reward
+```
+
+## Iteration 2 — TUNE on skeleton (score=-528.3, verdict=failure)
+Decision reasoning: Phase 1 (iter 1) - only two data points, cannot judge skeleton yet. Scores are poor (-547.5, -535.9) with short episodes (65 steps) but slightly improving. The skeleton has undirected smoothness penalty (sq_diff) and is missing a velocity penalty (agent dies quickly, likely crashing at high speed). Will fix smoothness to be directional and add a velocity penalty to prevent crashes. Also need to add a survival bonus to encourage longer episodes. The contact bonus is likely not triggering since episodes are too short to reach ground.
+```python
+def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+    # Create generic arrays for dimension-agnostic processing
+    o = obs
+    n = next_obs
+
+    # Component 1: Movement toward stability - penalize large absolute changes
+    # Encourages smooth transitions and stable states
+    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))
+    movement_reward = abs_diff / len(o)
+
+    # Component 2: Smoothness - penalize sudden large changes
+    # Uses squared differences to heavily penalize erratic movements
+    sq_diff = sum((n[i] - o[i]) ** 2 for i in range(len(o)))
+    smoothness_penalty = -sq_diff / (len(o) * 10.0)
+
+    # Component 3: Action cost - penalize frequent or aggressive actions
+    # Actions are discrete (0-3), normalize to [-1, 1] range
+    action_value = (action - 1.5) / 1.5
+    action_cost = -abs(action_value) * 0.1
+
+    # Component 4: Contact bonus - reward ground contact signals from info
+    # Generic contact detection from observation indices 6 and 7
+    contact_bonus = 0.0
+    if len(o) >= 8:
+        contact_bonus = (n[6] + n[7]) * 0.5  # Reward both legs contacting
+
+    # Stage-based weights that evolve with training_progress
+    # Early stage: focus on smoothness and movement
+    # Middle stage: balance all components
+    # Late stage: emphasize stability and contact
+
+    if training_progress < 0.3:
+        # Early exploration phase
+        w_movement = 1.0
+        w_smoothness = 2.0
+        w_action = 0.5
+        w_contact = 0.0
+    elif training_progress < 0.6:
+        # Middle refinement phase
+        w_movement = 0.5
+        w_smoothness = 1.0
+        w_action = 1.0
+        w_contact = 1.0
+    else:
+        # Late optimization phase
+        w_movement = 0.2
+        w_smoothness = 0.5
+        w_action = 1.5
+        w_contact = 2.0
+
+    # Combine components with stage weights
+    reward = (w_movement * movement_reward + 
+              w_smoothness * smoothness_penalty + 
+              w_action * action_cost + 
+              w_contact * contact_bonus)
 
     return reward
 ```

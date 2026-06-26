@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 0) - only one data point. Score -122.3 with episode length 116 indicates the agent dies quickly. The skeleton has reasonable components but needs: (1) stronger directional signals toward stability, (2) reduced action cost penalty that's too aggressive for early training, (3) fix undirected transition_smoothness to directional form, (4) add survival bonus to encourage longer episodes. Per-step reward -1.052 is too negative - need to balance components so per-step contribution is reasonable."
+}

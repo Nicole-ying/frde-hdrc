@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "After 4 iterations (3 tune + 1 rebuild attempt), the skeleton has consistently produced scores around -530 to -547 with episode lengths stuck at 64-65 steps. The per-step reward is catastrophically negative (-8.3). The current skeleton has fundamental flaws: undirected smoothness penalty punishing ALL change, contact bonus that never triggers, and movement reward that's too weak. The agent dies immediately every episode. A complete rebuild is needed with a simpler design: survival bonus to keep agent alive, velocity penalty to prevent crashes, angle penalty for stability, and directional movement toward zero. The previous rebuild attempt (iter 3) failed because it kept the same broken code structure instead of actually rebuilding."
+}
