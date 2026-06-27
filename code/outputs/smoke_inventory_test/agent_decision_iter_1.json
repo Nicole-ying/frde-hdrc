@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 0): Only 3 signal categories present, missing contact, velocity, and survival signals. The stability_penalty uses undirected squared change which conflicts with movement_reward. Episode length is very short (83) and per-step reward is -1.253, indicating the agent dies quickly and is punished. Need to add contact bonus, velocity penalty, and survival bonus while fixing the undirected stability signal. Rebuild with 5+ signal categories."
+}

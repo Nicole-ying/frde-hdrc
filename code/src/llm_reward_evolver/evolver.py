@@ -99,17 +99,20 @@ class RewardEvolver:
                     self.config.reward_structure,
                     self.config.expose_env_name_to_llm,
                     eureka_prompt_block,
-                    agent_memory.render(),  # 🆕 Agent Memory 替代旧 memory
+                    agent_memory.render(),  # 🆕 Agent Memory
                     self.config.allow_original_reward_in_reward,
+                    use_agent=self.config.agent_mode,  # 🆕 消融开关
                 )
 
             fallback_code = None if restart and best_score < self.config.rollback_min_score else best_code
             # 保存完整 prompt 便于调试
             self._write_text(f"prompt_iter_{iteration}.txt", prompt)
+            old_code_for_comparison = current_code  # 保存旧代码用于标签纠正
             current_code, llm_response = self._generate_valid_reward(prompt, fallback_code)
             reward_path = self._write_text(f"reward_iter_{iteration}.py", current_code)
-            # 🆕 提取 Agent 决策
-            agent_decision = parse_agent_decision(llm_response, current_code)
+            # 🆕 提取 Agent 决策（传入旧代码以纠正 rebuild 标签）
+            agent_decision = parse_agent_decision(llm_response, current_code,
+                                                  old_code=old_code_for_comparison or "")
             self._write_text(f"agent_decision_iter_{iteration}.json",
                 json.dumps(agent_decision.to_dict(), ensure_ascii=False, indent=2))
             reward_program = RewardProgram(
@@ -432,30 +435,40 @@ class RewardEvolver:
         path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def parse_agent_decision(response: str, code: str) -> AgentDecision:
-    """从 LLM 响应中提取 Agent 的 JSON 决策。"""
+def parse_agent_decision(response: str, code: str, old_code: str = "") -> AgentDecision:
+    """从 LLM 响应中提取 Agent 的 JSON 决策，并纠正不准确的标签。"""
     action_map = {
         "rebuild": AgentAction.REBUILD, "delete": AgentAction.DELETE,
         "add": AgentAction.ADD, "tune": AgentAction.TUNE,
     }
+    action = AgentAction.TUNE
+    target = "unknown"
+    reasoning = ""
     # 尝试提取 JSON 块
     json_match = re.search(r'```json\s*(.*?)\s*```', response, re.DOTALL)
     if json_match:
         try:
             data = json.loads(json_match.group(1))
-            return AgentDecision(
-                action=action_map.get(data.get("action", "tune"), AgentAction.TUNE),
-                target=data.get("target", "skeleton"),
-                reasoning=data.get("reasoning", ""),
-                code=code,
-                raw_response=response,
-            )
+            action = action_map.get(data.get("action", "tune"), AgentAction.TUNE)
+            target = data.get("target", "skeleton")
+            reasoning = data.get("reasoning", "")
         except (json.JSONDecodeError, KeyError):
             pass
-    # fallback: 从代码内容推断
+
+    # 🆕 纠正标签：比较新旧代码组件重叠度
+    if old_code and action == AgentAction.REBUILD:
+        old_comps = set(re.findall(r'# Feature \d+.*|# Component \d+.*|# \d+\)', old_code))
+        new_comps = set(re.findall(r'# Feature \d+.*|# Component \d+.*|# \d+\)', code))
+        # 也检查变量名重叠
+        old_vars = set(re.findall(r'(abs_diff|sq_change|movement|progress|contact|angle|velocity|survival|action_cost|stability|smoothness|ground_contact|height|speed)', old_code))
+        new_vars = set(re.findall(r'(abs_diff|sq_change|movement|progress|contact|angle|velocity|survival|action_cost|stability|smoothness|ground_contact|height|speed)', code))
+        overlap = len(old_vars & new_vars)
+        if overlap >= 2:
+            action = AgentAction.ADD  # 保留了核心结构 → 不是重建，是增删改
+            reasoning = f"[LABEL CORRECTED: LLM said rebuild, but {overlap} components reused → ADD] {reasoning}"
+
     return AgentDecision(
-        action=AgentAction.TUNE, target="unknown",
-        reasoning="Could not parse JSON decision; inferred from code.",
+        action=action, target=target, reasoning=reasoning,
         code=code, raw_response=response,
     )
 

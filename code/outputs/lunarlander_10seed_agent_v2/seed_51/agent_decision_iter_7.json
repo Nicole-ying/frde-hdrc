@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 3 (iter 6+): The current skeleton (iter 6) shows significant improvement - score -58.2 with episode length 961, which is near the max. The per-step reward is -0.061, much better than previous iterations. This skeleton has 6 components covering all necessary signal categories (stability, velocity, progress, contact, survival, action cost). The trend is improving (-60.3 → -58.2) and the episode length is excellent. The skeleton is working, just needs fine-tuning. Key issues: stability_penalty and velocity_penalty are being multiplied by negative weights, which means they are actually rewarding instability and high velocity - this is counterproductive. The survival_bonus of 1.0 is too large relative to other components. Will fix the sign of stability and velocity penalties (make them positive penalties with negative weights, or restructure), reduce survival_bonus, and adjust stage weights to encourage more exploration in early stages."
+}

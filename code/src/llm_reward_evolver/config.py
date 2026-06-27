@@ -54,6 +54,7 @@ class ExperimentConfig:
     ppo_ent_coef: float = 0.01
     ppo_vf_coef: float = 0.5
     ppo_max_grad_norm: float = 0.5
+    agent_mode: bool = True  # False = ablation: no JSON decision, plain prompt
     ppo_n_envs: int = 1
     ppo_verbose: int = 0
     ppo_device: str = "cpu"

@@ -41,5 +41,5 @@
   "shared_pool_min_score": null,
   "force_iterations_before_patience": 4,
   "patience": 8,
-  "output_dir": "outputs/lunarlander_10seed_agent_v2"
+  "output_dir": "outputs/lunarlander_10seed_agent_v3"
 }

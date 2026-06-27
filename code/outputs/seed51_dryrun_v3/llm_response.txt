@@ -1,0 +1,104 @@
+```json
+{
+  "inventory": [
+    "abs_diff: encourages movement toward states with smaller absolute values",
+    "sq_change: penalizes large sudden changes, encourages smooth transitions",
+    "action_cost: discourages excessive action usage",
+    "ground_contact: rewards ground contact"
+  ],
+  "missing": [
+    "stability: no signal for angular velocity or angle control",
+    "velocity_penalty: no signal penalizing high velocity (especially vertical)",
+    "survival: no time-based or survival incentive"
+  ],
+  "harmful": [
+    "abs_diff: direction is wrong - encourages moving toward zero (crashing) rather than controlled landing. abs(o)-abs(n) rewards decreasing absolute values, which in this environment means moving toward the center (ground) regardless of velocity",
+    "sq_change: penalizes all changes equally, discouraging necessary movement and exploration"
+  ],
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "The current skeleton has fundamental flaws: abs_diff encourages crashing toward zero, sq_change penalizes all movement, and critical signals (stability, velocity control, survival) are missing. The score is very poor (-221.7) with 0% success rate. Since this is iteration 0 with only one attempt, but the skeleton itself has harmful components that cannot be fixed by tuning alone, a rebuild is needed to introduce proper signal categories."
+}
+```
+
+```python
+def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+    # Extract observations
+    o = obs
+    n = next_obs
+    
+    # Component 1: Transition progress - reward moving toward stable states
+    # Use absolute value change directionally: reward decreasing absolute values of position/velocity
+    # but only if not already near zero (to avoid encouraging crashing)
+    progress = 0.0
+    for i in range(min(len(o), 4)):  # Focus on position (0,1) and velocity (2,3)
+        progress += abs(o[i]) - abs(n[i])
+    
+    # Component 2: Smoothness - penalize harsh changes but allow controlled movement
+    smoothness = 0.0
+    for i in range(len(o)):
+        diff = n[i] - o[i]
+        smoothness -= diff * diff
+    
+    # Component 3: Action efficiency - penalize fuel usage
+    action_penalty = 0.0
+    if action == 2:  # Main engine
+        action_penalty = -0.3
+    elif action in [1, 3]:  # Side engines
+        action_penalty = -0.1
+    
+    # Component 4: Stability - reward small angular velocity and angle
+    # obs[4] = angle, obs[5] = angular velocity
+    stability = 0.0
+    if len(o) >= 6:
+        angle_penalty = -abs(o[4])  # Reward upright position
+        angvel_penalty = -abs(o[5])  # Reward low angular velocity
+        stability = angle_penalty + angvel_penalty
+    
+    # Component 5: Velocity control - penalize high speed
+    velocity_penalty = 0.0
+    if len(o) >= 4:
+        # Penalize high vertical velocity (obs[3])
+        velocity_penalty = -abs(o[3]) * 0.5
+    
+    # Component 6: Ground contact bonus
+    ground_contact = 0.0
+    if len(o) >= 2:
+        ground_contact = o[-1] + o[-2]
+    
+    # Stage-based weights
+    if training_progress < 0.3:
+        # Early: explore, learn to move and stabilize
+        w_progress = 1.0
+        w_smoothness = 0.1
+        w_action = 0.5
+        w_stability = 0.8
+        w_velocity = 0.3
+        w_contact = 0.2
+    elif training_progress < 0.7:
+        # Middle: balance movement with control
+        w_progress = 0.7
+        w_smoothness = 0.3
+        w_action = 0.7
+        w_stability = 1.0
+        w_velocity = 0.5
+        w_contact = 0.5
+    else:
+        # Late: precision landing
+        w_progress = 0.3
+        w_smoothness = 0.5
+        w_action = 1.0
+        w_stability = 1.2
+        w_velocity = 0.8
+        w_contact = 1.0
+    
+    # Combine components
+    reward = (w_progress * progress +
+              w_smoothness * smoothness +
+              w_action * action_penalty +
+              w_stability * stability +
+              w_velocity * velocity_penalty +
+              w_contact * ground_contact)
+    
+    return reward
+```

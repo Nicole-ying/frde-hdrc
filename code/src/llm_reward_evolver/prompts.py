@@ -74,6 +74,7 @@ def build_refine_prompt(
     eureka_context: str = "",
     memory_context: str = "",
     allow_original_reward: bool = False,
+    use_agent: bool = True,
 ) -> str:
     best_block = f"\nPrevious best reward code:\n{previous_best_code}\n" if previous_best_code else ""
     structure_rule = _structure_rule(reward_structure)
@@ -88,120 +89,33 @@ def build_refine_prompt(
         """Build skeleton-quality diagnosis and component analysis instructions."""
         skeleton_diagnosis = (
             "\n\n"
-            "SKELETON QUALITY DIAGNOSIS (do this BEFORE writing code):\n"
+            "HOW TO IMPROVE THE REWARD FUNCTION — follow this exact process:\n"
             "\n"
-            "AGENT SEARCH STRATEGY — your search has phases, just like HRDC:\n"
+            "1. ANALYZE THE CURRENT SKELETON:\n"
+            "   a) List every component and what physical signal it guides. "
+            "Signal types: transition progress, smoothness, action cost, stability "
+            "(angle, angular velocity), velocity penalty, contact/landing, survival.\n"
+            "   b) Identify what is MISSING. If episode < 200: likely missing stability "
+            "or velocity signals. If episode is max but score negative: directional "
+            "signals point the wrong way.\n"
+            "   c) Check for REDUNDANCY. If two components measure the same thing "
+            "(e.g. both abs(o)-abs(n)), merge them. If a component uses undirected "
+            "form like (n-o)^2, it must be replaced with directional form abs(o)-abs(n).\n"
             "\n"
-            "  PHASE 1 (iter 0-2): Your job is SKELETON COMPLETION — make sure "
-            "the skeleton has all needed signal types. Execute Steps 1-2 BELOW: "
-            "Step 1 inventories what components exist, Step 2 identifies what is MISSING.\n"
-            "  MANDATORY: If the skeleton has < 5 signal categories, you MUST use "
-            "ADD to fill the gaps. If a component is redundant or harmful, you MUST "
-            "use DELETE. You MAY also tune coefficients, but ADD/DELETE take priority.\n"
-            "  Examples of ADDs: no stability signal → ADD angle_penalty + angvel_penalty. "
-            "no contact signal → ADD ground_contact bonus. no velocity signal → ADD speed_penalty. "
-            "no directional progress → TUNE undirected (n-o)^2 to directed abs(o)-abs(n).\n"
-            "  Do NOT REBUILD in this phase. The skeleton might work after completion.\n"
+            "2. DECIDE WHAT TO DO:\n"
+            "   - If a signal category is MISSING: use ADD to fill it.\n"
+            "   - If a component is REDUNDANT or HARMFUL: use DELETE to remove it.\n"
+            "   - If the skeleton is COMPLETE but poorly calibrated: use TUNE to adjust "
+            "coefficients, fix signal directions, or rebalance stage weights.\n"
+            "   - If the skeleton has been given at least 2 iterations of genuine "
+            "improvement attempts (the parent skeleton has 2+ child iterations in "
+            "Memory) AND scores are flat or declining despite those attempts: REBUILD.\n"
+            "   - If scores show a clear upward trend across iterations, do NOT "
+            "rebuild — keep improving with ADD/DELETE/TUNE.\n"
             "\n"
-            "  PHASE 2 (Judgment, iter 3-5): You now have 3+ data points. You CAN "
-            "judge the skeleton. If scores are IMPROVING (even -400→-200→-100): "
-            "the skeleton WORKS — keep tuning. If scores are FLAT or DECLINING "
-            "despite coefficient changes: REBUILD. If the agent still cannot "
-            "survive past 200 steps after 3+ iterations of trying: REBUILD.\n"
-            "\n"
-            "  PHASE 3 (Decisive, iter 6+): Trust the accumulated evidence. "
-            "If the skeleton has never produced positive scores or long episodes, "
-            "REBUILD aggressively. If scores are climbing toward the target, "
-            "REFINE with small adjustments.\n"
-            "\n"
-            "  KEY PRINCIPLE: Never REBUILD in Phase 1. You don't have enough "
-            "data yet. The score might be terrible, but you've only seen ONE "
-            "configuration of this skeleton — that's not evidence, that's a "
-            "single sample. Give every skeleton 3 iterations of genuine tuning "
-            "before deciding it's broken.\n"
-            "\n"
-            "Step 1 — Inventory the skeleton. List EVERY component in the current reward function "
-            "and what physical signal it captures:\n"
-            "  - Transition signal (e.g. abs_change, movement): does the agent move toward desirable states?\n"
-            "  - Smoothness penalty: does it prevent jerky/jumpy behavior?\n"
-            "  - Action cost: does it penalize unnecessary engine use?\n"
-            "  - Stability signal (angle, angular velocity): does it prevent tumbling/spinning?\n"
-            "  - Contact/landing signal (leg contact, height): does it reward successful touchdown?\n"
-            "  - Velocity penalty: does it discourage crashing at high speed?\n"
-            "  - Survival bonus: does it reward staying alive longer?\n"
-            "\n"
-            "Step 2 — Identify what is MISSING. Look at the feedback metrics:\n"
-            "  - Compute per-step reward: mean_score / mean_episode_length. "
-            "If this is very negative (< -0.5 per step), your reward signal is "
-            "fundamentally punishing the agent. Check all signs and directions.\n"
-            "  - If episode_length is short (< 200): the agent dies quickly. "
-            "You are likely MISSING a stability signal (angle/angular-velocity penalty) "
-            "or your transition signal is undirected (rewarding chaotic movement).\n"
-            "  - If episode_length is max (1000) but score is very negative (< -50): "
-            "the agent survives but does the WRONG thing. Your directional signals "
-            "likely point the wrong way (e.g. rewarding movement away from center).\n"
-            "  - If score oscillates wildly between iterations: "
-            "your components may CONFLICT or your reward scale per step is too large.\n"
-            "\n"
-            "Step 3 — Check signal DIRECTION, SCALE, and REDUNDANCY (MANDATORY — do NOT skip):\n"
-            "  - DIRECTION: Each component must point toward desirable behavior. "
-            "abs(o[i])-abs(n[i]) is directional (toward zero). (n[i]-o[i])**2 is UNDIRECTED "
-            "(rewards ANY change). If a component uses an undirected form, replace it with "
-            "a directional one.\n"
-            "  - SCALE: Estimate per-step contribution. A constant survival_bonus of 0.5 "
-            "gives +500 over 1000 steps, drowning all other signals. Keep per-component "
-            "per-step contribution in ±0.05 to ±2.0. Total per-step reward should be ±5 max.\n"
-            "  - REDUNDANCY (CRITICAL): Compare EVERY pair of components. If two components "
-            "measure the SAME physical quantity, you MUST merge them into one. Examples:\n"
-            "    * abs_change = sum(abs(o)-abs(n)) AND progress_signal = sum(abs(o)-abs(n)) "
-            "→ IDENTICAL, merge.\n"
-            "    * vel_change = sum(|n-o|) AND sq_change = sum((n-o)^2) → both measure "
-            "state-change magnitude (L1 vs L2), redundant. Keep the one that correlates "
-            "better with scores.\n"
-            "    * Many reward functions succeed with 7-9 components. Count alone is NOT "
-            "a problem — only TRUE redundancy is. Compare every pair carefully.\n"
-            "  - HARMFUL SIGNS: Does a component appear with a NEGATIVE sign in late training? "
-            "That may be punishing desirable behavior.\n"
-            "  - DELETE AUTHORITY: You CAN and SHOULD delete components. If a component was "
-            "added in the previous iteration and the score dropped significantly, DELETE it "
-            "— do NOT just reduce its weight to zero or near-zero. Actually remove it from "
-            "the code. If a component provides no unique signal, DELETE it. If a component "
-            "consistently correlates with worse scores, DELETE it. A cleaner reward function "
-            "with fewer well-chosen components is better than a bloated one.\n"
-            "  - When deciding between lowering a weight and deleting a component: if the "
-            "component measures something that SHOULD matter (e.g. contact for landing), "
-            "tune the weight. If the component is REDUNDANT with another, HARMFUL based on "
-            "score evidence, or conceptually WRONG, DELETE it.\n"
-            "\n"
-            "SIMPLE-FIRST PRINCIPLE:\n"
-            "  - Start every new skeleton with the SIMPLEST design that covers the "
-            "necessary signal categories. 4-6 clean components with clear stage "
-            "weights is better than 7-9 components with subtle interactions.\n"
-            "  - Only add a new component when there is clear evidence the skeleton "
-            "needs it (scores flat despite coefficient tuning across 2+ iterations).\n"
-            "  - Simple skeletons are easy to debug and improve. Complex skeletons "
-            "have too many interacting parameters — hard to tell what works.\n"
-            "  - CRITICAL: If the current iteration scored WELL (close to or above "
-            "the target), make ONLY one small coefficient adjustment. Do NOT add "
-            "new components, do NOT add new penalties to early training. A score "
-            "near the target means the skeleton is RIGHT — don't break it.\n"
-            "  - Early training stage (stage 1 / early_weight) MUST keep penalties "
-            "LOW. The agent needs freedom to explore before precision matters. "
-            "Never add new penalty terms to the early stage of a working reward.\n"
-            "\n"
-            "DECISION AUTHORITY — after completing Steps 0-3, make your choice:\n"
-            "  - The AGENT SEARCH STRATEGY (Step 0) tells you which phase you're in. "
-            "Phase 1 (iter 0-2): tune/add/delete only. Phase 2-3 (iter 3+): you "
-            "may REBUILD if the trend evidence supports it.\n"
-            "  - In ANY phase: if the code has undirected signals like (n-o)^2, "
-            "fix them to directional forms (abs(o)-abs(n)) — but don't use that "
-            "as an excuse to REBUILD. Fixing undirected signals is a TUNE action.\n"
-            "  - Trend examples: -200→-150→-100 = IMPROVING (keep tuning). "
-            "-100→-110→-105→-115 = STUCK (REBUILD if in Phase 2+).\n"
-            "\n"
-            "Step 5 — Output the improved reward function. Your changes must be justified "
-            "by the skeleton diagnosis above. If the skeleton is insufficient, ADD components. "
-            "If it is adequate, TUNE components."
+            "3. OUTPUT YOUR DECISION as JSON with your component analysis, "
+            "then generate the improved code. Your changes must be justified "
+            "by the analysis above.\n"
         )
 
         if not memory_ctx or "no previous experience" in memory_ctx:
@@ -225,6 +139,40 @@ def build_refine_prompt(
         )
 
     analysis_task = _analysis_task(memory_context, feedback)
+    if not use_agent:
+        # ── 消融版：无 Agent 结构，直接生成代码 ──
+        return dedent(
+            f"""
+            Improve the following RL reward function based on training evidence.
+            Study the memory and feedback below. Execute the skeleton diagnosis steps.
+            Output ONLY the improved Python code — no JSON, no explanation.
+
+            Rules:
+            - Output only Python code.
+            - Do not import modules. Do not use try/except, classes, lambdas.
+            - Use only {allowed_inputs}.
+            - {structure_rule}
+            - {reward_rule}
+            - Do not manually clamp the reward.
+            - For discrete actions, treat action as a scalar integer.{analysis_task}
+
+            Environment: {visible_env}
+            Task: {task_description}
+
+            Current reward code:
+            {current_code}
+            {best_block}
+            FDRE feedback / diagnostic report:
+            {feedback}
+
+            Eureka-style context:
+            {eureka_context}
+
+            Agent memory:
+            {memory_context}
+            """
+        ).strip()
+
     return dedent(
         f"""
         You are an Autonomous Reward Design Agent. You operate in a perceive→plan→act loop.
@@ -238,22 +186,37 @@ def build_refine_prompt(
 
         ```json
         {{
-          "action": "rebuild" | "delete" | "add" | "tune",
-          "target": "skeleton" or the specific component name,
-          "reasoning": "Why you chose this action, based on evidence from Memory"
+          "inventory": ["comp_name: what it measures", ...],
+          "missing": ["signal_category_not_present", ...],
+          "harmful": ["comp_name: why harmful", ...],
+          "action": "add" | "delete" | "tune" | "rebuild",
+          "target": "specific_component_name",
+          "reasoning": "Based on inventory/missing/harmful analysis"
         }}
         ```
+        ACTION RULES for the \"action\" field:
+        - If your new code keeps 2+ components from the current code → use \"add\", \"delete\", or \"tune\".
+          You CANNOT use \"rebuild\" if the skeleton structure is partially preserved.
+        - Only use \"rebuild\" if you COMPLETELY replaced everything — zero components reused.
+        FILLING \"inventory\", \"missing\", \"harmful\" IS MANDATORY.
 
         ```python
         def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
             ...
         ```
 
-        ACTION MEANINGS (choose the one that matches your diagnosis):
-        - "add": you found a MISSING signal category in Step 2 → add it (e.g. "add" on "contact")
-        - "delete": you found a harmful/redundant component in Step 3 → remove it
-        - "tune": the skeleton is COMPLETE (5+ categories) but poorly calibrated → adjust
-        - "rebuild": Phase 2+ only — skeleton is proven broken after 3+ iterations
+        ACTION MEANINGS — choose the one that BEST describes what you actually did:
+        - "add": you added one or more missing signal categories to the EXISTING skeleton.
+          The original skeleton's core structure is preserved.
+        - "delete": you removed one or more harmful/redundant components from the EXISTING skeleton.
+        - "tune": you adjusted coefficients, fixed signal directions, or rebalanced weights
+          within the EXISTING skeleton, without adding or removing component types.
+        - "rebuild": you COMPLETELY replaced the skeleton with a fundamentally different design.
+          None of the original component structure is reused. Use this ONLY when the skeleton
+          has been given 2+ iterations of genuine improvement attempts and scores are
+          flat or declining — proving the skeleton itself is the problem.
+          IMPORTANT: if you keep 2+ components from the original skeleton, it is NOT a rebuild —
+          it is ADD, DELETE, or TUNE.
 
         Keep the same signature.
 

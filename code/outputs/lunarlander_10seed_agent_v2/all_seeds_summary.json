@@ -1,0 +1,752 @@
+{
+  "42": [
+    {
+      "iteration": 0,
+      "score": 136.1045122038656,
+      "success_rate": 0.35,
+      "mean_episode_length": 737,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": 23.273326268441622,
+      "success_rate": 0.05,
+      "mean_episode_length": 938.6,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": 111.00527771205535,
+      "success_rate": 0.35,
+      "mean_episode_length": 570.45,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": 253.90325063580983,
+      "success_rate": 0.95,
+      "mean_episode_length": 274.05,
+      "converged": true,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "43": [
+    {
+      "iteration": 0,
+      "score": 63.36729389531345,
+      "success_rate": 0.2,
+      "mean_episode_length": 660.4,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -14.209958915602465,
+      "success_rate": 0.1,
+      "mean_episode_length": 533.6,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": 216.82238299285763,
+      "success_rate": 0.8,
+      "mean_episode_length": 356.45,
+      "converged": true,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "44": [
+    {
+      "iteration": 0,
+      "score": -632.8381110916633,
+      "success_rate": 0.0,
+      "mean_episode_length": 82.9,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -545.1376376325828,
+      "success_rate": 0.0,
+      "mean_episode_length": 83.2,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": -631.0329356025989,
+      "success_rate": 0.0,
+      "mean_episode_length": 83.8,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": -636.0529915856729,
+      "success_rate": 0.0,
+      "mean_episode_length": 82.25,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": -644.237313332995,
+      "success_rate": 0.0,
+      "mean_episode_length": 81,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": -130.44009326430404,
+      "success_rate": 0.0,
+      "mean_episode_length": 201.05,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 6,
+      "score": -390.59628026840073,
+      "success_rate": 0.0,
+      "mean_episode_length": 111.3,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 7,
+      "score": -116.9259075777947,
+      "success_rate": 0.0,
+      "mean_episode_length": 69.95,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 8,
+      "score": -175.01751648102504,
+      "success_rate": 0.0,
+      "mean_episode_length": 198.25,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 9,
+      "score": 38.65505618260314,
+      "success_rate": 0.05,
+      "mean_episode_length": 864.15,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "45": [
+    {
+      "iteration": 0,
+      "score": -127.14230510833397,
+      "success_rate": 0.0,
+      "mean_episode_length": 77.6,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -124.53150731907444,
+      "success_rate": 0.0,
+      "mean_episode_length": 926.7,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": -103.68126839681632,
+      "success_rate": 0.0,
+      "mean_episode_length": 959.35,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": -113.12597428204191,
+      "success_rate": 0.0,
+      "mean_episode_length": 926.4,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": -168.42317491690224,
+      "success_rate": 0.0,
+      "mean_episode_length": 761.55,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": -126.48207563561142,
+      "success_rate": 0.0,
+      "mean_episode_length": 69.2,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 6,
+      "score": 12.860133323825874,
+      "success_rate": 0.1,
+      "mean_episode_length": 303.8,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 7,
+      "score": -220.86434065138417,
+      "success_rate": 0.0,
+      "mean_episode_length": 182.25,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 8,
+      "score": -50.774867878854195,
+      "success_rate": 0.1,
+      "mean_episode_length": 291.1,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 9,
+      "score": 26.31120833364716,
+      "success_rate": 0.0,
+      "mean_episode_length": 603.1,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "46": [
+    {
+      "iteration": 0,
+      "score": 95.39596959283281,
+      "success_rate": 0.2,
+      "mean_episode_length": 382.95,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": 130.76350842233057,
+      "success_rate": 0.25,
+      "mean_episode_length": 732.6,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": -75.2279286044795,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": 108.18053642057843,
+      "success_rate": 0.15,
+      "mean_episode_length": 623,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": -161.53435217650627,
+      "success_rate": 0.0,
+      "mean_episode_length": 949.75,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": 189.60393049507533,
+      "success_rate": 0.55,
+      "mean_episode_length": 538.3,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 6,
+      "score": -132.07078205968398,
+      "success_rate": 0.0,
+      "mean_episode_length": 957.95,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 7,
+      "score": -138.47902948025651,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 8,
+      "score": 166.15884838360927,
+      "success_rate": 0.6,
+      "mean_episode_length": 288.15,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 9,
+      "score": 235.22907374774798,
+      "success_rate": 0.95,
+      "mean_episode_length": 398,
+      "converged": true,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "47": [
+    {
+      "iteration": 0,
+      "score": 192.29358272489856,
+      "success_rate": 0.6,
+      "mean_episode_length": 574.85,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -112.99405902888985,
+      "success_rate": 0.0,
+      "mean_episode_length": 69,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": 8.652009074640567,
+      "success_rate": 0.05,
+      "mean_episode_length": 380,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": -230.5727835759045,
+      "success_rate": 0.0,
+      "mean_episode_length": 187.05,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": -172.96727803018518,
+      "success_rate": 0.0,
+      "mean_episode_length": 164.55,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": 191.69876384170402,
+      "success_rate": 0.6,
+      "mean_episode_length": 543,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 6,
+      "score": -155.51138801726867,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 7,
+      "score": -133.89539104746527,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 8,
+      "score": 100.35888023109855,
+      "success_rate": 0.25,
+      "mean_episode_length": 515.05,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 9,
+      "score": -112.43805339962951,
+      "success_rate": 0.0,
+      "mean_episode_length": 1000,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "48": [
+    {
+      "iteration": 0,
+      "score": 165.53989855973416,
+      "success_rate": 0.25,
+      "mean_episode_length": 871.7,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": 231.95539198288972,
+      "success_rate": 0.9,
+      "mean_episode_length": 433.45,
+      "converged": true,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "49": [
+    {
+      "iteration": 0,
+      "score": -232.10853433899808,
+      "success_rate": 0.0,
+      "mean_episode_length": 138.25,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -184.0964326808252,
+      "success_rate": 0.0,
+      "mean_episode_length": 153.45,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": -259.92996481277066,
+      "success_rate": 0.0,
+      "mean_episode_length": 144.3,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": -284.56855339441967,
+      "success_rate": 0.0,
+      "mean_episode_length": 143.1,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": -213.43491232048834,
+      "success_rate": 0.0,
+      "mean_episode_length": 135.35,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": 219.20728403866804,
+      "success_rate": 0.8,
+      "mean_episode_length": 454,
+      "converged": true,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "50": [
+    {
+      "iteration": 0,
+      "score": -69.09507518238168,
+      "success_rate": 0.0,
+      "mean_episode_length": 74.15,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -40.96002830338864,
+      "success_rate": 0.0,
+      "mean_episode_length": 81.3,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": -42.84324317161401,
+      "success_rate": 0.0,
+      "mean_episode_length": 78.65,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": -148.890706586092,
+      "success_rate": 0.0,
+      "mean_episode_length": 74.5,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": -153.7383782829466,
+      "success_rate": 0.0,
+      "mean_episode_length": 71.45,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": -125.73104640005779,
+      "success_rate": 0.0,
+      "mean_episode_length": 397.35,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 6,
+      "score": 28.877710647330424,
+      "success_rate": 0.1,
+      "mean_episode_length": 936.4,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 7,
+      "score": 249.66484663236582,
+      "success_rate": 1.0,
+      "mean_episode_length": 348.45,
+      "converged": true,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ],
+  "51": [
+    {
+      "iteration": 0,
+      "score": -221.65326909484472,
+      "success_rate": 0.0,
+      "mean_episode_length": 152.05,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 1,
+      "score": -121.45521439263094,
+      "success_rate": 0.0,
+      "mean_episode_length": 74.6,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 2,
+      "score": -124.05424347841233,
+      "success_rate": 0.0,
+      "mean_episode_length": 72.05,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 3,
+      "score": 99.34603091288146,
+      "success_rate": 0.3,
+      "mean_episode_length": 479.7,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 4,
+      "score": -93.40809673881986,
+      "success_rate": 0.0,
+      "mean_episode_length": 81.45,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 5,
+      "score": -60.34262353384673,
+      "success_rate": 0.1,
+      "mean_episode_length": 514.5,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 6,
+      "score": -58.15382471915068,
+      "success_rate": 0.0,
+      "mean_episode_length": 961.15,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 7,
+      "score": -94.28285399220294,
+      "success_rate": 0.0,
+      "mean_episode_length": 83.9,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 8,
+      "score": -150.34779247865418,
+      "success_rate": 0.0,
+      "mean_episode_length": 76.9,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    },
+    {
+      "iteration": 9,
+      "score": -125.27674205465907,
+      "success_rate": 0.0,
+      "mean_episode_length": 70.6,
+      "converged": false,
+      "failure_mode": "",
+      "interrupted": false,
+      "reward_error_count": 0
+    }
+  ]
+}

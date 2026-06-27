@@ -1,0 +1,10 @@
+Score: -150.3 | Success rate: 0.00 | Episode length: 77 | Per-step: -1.955 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 3 (iter 6+): The current skeleton (iter 7) reverted to 4 components and scored -94.3 with episode length 84 - a regression from iter 6's -58.2 with len 961. The iter 6 skeleton had 6 components including stability and survival signals which are critical for long episodes. The current skeleton is missing these. Rebuilding with the 6-component structure but fixing the sign issues (stability/velocity penalties were rewarding instability due to negative weights on positive values).

@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "Phase 3 (iter 6+): After 5 iterations with the same skeleton, scores are flat/declining with short episodes. The skeleton has never produced positive per-step rewards or long episodes consistently. The current skeleton has 4 components but is missing critical stability signals (angle/angular velocity), velocity penalty, and survival bonus. The per-step reward is very negative (-1.147) indicating the reward is fundamentally punishing the agent. A rebuild is needed to add missing signal categories and fix the reward direction."
+}

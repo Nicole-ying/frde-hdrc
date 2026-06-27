@@ -1,0 +1,79 @@
+```json
+{
+  "inventory": [
+    "abs_diff: encourages movement toward desirable states via absolute value change",
+    "sq_change: penalizes large sudden changes for smooth transitions",
+    "action_cost: discourages excessive engine use",
+    "ground_contact: rewards successful landing/touchdown"
+  ],
+  "missing": [
+    "stability_signal: no angle or angular velocity penalty to prevent tumbling",
+    "velocity_penalty: no penalty for high speed crashes",
+    "survival_bonus: no reward for staying alive longer"
+  ],
+  "harmful": [
+    "sq_change: undirected signal (n-o)^2 penalizes ALL change including desirable movement, conflicts with abs_diff which rewards movement",
+    "action_cost: negative weight on action cost may discourage necessary engine use for survival"
+  ],
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 0) - skeleton has only 4 signal categories (<5 minimum). sq_change is undirected and harmful, conflicting with abs_diff. Missing critical stability signal (angle/angvel) and velocity penalty. Episode length 71 is very short, indicating agent dies quickly. Per-step reward -1.458 is highly negative. Need to rebuild with proper directional signals, add stability and velocity components, and remove the harmful sq_change."
+}
+```
+
+```python
+def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+    o = obs
+    n = next_obs
+    
+    # Component 1: Directional progress toward zero state (encourages stabilization)
+    progress = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))
+    
+    # Component 2: Angular stability - penalize angle and angular velocity
+    angle = o[4]  # angle observation
+    angvel = o[5]  # angular velocity observation
+    stability_penalty = abs(angle) + abs(angvel)
+    
+    # Component 3: Velocity penalty - discourage high speed
+    vel_x = o[2]
+    vel_y = o[3]
+    speed = abs(vel_x) + abs(vel_y)
+    
+    # Component 4: Ground contact bonus
+    ground_contact = o[-1] + o[-2] if len(o) >= 2 else 0.0
+    
+    # Component 5: Action cost
+    action_cost = 0.0
+    if action == 2:
+        action_cost = 1.0
+    elif action in [1, 3]:
+        action_cost = 0.5
+    
+    # Stage-based weights
+    if training_progress < 0.3:
+        w_progress = 1.0
+        w_stability = -0.5
+        w_speed = -0.3
+        w_contact = 0.5
+        w_action = -0.1
+    elif training_progress < 0.7:
+        w_progress = 0.8
+        w_stability = -0.8
+        w_speed = -0.5
+        w_contact = 1.0
+        w_action = -0.2
+    else:
+        w_progress = 0.5
+        w_stability = -1.0
+        w_speed = -0.7
+        w_contact = 2.0
+        w_action = -0.3
+    
+    reward = (w_progress * progress +
+              w_stability * stability_penalty +
+              w_speed * speed +
+              w_contact * ground_contact +
+              w_action * action_cost)
+    
+    return reward
+```

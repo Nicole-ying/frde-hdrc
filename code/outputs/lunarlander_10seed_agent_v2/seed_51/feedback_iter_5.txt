@@ -1,0 +1,10 @@
+Score: -60.3 | Success rate: 0.10 | Episode length: 514 | Per-step: -0.117 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 3 (iter 6+): After 5 iterations with the same skeleton, scores are flat/declining with short episodes. The skeleton has never produced positive per-step rewards or long episodes consistently. The current skeleton has 4 components but is missing critical stability signals (angle/angular velocity), velocity penalty, and survival bonus. The per-step reward is very negative (-1.147) indicating the reward is fundamentally punishing the agent. A rebuild is needed to add missing signal categories and fix the reward direction.
