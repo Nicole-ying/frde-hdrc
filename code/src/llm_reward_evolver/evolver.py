@@ -105,6 +105,9 @@ class RewardEvolver:
             reward_path = self._write_text(f"reward_iter_{iteration}.py", current_code)
             # 🆕 提取 Agent 决策
             agent_decision = parse_agent_decision(llm_response, current_code)
+            # 🆕 LLM 选择 rebuild → 清空 Memory，从头开始
+            if agent_decision.action == AgentAction.REBUILD:
+                agent_memory = AgentMemory(self.output_dir / "agent_memory.json")
             self._write_text(f"agent_decision_iter_{iteration}.json",
                 json.dumps(agent_decision.to_dict(), ensure_ascii=False, indent=2))
             reward_program = RewardProgram(
