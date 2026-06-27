@@ -1,0 +1,444 @@
+You are an Autonomous Reward Design Agent. You operate in a perceive→plan→act loop.
+        Your Agent Memory stores every reward function you've ever generated and its score.
+
+        ## Your Task
+
+        Study the Agent Memory below. Execute the SKELETON QUALITY DIAGNOSIS.
+        Then output your decision in this EXACT format — first a JSON decision block,
+        then the Python code:
+
+        ```json
+        {
+          "inventory": ["comp_name: what it measures", ...],
+          "missing": ["signal_category_not_present", ...],
+          "harmful": ["comp_name: why harmful", ...],
+          "action": "add" | "delete" | "tune" | "mix" | "rebuild",
+          "target": "specific_component_name",
+          "reasoning": "Based on inventory/missing/harmful analysis"
+        }
+        ```
+        ACTION RULES for the "action" field:
+        - If you only ADDED missing signals → use "add".
+        - If you only DELETED harmful components → use "delete".
+        - If you only TUNED coefficients → use "tune".
+        - If you did TWO OR MORE of the above (e.g. added velocity AND deleted sq_change
+          AND tuned contact weight) → use "mix". This is the most common case when
+          the skeleton needs significant but not total restructuring.
+        - Only use "rebuild" when this skeleton has been tried for 2+ iterations
+          (your current skeleton appears 2+ times in Agent Memory as a parent)
+          AND scores are flat or declining — proving the skeleton itself cannot work.
+          REBUILD means: discard all memory of this skeleton, generate a completely
+          new design from scratch, as if you are starting from iter0.
+
+        ```python
+        def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+            ...
+        ```
+
+        ACTION MEANINGS:
+        - "add": you added missing signal categories. Skeleton preserved.
+        - "delete": you removed harmful/redundant components. Skeleton preserved.
+        - "tune": you adjusted coefficients/signs/weights only. No component type changes.
+        - "mix": you did BOTH adding missing signals AND removing harmful ones (or tuning).
+          Example: the skeleton has 4 components, you add 3 new signal types (stability,
+          velocity, survival) AND delete 1 harmful component (undirected sq_change) AND
+          tune coefficients. This is MIX — you are improving the existing skeleton, not
+          discarding it. MIX is the most common action, especially in early iterations.
+          When in doubt between MIX and REBUILD: if you are building ON TOP of the
+          existing skeleton concept, it's MIX. Only if you are starting a fundamentally
+          different design philosophy is it REBUILD.
+        - "rebuild": LAST RESORT. The skeleton has been tried for 2+ iterations and
+          proven unfixable. Discard it entirely, clear memory context, and generate
+          a fresh design from scratch as if at iter0. Use sparingly.
+
+        Keep the same signature.
+
+        Rules:
+        - Output only Python code.
+        - Do not import modules.
+        - Do not use try/except, classes, lambdas, file I/O, eval, exec, or external libraries.
+        - Use only obs, action, next_obs, info, and training_progress.
+        - Use an HRDC-style structure: propose generic reward components from observed transition signals, then combine them with stage weights based on training_progress. Each component should have its own weight that evolves across training stages.
+        - Fix the failure mode described by the feedback.
+        - The official reward is masked and must not be used. Do not reference original_reward in the generated reward code; derive the training reward only from obs, action, next_obs, info, and training_progress.
+        - Follow the HOW TO IMPROVE analysis process above to decide your action.
+        - If adding missing signal categories, use ADD. If removing harmful ones, use DELETE.
+        - Do not manually clamp the reward inside compute_reward; the training framework performs final clipping.
+        - Avoid undefined variables. Before returning, check that every variable has been assigned.
+        - For discrete actions, treat action as a scalar integer, not an array.
+        - Do not introduce rules not justified by task description, masked step source, feedback, or memory.
+        - Prefer generic reward-search patterns: transition progress, smoothness, action cost, stage weights,
+          and numerical safety.
+        - If reward leakage guard failed, remove any use of masked official reward variables or original_reward.
+
+HOW TO IMPROVE THE REWARD FUNCTION — follow this exact process:
+
+1. ANALYZE THE CURRENT SKELETON:
+   a) List every component and what physical signal it guides. Signal types: transition progress, smoothness, action cost, stability (angle, angular velocity), velocity penalty, contact/landing, survival.
+   b) Identify what is MISSING. If episode < 200: likely missing stability or velocity signals. If episode is max but score negative: directional signals point the wrong way.
+   c) Check for REDUNDANCY. If two components measure the same thing (e.g. both abs(o)-abs(n)), merge them. If a component uses undirected form like (n-o)^2, it must be replaced with directional form abs(o)-abs(n).
+
+2. DECIDE WHAT TO DO:
+   - If a signal category is MISSING AND a component is HARMFUL: use MIX.
+     Example: add stability+velocity+survival AND delete undirected sq_change = MIX.
+   - If ONLY missing signals → use ADD. If ONLY harmful/redundant → use DELETE.
+   - If the skeleton is COMPLETE but poorly calibrated: use TUNE.
+   - REBUILD is the LAST RESORT. Only use it when this skeleton has been tried for 2+ iterations AND scores are flat/declining. In ALL other cases, use MIX, ADD, DELETE, or TUNE. When in doubt, choose MIX — it preserves the good parts while fixing the bad.
+   - If scores show a clear upward trend, do NOT rebuild.
+
+3. OUTPUT YOUR DECISION as JSON with your component analysis, then generate the improved code. Your changes must be justified by the analysis above.
+
+
+CROSS-ITERATION EVIDENCE:
+Study the Agent Memory section below. For each past iteration, note its components and its score. If the same skeleton was tried with different coefficients and scores stayed bad → the skeleton is the problem, not the coefficients. If adding a component made scores worse → that component is harmful, remove it. If simplifying the skeleton made scores better → the original skeleton was over-engineered.
+
+        Environment: BlackBoxControlEnv
+        Task: Black-box control task.
+
+        Current reward code:
+        json
+{
+  "inventory": [
+    "abs_diff: directional progress toward states with smaller absolute values",
+    "sq_change: undirected smoothness penalty on all movement",
+    "action_cost: penalty for main engine (0.5) and side engines (0.2)",
+    "ground_contact: reward for leg contact with ground"
+  ],
+  "missing": [
+    "stability: no angle or angular velocity penalty to keep lander upright",
+    "velocity: no direct velocity penalty for soft landing",
+    "survival: no alive bonus or time-based reward for longer episodes",
+    "height_progress: no signal encouraging descent toward ground"
+  ],
+  "harmful": [
+    "sq_change: undirected squared change penalizes ALL movement equally, including beneficial movement toward goal. This is harmful because it discourages the agent from moving at all.",
+    "abs_diff: uses abs(o[i]) - abs(n[i]) which is confusing when signs change and doesn't properly reward goal-directed movement"
+  ],
+  "action": "mix",
+  "target": "skeleton",
+  "reasoning": "Based on inventory analysis: 4 components present, 4 missing signal categories, 2 harmful components. The current skeleton has been tried for 2 iterations with scores improving from -221.7 to -121.5 but still failing. The harmful sq_change component penalizes all movement including beneficial movement, and abs_diff is directionally confusing. Need to: (1) remove harmful sq_change and replace abs_diff with proper progress signals, (2) add stability (angle penalty), velocity penalty, survival bonus, and height progress. This is a MIX operation since we're preserving the action_cost and ground_contact components while adding missing signals and removing harmful ones."
+
+Previous best reward code:
+json
+{
+  "inventory": [
+    "abs_diff: encourages movement toward states with smaller absolute values (directional progress)",
+    "sq_change: penalizes large sudden changes (smoothness, undirected)",
+    "action_cost: penalizes main engine (0.5) and side engines (0.2) usage",
+    "ground_contact: rewards contact with ground (last two obs elements)"
+  ],
+  "missing": [
+    "stability: no angle or angular velocity penalty to keep the lander upright",
+    "velocity: no direct velocity penalty to encourage soft landings",
+    "survival: no time-based or alive bonus to encourage longer episodes"
+  ],
+  "harmful": [
+    "sq_change: undirected squared change penalizes ALL movement equally, including beneficial movement toward the goal. This is harmful because it discourages the agent from moving at all.",
+    "abs_diff: uses abs(o[i]) - abs(n[i]) which is directional but may be confusing when signs change; could be replaced with more direct progress signals"
+  ],
+  "action": "mix",
+  "target": "skeleton",
+  "reasoning": "The skeleton has 4 components but is missing critical signal categories (stability, velocity, survival) and contains harmful components (sq_change penalizes all movement). Need to add stability (angle penalty), velocity (soft landing), survival (alive bonus), and remove the harmful undirected sq_change. Also need to tune coefficients. This is a mix operation."
+}
+
+        FDRE feedback / diagnostic report:
+        Score: -124.1 | Success rate: 0.00 | Episode length: 72 | Per-step: -1.722 | Errors: 0
+Rules reminder: black-box MDP, generic signals.
+official_reward guard: not used. domain guard: clean.
+
+        Eureka-style context:
+        Task description file:
+Black-box control task. The agent receives observations from the environment and must learn a training reward from the masked environment source. The official reward formula is intentionally hidden from the reward-generation model. Generate a training reward that uses generic transition signals from obs, action, next_obs, info, and training_progress, and avoids hand-written task semantics or any reconstruction of the masked official reward.
+
+Environment step source with official reward masked:
+def step(self, action):
+        assert self.lander is not None
+
+        # Update wind and apply to the lander
+        assert self.lander is not None, "You forgot to call reset()"
+        if self.enable_wind and not (
+            self.legs[0].ground_contact or self.legs[1].ground_contact
+        ):
+            # the function used for wind is tanh(sin(2 k x) + sin(pi k x)),
+            # which is proven to never be periodic, k = 0.01
+            wind_mag = (
+                math.tanh(
+                    math.sin(0.02 * self.wind_idx)
+                    + (math.sin(math.pi * 0.01 * self.wind_idx))
+                )
+                * self.wind_power
+            )
+            self.wind_idx += 1
+            self.lander.ApplyForceToCenter(
+                (wind_mag, 0.0),
+                True,
+            )
+
+            # the function used for torque is tanh(sin(2 k x) + sin(pi k x)),
+            # which is proven to never be periodic, k = 0.01
+            torque_mag = (
+                math.tanh(
+                    math.sin(0.02 * self.torque_idx)
+                    + (math.sin(math.pi * 0.01 * self.torque_idx))
+                )
+                * self.turbulence_power
+            )
+            self.torque_idx += 1
+            self.lander.ApplyTorque(
+                torque_mag,
+                True,
+            )
+
+        if self.continuous:
+            action = np.clip(action, -1, +1).astype(np.float64)
+        else:
+            assert self.action_space.contains(
+                action
+            ), f"{action!r} ({type(action)}) invalid "
+
+        # Apply Engine Impulses
+
+        # Tip is the (X and Y) components of the rotation of the lander.
+        tip = (math.sin(self.lander.angle), math.cos(self.lander.angle))
+
+        # Side is the (-Y and X) components of the rotation of the lander.
+        side = (-tip[1], tip[0])
+
+        # Generate two random numbers between -1/SCALE and 1/SCALE.
+        dispersion = [self.np_random.uniform(-1.0, +1.0) / SCALE for _ in range(2)]
+
+        m_power = 0.0
+        if (self.continuous and action[0] > 0.0) or (
+            not self.continuous and action == 2
+        ):
+            # Main engine
+            if self.continuous:
+                m_power = (np.clip(action[0], 0.0, 1.0) + 1.0) * 0.5  # 0.5..1.0
+                assert m_power >= 0.5 and m_power <= 1.0
+            else:
+                m_power = 1.0
+
+            # 4 is move a bit downwards, +-2 for randomness
+            # The components of the impulse to be applied by the main engine.
+            ox = (
+                tip[0] * (MAIN_ENGINE_Y_LOCATION / SCALE + 2 * dispersion[0])
+                + side[0] * dispersion[1]
+            )
+            oy = (
+                -tip[1] * (MAIN_ENGINE_Y_LOCATION / SCALE + 2 * dispersion[0])
+                - side[1] * dispersion[1]
+            )
+
+            impulse_pos = (self.lander.position[0] + ox, self.lander.position[1] + oy)
+            if self.render_mode is not None:
+                # particles are just a decoration, with no impact on the physics, so don't add them when not rendering
+                p = self._create_particle(
+                    3.5,  # 3.5 is here to make particle speed adequate
+                    impulse_pos[0],
+                    impulse_pos[1],
+                    m_power,
+                )
+                p.ApplyLinearImpulse(
+                    (
+                        ox * MAIN_ENGINE_POWER * m_power,
+                        oy * MAIN_ENGINE_POWER * m_power,
+                    ),
+                    impulse_pos,
+                    True,
+                )
+            self.lander.ApplyLinearImpulse(
+                (-ox * MAIN_ENGINE_POWER * m_power, -oy * MAIN_ENGINE_POWER * m_power),
+                impulse_pos,
+                True,
+            )
+
+        s_power = 0.0
+        if (self.continuous and np.abs(action[1]) > 0.5) or (
+            not self.continuous and action in [1, 3]
+        ):
+            # Orientation/Side engines
+            if self.continuous:
+                direction = np.sign(action[1])
+                s_power = np.clip(np.abs(action[1]), 0.5, 1.0)
+                assert s_power >= 0.5 and s_power <= 1.0
+            else:
+                # action = 1 is left, action = 3 is right
+                direction = action - 2
+                s_power = 1.0
+
+            # The components of the impulse to be applied by the side engines.
+            ox = tip[0] * dispersion[0] + side[0] * (
+                3 * dispersion[1] + direction * SIDE_ENGINE_AWAY / SCALE
+            )
+            oy = -tip[1] * dispersion[0] - side[1] * (
+                3 * dispersion[1] + direction * SIDE_ENGINE_AWAY / SCALE
+            )
+
+            # The constant 17 is a constant, that is presumably meant to be SIDE_ENGINE_HEIGHT.
+            # However, SIDE_ENGINE_HEIGHT is defined as 14
+            # This causes the position of the thrust on the body of the lander to change, depending on the orientation of the lander.
+            # This in turn results in an orientation dependent torque being applied to the lander.
+            impulse_pos = (
+                self.lander.position[0] + ox - tip[0] * 17 / SCALE,
+                self.lander.position[1] + oy + tip[1] * SIDE_ENGINE_HEIGHT / SCALE,
+            )
+            if self.render_mode is not None:
+                # particles are just a decoration, with no impact on the physics, so don't add them when not rendering
+                p = self._create_particle(0.7, impulse_pos[0], impulse_pos[1], s_power)
+                p.ApplyLinearImpulse(
+                    (
+                        ox * SIDE_ENGINE_POWER * s_power,
+                        oy * SIDE_ENGINE_POWER * s_power,
+                    ),
+                    impulse_pos,
+                    True,
+                )
+            self.lander.ApplyLinearImpulse(
+                (-ox * SIDE_ENGINE_POWER * s_power, -oy * SIDE_ENGINE_POWER * s_power),
+                impulse_pos,
+                True,
+            )
+
+        self.world.Step(1.0 / FPS, 6 * 30, 2 * 30)
+
+        pos = self.lander.position
+        vel = self.lander.linearVelocity
+
+        state = [
+            (pos.x - VIEWPORT_W / SCALE / 2) / (VIEWPORT_W / SCALE / 2),
+            (pos.y - (self.helipad_y + LEG_DOWN / SCALE)) / (VIEWPORT_H / SCALE / 2),
+            vel.x * (VIEWPORT_W / SCALE / 2) / FPS,
+            vel.y * (VIEWPORT_H / SCALE / 2) / FPS,
+            self.lander.angle,
+            20.0 * self.lander.angularVelocity / FPS,
+            1.0 if self.legs[0].ground_contact else 0.0,
+            1.0 if self.legs[1].ground_contact else 0.0,
+        ]
+        assert len(state) == 8
+
+        # Official reward computation is intentionally masked.
+        # Official reward computation is intentionally masked.
+        masked_reward = <OFFICIAL_REWARD_MASKED>
+        return np.array(state, dtype=np.float32), masked_reward, terminated, False, {}
+
+
+        Agent memory:
+        === Agent Memory ===
+
+## Evolution Summary
+| iter | action | target | score | len | verdict | diagnosis (LLM-generated) |
+|------|--------|--------|-------|-----|---------|---------------------------|
+| 0 | initial | skeleton | -221.7 | 152 | failure | first generation |
+| 1 | mix | skeleton | -121.5 | 152 | failure | inv=4 miss=6 harm=3 |
+| 2 | mix | skeleton | -124.1 | 75 | failure | inv=4 miss=8 harm=3 |
+
+## Iteration 0 — INITIAL on skeleton (score=-221.7, verdict=failure)
+Decision reasoning: first generation
+```python
+def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+    # Extract observation arrays
+    o = obs
+    n = next_obs
+
+    # Generic transition features
+    # Feature 1: Change in absolute values (encourages movement toward desirable states)
+    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))
+
+    # Feature 2: Squared change (penalizes large sudden changes, encourages smooth transitions)
+    sq_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))
+
+    # Feature 3: Action penalty (discourages excessive action usage)
+    action_cost = 0.0
+    if action == 2:  # Main engine
+        action_cost = 0.5
+    elif action in [1, 3]:  # Side engines
+        action_cost = 0.2
+
+    # Feature 4: Ground contact bonus (from info or observation)
+    # Last two elements of obs are ground contact indicators
+    ground_contact = o[-1] + o[-2] if len(o) >= 2 else 0.0
+
+    # Stage-based weights
+    # Early stage: focus on exploration and smooth movement
+    # Middle stage: balance movement and control
+    # Late stage: emphasize precision and ground contact
+
+    if training_progress < 0.3:
+        # Early training: encourage movement and exploration
+        w_abs = 1.0
+        w_sq = -0.1
+        w_action = -0.2
+        w_contact = 0.5
+    elif training_progress < 0.7:
+        # Middle training: balance
+        w_abs = 0.8
+        w_sq = -0.3
+        w_action = -0.4
+        w_contact = 1.0
+    else:
+        # Late training: precision and landing
+        w_abs = 0.5
+        w_sq = -0.5
+        w_action = -0.6
+        w_contact = 2.0
+
+    # Combine components
+    reward = (w_abs * abs_diff + 
+              w_sq * sq_change + 
+              w_action * action_cost + 
+              w_contact * ground_contact)
+
+    return reward
+```
+
+## Iteration 1 — MIX on skeleton (score=-121.5, verdict=failure)
+Decision reasoning: inv=4 miss=6 harm=3
+```python
+json
+{
+  "inventory": [
+    "abs_diff: encourages movement toward states with smaller absolute values (directional progress)",
+    "sq_change: penalizes large sudden changes (smoothness, undirected)",
+    "action_cost: penalizes main engine (0.5) and side engines (0.2) usage",
+    "ground_contact: rewards contact with ground (last two obs elements)"
+  ],
+  "missing": [
+    "stability: no angle or angular velocity penalty to keep the lander upright",
+    "velocity: no direct velocity penalty to encourage soft landings",
+    "survival: no time-based or alive bonus to encourage longer episodes"
+  ],
+  "harmful": [
+    "sq_change: undirected squared change penalizes ALL movement equally, including beneficial movement toward the goal. This is harmful because it discourages the agent from moving at all.",
+    "abs_diff: uses abs(o[i]) - abs(n[i]) which is directional but may be confusing when signs change; could be replaced with more direct progress signals"
+  ],
+  "action": "mix",
+  "target": "skeleton",
+  "reasoning": "The skeleton has 4 components but is missing critical signal categories (stability, velocity, survival) and contains harmful components (sq_change penalizes all movement). Need to add stability (angle penalty), velocity (soft landing), survival (alive bonus), and remove the harmful undirected sq_change. Also need to tune coefficients. This is a mix operation."
+}
+```
+
+## Iteration 2 — MIX on skeleton (score=-124.1, verdict=failure)
+Decision reasoning: inv=4 miss=8 harm=3
+```python
+json
+{
+  "inventory": [
+    "abs_diff: directional progress toward states with smaller absolute values",
+    "sq_change: undirected smoothness penalty on all movement",
+    "action_cost: penalty for main engine (0.5) and side engines (0.2)",
+    "ground_contact: reward for leg contact with ground"
+  ],
+  "missing": [
+    "stability: no angle or angular velocity penalty to keep lander upright",
+    "velocity: no direct velocity penalty for soft landing",
+    "survival: no alive bonus or time-based reward for longer episodes",
+    "height_progress: no signal encouraging descent toward ground"
+  ],
+  "harmful": [
+    "sq_change: undirected squared change penalizes ALL movement equally, including beneficial movement toward goal. This is harmful because it discourages the agent from moving at all.",
+    "abs_diff: uses abs(o[i]) - abs(n[i]) which is confusing when signs change and doesn't properly reward goal-directed movement"
+  ],
+  "action": "mix",
+  "target": "skeleton",
+  "reasoning": "Based on inventory analysis: 4 components present, 4 missing signal categories, 2 harmful components. The current skeleton has been tried for 2 iterations with scores improving from -221.7 to -121.5 but still failing. The harmful sq_change component penalizes all movement including beneficial movement, and abs_diff is directionally confusing. Need to: (1) remove harmful sq_change and replace abs_diff with proper progress signals, (2) add stability (angle penalty), velocity penalty, survival bonus, and height progress. This is a MIX operation since we're preserving the action_cost and ground_contact components while adding missing signals and removing harmful ones."
+```

@@ -194,18 +194,22 @@ def build_refine_prompt(
           "reasoning": "Based on inventory/missing/harmful analysis"
         }}
         ```
+        MINIMALIST PRINCIPLE — do NOT over-engineer the reward:
+        - Only ADD when a signal category is GENUINELY missing and needed.
+        - Only DELETE when a component is PROVEN harmful or redundant.
+        - If the skeleton is already complete with 5+ adequate signal types,
+          use TUNE even if you can think of more things to add.
+        - "missing" and "harmful" fields must be EMPTY [] when there are
+          no genuine issues. Do NOT invent problems to fill these fields.
+        - A simple, clean reward with 5-6 components that works is BETTER
+          than a bloated one with 8-9 components.
+
         ACTION RULES for the \"action\" field:
         - If you only ADDED missing signals → use \"add\".
         - If you only DELETED harmful components → use \"delete\".
         - If you only TUNED coefficients → use \"tune\".
-        - If you did TWO OR MORE of the above (e.g. added velocity AND deleted sq_change
-          AND tuned contact weight) → use \"mix\". This is the most common case when
-          the skeleton needs significant but not total restructuring.
-        - Only use \"rebuild\" when this skeleton has been tried for 2+ iterations
-          (your current skeleton appears 2+ times in Agent Memory as a parent)
-          AND scores are flat or declining — proving the skeleton itself cannot work.
-          REBUILD means: discard all memory of this skeleton, generate a completely
-          new design from scratch, as if you are starting from iter0.
+        - If you did TWO OR MORE → use \"mix\".
+        - REBUILD only after 2+ iterations of proven failure.
 
         ```python
         def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
