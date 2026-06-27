@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 3 (iter 8): The latest score is 166.2 with episode length 288 and per-step 0.577, which is the best score so far. The skeleton has shown improvement from -138.5 to 166.2, indicating it works. However, episode length is still short (288), suggesting the agent dies quickly. The skeleton is missing a stability signal (angle/angular velocity) and a survival bonus. The squared_change component is undirected and redundant with abs_change. I will: (1) remove squared_change (redundant with abs_change), (2) add stability signal for angle and angular velocity, (3) add survival bonus, (4) fix action_cost to use abs(action), (5) tune stage weights to encourage longer episodes."
+}

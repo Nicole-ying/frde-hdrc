@@ -1,0 +1,10 @@
+Score: 8.7 | Success rate: 0.05 | Episode length: 380 | Per-step: 0.023 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 1 (iter 0-2): Only 2 iterations seen. Score dropped from 192.3 to -113.0, but this is still early. The skeleton has 4 components covering movement, directional progress, smoothness, and stability. However, episode length dropped to 69, indicating the agent dies quickly. The stability penalty (-sum(abs(n))) is too aggressive - it penalizes any non-zero state, which is harmful during early exploration. Need to: 1) Remove the harmful stability component that punishes all movement, 2) Add a survival bonus to encourage longer episodes, 3) Fix the smoothness direction (currently negative, punishing all change). The skeleton structure is salvageable with targeted fixes.

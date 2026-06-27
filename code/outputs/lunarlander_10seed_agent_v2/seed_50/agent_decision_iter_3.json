@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "After 3 iterations, the same skeleton has produced consistently poor scores (-69.1, -41.0, -42.8) with very short episode lengths (74-81 steps) and negative per-step rewards (-0.5 to -0.9). The skeleton has only 3 components (abs_diff, delta_sq, action_cost) and is missing critical signal categories: stability (angle/angular velocity), contact/landing bonus, velocity penalty, and survival bonus. The scores are flat/declining despite repeated attempts. Following Phase 2-3 of the search strategy, with 3+ data points showing no improvement, a rebuild is warranted to create a complete skeleton with 5+ signal categories."
+}

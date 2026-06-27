@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 2 (iter 3-5): Score trend is improving from -127.1 to 12.9 (iter 6) and then -50.8 (iter 8). Episode length increased from 78 to 291-304. The skeleton is working but needs: 1) Add survival bonus to encourage longer episodes, 2) Add velocity damping to reward speed reduction, 3) Add angle stability penalty to prevent tumbling, 4) Fix undirected squared_change to directional form, 5) Adjust stage weights to better balance early exploration vs late precision. The skeleton is fundamentally sound - just needs component additions and coefficient tuning."
+}

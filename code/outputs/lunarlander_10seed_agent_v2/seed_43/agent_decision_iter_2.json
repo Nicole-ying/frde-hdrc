@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 1): Only two data points. Score dropped from 63.4 to -14.2, but episode length is still reasonable (534). The skeleton has 4 components covering movement, smoothness, action cost, and ground contact. The per-step reward is -0.027 which is slightly negative. The main issue is that the smoothness penalty is undirected (uses squared differences) and the movement reward may be conflicting with it. Need to fix the smoothness penalty to directional form, adjust scaling to balance components, and add a survival bonus to encourage longer episodes. The skeleton is fundamentally sound - just needs tuning."
+}

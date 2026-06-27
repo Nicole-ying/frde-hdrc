@@ -1,0 +1,10 @@
+Score: -112.4 | Success rate: 0.00 | Episode length: 1000 | Per-step: -0.112 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 3 (iter 6+): After 8 iterations, the best score was 192.3 (iter 0) and 191.7 (iter 5), but the current skeleton has never produced positive scores. The current skeleton (iter 7) scored -133.9 with episode length 1000 but per-step -0.134, meaning the agent survives but does the wrong thing. The skeleton is missing critical components: survival bonus, stability signal, and contact bonus. The movement component is undirected (rewards ANY change). The iteration 5 skeleton had 6 well-designed components and scored 191.7. Rebuilding to restore that working skeleton structure with directional progress, smoothness, action cost, survival bonus, stability, and contact bonus.

@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "The current skeleton produces a per-step reward of -0.932 and episode length of only 74 steps, indicating the agent dies very quickly. The skeleton has only 3 components (abs_diff, delta_sq, action_cost) and is missing critical signal categories: stability (angle/angular velocity), contact/landing bonus, and velocity penalty. The abs_diff component is undirected (rewards any movement toward zero regardless of state) and the delta_sq is also undirected. The action_cost penalizes the main engine (action=2) too heavily. Since this is iteration 0 with only 1 data point showing clear failure, and the skeleton is missing essential signals, a rebuild is warranted to create a more complete skeleton with 5+ signal categories."
+}

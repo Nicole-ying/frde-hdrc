@@ -1,0 +1,10 @@
+Score: -644.2 | Success rate: 0.00 | Episode length: 81 | Per-step: -7.954 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 3 (iter 3+): After 4 iterations with the same skeleton, scores remain extremely negative (-632.8, -545.1, -631.0, -636.1) with episode length stuck at ~83 steps. The skeleton has fundamental flaws: (1) smoothness uses undirected (n-o)^2 which rewards ANY change; (2) action_cost uses arbitrary center at 1.5 for discrete actions 0-3; (3) no survival bonus to encourage longer episodes; (4) contact_bonus relies on 'contact' key which may not exist; (5) per-step reward is extremely negative (-7.5), punishing the agent. The skeleton has never produced positive scores or episodes >100 steps after 4 iterations. A complete rebuild with proper directional signals, survival bonus, and appropriate action cost is needed.

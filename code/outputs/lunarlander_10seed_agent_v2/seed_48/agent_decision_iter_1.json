@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 0): Score 165.5 with episode length 872 is actually quite good - the agent survives long and gets positive per-step reward (0.19). The skeleton has 4 components covering movement toward stability, smoothness, action cost, and ground contact. The main issues are: 1) The change_penalty uses undirected squared changes which punish ANY movement, 2) The leg_contact_bonus uses raw observation values (0 or 1) but the weight is too low in early stages, 3) No survival bonus to encourage longer episodes. I will tune by making change_penalty directional, adding a small survival bonus, and adjusting stage weights to better balance exploration vs exploitation."
+}

@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "Phase 3 (iter 5): After 5 iterations with the same skeleton (scores: 95.4, 130.8, -75.2, 108.2, -161.5), the skeleton has never produced positive per-step reward above 0.25, episode length oscillates wildly, and the latest score is the worst at -161.5. The skeleton has fundamental flaws: (1) squared_change is undirected and redundant with abs_change, (2) no stability signal for angle/angular velocity, (3) no survival bonus, (4) action_cost uses raw action instead of abs(action), (5) stage weights were never actually changed across iterations. The skeleton has been given 5 iterations without meaningful improvement - it's time to rebuild with a cleaner, simpler design that covers all necessary signal categories."
+}

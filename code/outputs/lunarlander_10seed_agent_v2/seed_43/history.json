@@ -1,0 +1,41 @@
+[
+  {
+    "iteration": 0,
+    "score": 63.36729389531345,
+    "success_rate": 0.2,
+    "mean_episode_length": 660.4,
+    "converged": false,
+    "failure_mode": "",
+    "reward_code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_43\\reward_iter_0.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  },
+  {
+    "iteration": 1,
+    "score": -14.209958915602465,
+    "success_rate": 0.1,
+    "mean_episode_length": 533.6,
+    "converged": false,
+    "failure_mode": "",
+    "reward_code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_43\\reward_iter_1.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  },
+  {
+    "iteration": 2,
+    "score": 216.82238299285763,
+    "success_rate": 0.8,
+    "mean_episode_length": 356.45,
+    "converged": true,
+    "failure_mode": "",
+    "reward_code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_43\\reward_iter_2.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  }
+]

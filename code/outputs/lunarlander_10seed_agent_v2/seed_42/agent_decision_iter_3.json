@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 0-2): Score 111.0 with episode length 570 and per-step 0.195 is a solid starting point. The skeleton has 5 components covering movement, smoothness, action cost, contact, and angular velocity. The agent survives well (570 steps) and gets positive per-step reward. However, the score dropped from 136.1 to 111.0 after adding the angular velocity penalty. The main issues: (1) The angular velocity penalty may be too aggressive in early training - the agent needs freedom to explore. (2) The smoothness component uses abs change which is undirected - should use directional form. (3) Contact bonus needs better scaling. (4) Stage weights need adjustment - early stage should have lower penalties. Tune all components with better scaling and directional signals."
+}

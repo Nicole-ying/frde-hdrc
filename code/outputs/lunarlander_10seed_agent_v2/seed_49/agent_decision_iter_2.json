@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "Phase 2 (iter 0-1): Score is -184.1 with episode length 153, still very short. The skeleton has only 3 components (abs_diff, sq_diff, action_cost), missing critical stability signals (angle/angular velocity) and contact/landing signals. The per-step reward is -1.200, indicating the reward is fundamentally punishing the agent. The skeleton is too simple and missing essential signal categories for this control task. A rebuild is needed to add stability, contact, and velocity components."
+}

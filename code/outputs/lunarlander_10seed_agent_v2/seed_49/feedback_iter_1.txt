@@ -1,0 +1,10 @@
+Score: -184.1 | Success rate: 0.00 | Episode length: 153 | Per-step: -1.200 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 2 (iter 0-1) - Score is -232.1 with episode length 138, which is very short. The current skeleton has only 3 components (abs_diff, sq_diff, action_cost), missing critical stability signals (angle/angular velocity) and contact/landing signals. The per-step reward is -1.679, indicating the reward is fundamentally punishing the agent. The skeleton is too simple and missing essential signal categories for this control task. A rebuild is needed to add stability, contact, and velocity components.

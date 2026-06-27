@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "The current skeleton scored -155.5, a significant drop from 191.7 in iteration 5. The current skeleton is missing critical components: survival bonus, stability signal, and contact bonus. The movement component is undirected (rewards ANY change) which is harmful. The iteration 5 skeleton had 6 well-designed components and scored 191.7. Rebuilding to restore that working skeleton structure with directional progress, smoothness, action cost, survival bonus, stability, and contact bonus."
+}

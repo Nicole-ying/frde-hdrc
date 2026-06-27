@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 0): Score -632.8, episode length 83, per-step -7.634. The skeleton has only 4 components but critical signals are missing or misdirected. The smoothness component uses undirected (n-o)^2 which rewards ANY change, not stability. The action_cost uses absolute distance from 1.5 which is arbitrary for discrete actions 0-3. No survival bonus exists to encourage longer episodes. No velocity penalty to prevent crashes. The contact_bonus relies on 'contact' key which may not exist. The per-step reward of -7.634 is extremely negative, indicating the reward is fundamentally punishing the agent. Need a complete rebuild with proper directional signals, survival bonus, and appropriate action cost."
+}

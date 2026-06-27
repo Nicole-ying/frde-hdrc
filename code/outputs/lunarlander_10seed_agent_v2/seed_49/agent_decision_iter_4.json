@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "Phase 3 (iter 3+): After 4 iterations with the same skeleton (abs_diff, sq_diff, action_cost), scores are consistently poor (-232.1, -184.1, -259.9, -284.6) with short episode lengths (138, 153, 144, 143). The per-step reward is very negative (-1.2 to -1.8), indicating the reward is fundamentally punishing the agent. The skeleton lacks critical signal categories: stability (angle/angular velocity), contact/landing, and velocity control. Despite multiple rebuild attempts, the code remained identical, suggesting the diagnosis was not properly executed. A fresh skeleton with 5+ signal categories is needed."
+}

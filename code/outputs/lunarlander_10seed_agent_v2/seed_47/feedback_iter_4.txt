@@ -1,0 +1,10 @@
+Score: -173.0 | Success rate: 0.00 | Episode length: 165 | Per-step: -1.051 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: After 4 iterations, scores are declining (192.3 → -113.0 → 8.7 → -230.6) with no improvement trend. Episode length is very short (187). The stability penalty (-sum(|n|)) is fundamentally harmful, punishing all non-zero states. Movement and smoothness components are redundant (both measure state-change magnitude). Per-step reward is -1.233, indicating the reward signal is punishing the agent. A fresh, simpler skeleton is needed with: directional progress toward zero, gentle smoothness, action cost, survival bonus, and a contact bonus for ground contact.

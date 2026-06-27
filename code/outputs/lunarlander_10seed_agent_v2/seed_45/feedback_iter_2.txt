@@ -1,0 +1,10 @@
+Score: -103.7 | Success rate: 0.00 | Episode length: 959 | Per-step: -0.108 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 1 (iter 0-1): Only 2 iterations, not enough evidence to rebuild. Score improved from -127.1 (len=78) to -124.5 (len=927) - episode length dramatically increased from 78 to 927, showing the skeleton is working. The per-step reward is -0.134 which is reasonable. The skeleton has all necessary signal categories: movement, smoothness, action cost, contact, velocity damping, angle stability, and survival bonus. The main issue is the score is still negative. Need to tune: 1) Reduce smoothness penalty weight in early/mid stages to allow more exploration, 2) Increase movement reward coefficient to better incentivize centering, 3) Reduce angle penalty weight in early stage since agent is surviving long episodes now, 4) Increase survival bonus slightly to maintain long episodes. The skeleton is fundamentally sound - just needs coefficient tuning.

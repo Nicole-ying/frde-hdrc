@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Score improved from 95.4 to 130.8 and episode length from 383 to 733, showing the skeleton works. However, per-step reward is still low (0.178) and episode length isn't max (1000). Need to: (1) fix undirected squared_change to directional form, (2) add stability signal for angle/angular velocity, (3) add survival bonus to encourage longer episodes, (4) tune stage weights for better balance."
+}

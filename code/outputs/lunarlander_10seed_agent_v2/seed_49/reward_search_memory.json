@@ -1,0 +1,62 @@
+[
+  {
+    "iteration": 0,
+    "score": -232.10853433899808,
+    "success_rate": 0.0,
+    "mean_episode_length": 138.25,
+    "verdict": "failure",
+    "lesson": "score=-232.1, survived 138 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_49\\reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Movement towards stability - sum of absolute differences\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Feature 2: Smoothness of transition - squared differences\n    sq_diff = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 3: Action penalty (small cost for taking actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights\n    # Early stage: focus on exploration and reducing absolute values\n    w1 = 0.5 * (1.0 - training_progress)\n    # Middle stage: focus on smooth transitions\n    w2 = 0.3 * (1.0 - abs(training_progress - 0.5) * 2)\n    # Late stage: focus on precision\n    w3 = 0.2 * training_progress\n    \n    # Combine components\n    reward = w1 * abs_diff - w2 * sq_diff - w3 * action_cost\n    \n    return float(reward)"
+  },
+  {
+    "iteration": 1,
+    "score": -184.0964326808252,
+    "success_rate": 0.0,
+    "mean_episode_length": 153.45,
+    "verdict": "failure",
+    "lesson": "score=-184.1, survived 153 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_49\\reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Movement towards stability - sum of absolute differences\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Feature 2: Smoothness of transition - squared differences\n    sq_diff = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 3: Action penalty (small cost for taking actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights\n    # Early stage: focus on exploration and reducing absolute values\n    w1 = 0.5 * (1.0 - training_progress)\n    # Middle stage: focus on smooth transitions\n    w2 = 0.3 * (1.0 - abs(training_progress - 0.5) * 2)\n    # Late stage: focus on precision\n    w3 = 0.2 * training_progress\n    \n    # Combine components\n    reward = w1 * abs_diff - w2 * sq_diff - w3 * action_cost\n    \n    return float(reward)"
+  },
+  {
+    "iteration": 2,
+    "score": -259.92996481277066,
+    "success_rate": 0.0,
+    "mean_episode_length": 144.3,
+    "verdict": "failure",
+    "lesson": "score=-259.9, survived 144 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_49\\reward_iter_2.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Movement towards stability - sum of absolute differences\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Feature 2: Smoothness of transition - squared differences\n    sq_diff = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 3: Action penalty (small cost for taking actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights\n    # Early stage: focus on exploration and reducing absolute values\n    w1 = 0.5 * (1.0 - training_progress)\n    # Middle stage: focus on smooth transitions\n    w2 = 0.3 * (1.0 - abs(training_progress - 0.5) * 2)\n    # Late stage: focus on precision\n    w3 = 0.2 * training_progress\n    \n    # Combine components\n    reward = w1 * abs_diff - w2 * sq_diff - w3 * action_cost\n    \n    return float(reward)"
+  },
+  {
+    "iteration": 3,
+    "score": -284.56855339441967,
+    "success_rate": 0.0,
+    "mean_episode_length": 143.1,
+    "verdict": "failure",
+    "lesson": "score=-284.6, survived 143 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_49\\reward_iter_3.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Movement towards stability - sum of absolute differences\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Feature 2: Smoothness of transition - squared differences\n    sq_diff = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 3: Action penalty (small cost for taking actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights\n    # Early stage: focus on exploration and reducing absolute values\n    w1 = 0.5 * (1.0 - training_progress)\n    # Middle stage: focus on smooth transitions\n    w2 = 0.3 * (1.0 - abs(training_progress - 0.5) * 2)\n    # Late stage: focus on precision\n    w3 = 0.2 * training_progress\n    \n    # Combine components\n    reward = w1 * abs_diff - w2 * sq_diff - w3 * action_cost\n    \n    return float(reward)"
+  },
+  {
+    "iteration": 4,
+    "score": -213.43491232048834,
+    "success_rate": 0.0,
+    "mean_episode_length": 135.35,
+    "verdict": "failure",
+    "lesson": "score=-213.4, survived 135 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_49\\reward_iter_4.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Movement towards stability - sum of absolute differences\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Feature 2: Smoothness of transition - squared differences\n    sq_diff = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Feature 3: Action penalty (small cost for taking actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights\n    # Early stage: focus on exploration and reducing absolute values\n    w1 = 0.5 * (1.0 - training_progress)\n    # Middle stage: focus on smooth transitions\n    w2 = 0.3 * (1.0 - abs(training_progress - 0.5) * 2)\n    # Late stage: focus on precision\n    w3 = 0.2 * training_progress\n    \n    # Combine components\n    reward = w1 * abs_diff - w2 * sq_diff - w3 * action_cost\n    \n    return float(reward)"
+  },
+  {
+    "iteration": 5,
+    "score": 219.20728403866804,
+    "success_rate": 0.8,
+    "mean_episode_length": 454.0,
+    "verdict": "success",
+    "lesson": "solved (score=219.2 >= 200)",
+    "code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_49\\reward_iter_5.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement toward stability (reducing absolute values)\n    # Positive when absolute values decrease\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    movement_reward = abs_diff * 0.1\n    \n    # Component 2: Smoothness - penalize large changes in state\n    # Negative when state changes are large\n    state_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    smoothness_penalty = -state_change * 0.05\n    \n    # Component 3: Action cost - penalize taking actions\n    # Small penalty for any action to encourage efficiency\n    action_cost = -0.01\n    \n    # Component 4: Ground contact bonus (from info or obs)\n    # Check if legs are in contact (indices 6 and 7 in obs)\n    leg_contact = 0.0\n    if len(o) >= 8:\n        leg_contact = (n[6] + n[7]) * 0.5  # Both legs contact gives max bonus\n    \n    # Component 5: Velocity reduction bonus\n    # Penalize high velocities (indices 2 and 3 for x,y velocity)\n    vel_penalty = 0.0\n    if len(o) >= 4:\n        prev_vel = abs(o[2]) + abs(o[3])\n        curr_vel = abs(n[2]) + abs(n[3])\n        vel_penalty = (prev_vel - curr_vel) * 0.2\n    \n    # Stage-based weighting\n    # Early: focus on movement and exploration\n    # Middle: balance smoothness and contact\n    # Late: emphasize stability and ground contact\n    stage1_weight = max(0.0, 1.0 - training_progress * 2.0)  # Decays in first half\n    stage2_weight = 1.0 - abs(training_progress - 0.5) * 2.0  # Peaks at middle\n    stage3_weight = max(0.0, training_progress * 2.0 - 1.0)  # Grows in second half\n    \n    # Combine components with stage weights\n    reward = (\n        movement_reward * (0.3 + 0.2 * stage1_weight) +\n        smoothness_penalty * (0.2 + 0.3 * stage2_weight) +\n        action_cost * (0.1 + 0.1 * stage1_weight) +\n        leg_contact * (0.2 + 0.4 * stage3_weight) +\n        vel_penalty * (0.2 + 0.2 * stage2_weight)\n    )\n    \n    return reward"
+  }
+]

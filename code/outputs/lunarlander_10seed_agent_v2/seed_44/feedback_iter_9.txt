@@ -1,0 +1,10 @@
+Score: 38.7 | Success rate: 0.05 | Episode length: 864 | Per-step: 0.045 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Could not parse JSON decision; inferred from code.

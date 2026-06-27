@@ -1,0 +1,32 @@
+[
+  {
+    "iteration": 0,
+    "score": 63.36729389531345,
+    "success_rate": 0.2,
+    "mean_episode_length": 660.4,
+    "verdict": "failure",
+    "lesson": "score=63.4, survived 660 steps, success_rate=0.20",
+    "code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_43\\reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observations as generic arrays\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement toward stability - penalize large changes in absolute values\n    # This encourages the agent to reduce extreme states\n    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    movement_reward = abs_change * 0.1\n    \n    # Component 2: Smoothness penalty - penalize large jumps in state\n    # This encourages smooth, controlled movements\n    diff_squared = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    smoothness_penalty = -diff_squared * 0.05\n    \n    # Component 3: Action penalty - penalize excessive action usage\n    # Convert action to a small cost\n    action_cost = -0.01 * float(action)\n    \n    # Component 4: Ground contact bonus - encourage stable contact\n    # Using info if available, otherwise from next_obs indices 6 and 7\n    ground_contact_bonus = 0.0\n    if len(n) >= 8:\n        ground_contact_bonus = (n[6] + n[7]) * 0.5\n    \n    # Stage-based weighting\n    # Early training: focus on movement and smoothness\n    # Late training: focus on ground contact and stability\n    early_weight = 1.0 - training_progress\n    late_weight = training_progress\n    \n    # Combine components with stage weights\n    reward = (\n        early_weight * (movement_reward + smoothness_penalty + action_cost) +\n        late_weight * ground_contact_bonus\n    )\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": -14.209958915602465,
+    "success_rate": 0.1,
+    "mean_episode_length": 533.6,
+    "verdict": "failure",
+    "lesson": "score=-14.2, survived 534 steps, success_rate=0.10",
+    "code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_43\\reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observations as generic arrays\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement toward stability - penalize large changes in absolute values\n    # This encourages the agent to reduce extreme states\n    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    movement_reward = abs_change * 0.1\n    \n    # Component 2: Smoothness penalty - penalize large jumps in state\n    # This encourages smooth, controlled movements\n    diff_squared = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    smoothness_penalty = -diff_squared * 0.05\n    \n    # Component 3: Action penalty - penalize excessive action usage\n    # Convert action to a small cost\n    action_cost = -0.01 * float(action)\n    \n    # Component 4: Ground contact bonus - encourage stable contact\n    # Using info if available, otherwise from next_obs indices 6 and 7\n    ground_contact_bonus = 0.0\n    if len(n) >= 8:\n        ground_contact_bonus = (n[6] + n[7]) * 0.5\n    \n    # Stage-based weighting\n    # Early training: focus on movement and smoothness\n    # Late training: focus on ground contact and stability\n    early_weight = 1.0 - training_progress\n    late_weight = training_progress\n    \n    # Combine components with stage weights\n    reward = (\n        early_weight * (movement_reward + smoothness_penalty + action_cost) +\n        late_weight * ground_contact_bonus\n    )\n    \n    return reward"
+  },
+  {
+    "iteration": 2,
+    "score": 216.82238299285763,
+    "success_rate": 0.8,
+    "mean_episode_length": 356.45,
+    "verdict": "success",
+    "lesson": "solved (score=216.8 >= 200)",
+    "code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_43\\reward_iter_2.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observations as generic arrays\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement toward stability - penalize large changes in absolute values\n    # This encourages the agent to reduce extreme states\n    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    movement_reward = abs_change * 0.1\n    \n    # Component 2: Smoothness penalty - penalize large jumps in state\n    # This encourages smooth, controlled movements\n    diff_squared = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    smoothness_penalty = -diff_squared * 0.05\n    \n    # Component 3: Action penalty - penalize excessive action usage\n    # Convert action to a small cost\n    action_cost = -0.01 * float(action)\n    \n    # Component 4: Ground contact bonus - encourage stable contact\n    # Using info if available, otherwise from next_obs indices 6 and 7\n    ground_contact_bonus = 0.0\n    if len(n) >= 8:\n        ground_contact_bonus = (n[6] + n[7]) * 0.5\n    \n    # Stage-based weighting\n    # Early training: focus on movement and smoothness\n    # Late training: focus on ground contact and stability\n    early_weight = 1.0 - training_progress\n    late_weight = training_progress\n    \n    # Combine components with stage weights\n    reward = (\n        early_weight * (movement_reward + smoothness_penalty + action_cost) +\n        late_weight * ground_contact_bonus\n    )\n    \n    return reward"
+  }
+]

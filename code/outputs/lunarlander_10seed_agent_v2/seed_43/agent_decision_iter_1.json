@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 0): Only one data point with score 63.4 and episode length 660. The skeleton has 4 components covering movement, smoothness, action cost, and ground contact. Per-step reward is 0.096 which is reasonable. The skeleton is working but can be improved. Need to fix undirected smoothness penalty to directional form, adjust scaling to keep per-step contributions balanced, and add a survival bonus to encourage longer episodes. The ground contact bonus sign should be checked - currently it's positive which is correct for encouraging landing."
+}

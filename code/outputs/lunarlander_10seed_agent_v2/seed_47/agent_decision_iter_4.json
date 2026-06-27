@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "After 4 iterations, scores are declining (192.3 → -113.0 → 8.7 → -230.6) with no improvement trend. Episode length is very short (187). The stability penalty (-sum(|n|)) is fundamentally harmful, punishing all non-zero states. Movement and smoothness components are redundant (both measure state-change magnitude). Per-step reward is -1.233, indicating the reward signal is punishing the agent. A fresh, simpler skeleton is needed with: directional progress toward zero, gentle smoothness, action cost, survival bonus, and a contact bonus for ground contact."
+}

@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "After 2 iterations, the skeleton has never produced positive scores or episodes longer than 81 steps. The per-step reward is -0.504, indicating the agent dies quickly. The skeleton is missing critical signal categories: stability (angle/angular velocity), contact/landing bonus, and velocity penalty. The current components (abs_diff, delta_sq, action_cost) are insufficient and undirected. Following Phase 2 of the search strategy, with scores flat/declining and episodes very short, a rebuild is warranted to create a complete skeleton with 5+ signal categories."
+}

@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "Phase 2 (iter 3): We now have 4 data points with scores 95.4, 130.8, -75.2, 108.2. The skeleton has been tried 4 times with the same 5 components and the same stage weights (the code was never actually changed across iterations). The score oscillates wildly and the per-step reward has been declining (0.249→0.178→-0.075→0.174). Episode length varies from 383 to 1000, showing the agent can survive but is confused by conflicting signals. The skeleton has fundamental issues: (1) squared_change is undirected and conflicts with abs_change (both measure state-change magnitude), (2) no stability signal for angle/angular velocity, (3) no survival bonus, (4) action_cost uses raw action instead of abs(action). The skeleton has been given 4 iterations without meaningful improvement - it's time to rebuild with a cleaner design."
+}

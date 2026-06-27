@@ -1,0 +1,10 @@
+Score: -14.2 | Success rate: 0.10 | Episode length: 534 | Per-step: -0.027 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 1 (iter 0): Only one data point with score 63.4 and episode length 660. The skeleton has 4 components covering movement, smoothness, action cost, and ground contact. Per-step reward is 0.096 which is reasonable. The skeleton is working but can be improved. Need to fix undirected smoothness penalty to directional form, adjust scaling to keep per-step contributions balanced, and add a survival bonus to encourage longer episodes. The ground contact bonus sign should be checked - currently it's positive which is correct for encouraging landing.

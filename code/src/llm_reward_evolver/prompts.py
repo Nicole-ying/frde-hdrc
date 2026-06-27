@@ -92,16 +92,16 @@ def build_refine_prompt(
             "\n"
             "AGENT SEARCH STRATEGY — your search has phases, just like HRDC:\n"
             "\n"
-            "  PHASE 1 (Exploration, iter 0-2): Give this skeleton a fair chance. "
-            "Many great rewards started at -400 and climbed. Your PRIORITY in this "
-            "phase is to get the skeleton to a COMPLETE state — make sure it has "
-            "all necessary signal categories (Steps 1-2 below). "
-            "Step 1 asks: what components exist? Step 2 asks: what is MISSING? "
-            "If stability is missing → ADD angle_penalty. If contact is missing → "
-            "ADD contact_bonus. If a signal is undirected → TUNE to directional form. "
-            "If a component is clearly harmful → DELETE it. "
-            "Only after the skeleton has 5+ adequate signal categories should you "
-            "focus purely on TUNE. Do NOT REBUILD — you don't have enough evidence yet.\n"
+            "  PHASE 1 (iter 0-2): Your job is SKELETON COMPLETION — make sure "
+            "the skeleton has all needed signal types. Execute Steps 1-2 BELOW: "
+            "Step 1 inventories what components exist, Step 2 identifies what is MISSING.\n"
+            "  MANDATORY: If the skeleton has < 5 signal categories, you MUST use "
+            "ADD to fill the gaps. If a component is redundant or harmful, you MUST "
+            "use DELETE. You MAY also tune coefficients, but ADD/DELETE take priority.\n"
+            "  Examples of ADDs: no stability signal → ADD angle_penalty + angvel_penalty. "
+            "no contact signal → ADD ground_contact bonus. no velocity signal → ADD speed_penalty. "
+            "no directional progress → TUNE undirected (n-o)^2 to directed abs(o)-abs(n).\n"
+            "  Do NOT REBUILD in this phase. The skeleton might work after completion.\n"
             "\n"
             "  PHASE 2 (Judgment, iter 3-5): You now have 3+ data points. You CAN "
             "judge the skeleton. If scores are IMPROVING (even -400→-200→-100): "
@@ -249,11 +249,11 @@ def build_refine_prompt(
             ...
         ```
 
-        ACTION MEANINGS:
-        - "rebuild": skeleton is broken → generate a fresh simple design from scratch
-        - "delete": a specific component is harmful/redundant → remove it
-        - "add": a signal category is missing → add the needed component
-        - "tune": skeleton is working → adjust coefficients/stage-weights
+        ACTION MEANINGS (choose the one that matches your diagnosis):
+        - "add": you found a MISSING signal category in Step 2 → add it (e.g. "add" on "contact")
+        - "delete": you found a harmful/redundant component in Step 3 → remove it
+        - "tune": the skeleton is COMPLETE (5+ categories) but poorly calibrated → adjust
+        - "rebuild": Phase 2+ only — skeleton is proven broken after 3+ iterations
 
         Keep the same signature.
 

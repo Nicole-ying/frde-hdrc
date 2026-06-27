@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "Phase 2 (iter 1): Score -545.1, episode length 83, per-step -6.552. The skeleton has been tried twice with identical code (iter 0 and iter 1 both used the same components and weights). Scores improved slightly from -632.8 to -545.1 but are still very negative, episode length remains stuck at 83, and per-step reward is -6.552. The skeleton is fundamentally broken: (1) smoothness uses undirected (n-o)^2 which rewards ANY change; (2) action_cost uses arbitrary center at 1.5 for discrete actions 0-3; (3) no survival bonus to encourage longer episodes; (4) contact_bonus relies on 'contact' key which may not exist; (5) per-step reward is extremely negative, punishing the agent. The skeleton has not produced positive scores or long episodes after 2 iterations. A complete rebuild with proper directional signals, survival bonus, and appropriate action cost is needed."
+}

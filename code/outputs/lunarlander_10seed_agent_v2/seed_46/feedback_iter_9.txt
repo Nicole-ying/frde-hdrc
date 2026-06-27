@@ -1,0 +1,10 @@
+Score: 235.2 | Success rate: 0.95 | Episode length: 398 | Per-step: 0.591 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 3 (iter 8): The latest score is 166.2 with episode length 288 and per-step 0.577, which is the best score so far. The skeleton has shown improvement from -138.5 to 166.2, indicating it works. However, episode length is still short (288), suggesting the agent dies quickly. The skeleton is missing a stability signal (angle/angular velocity) and a survival bonus. The squared_change component is undirected and redundant with abs_change. I will: (1) remove squared_change (redundant with abs_change), (2) add stability signal for angle and angular velocity, (3) add survival bonus, (4) fix action_cost to use abs(action), (5) tune stage weights to encourage longer episodes.

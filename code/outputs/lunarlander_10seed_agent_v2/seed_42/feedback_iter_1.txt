@@ -1,0 +1,10 @@
+Score: 23.3 | Success rate: 0.05 | Episode length: 939 | Per-step: 0.025 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 1 (iter 0): Score 136.1 with episode length 737 and per-step 0.185 is a solid starting point. The skeleton has 4 components covering movement, smoothness, action cost, and contact. The agent survives well (737 steps) and gets positive per-step reward. However, the score is still below target. The main issues: (1) abs_diff uses sum(abs(o)-abs(n)) which is directional but may be too weak - should use a stronger directional signal like sum(abs(n)-abs(o)) to reward moving toward zero. (2) smoothness uses undirected squared change - should use directional form. (3) contact_bonus is additive without scaling - needs normalization. (4) Stage weights need adjustment - early stage should have some contact exploration. (5) action_cost is too small for discrete action. Tune all components with better scaling and directional signals.

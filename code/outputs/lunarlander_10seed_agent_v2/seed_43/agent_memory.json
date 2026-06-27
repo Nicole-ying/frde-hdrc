@@ -1,0 +1,38 @@
+[
+  {
+    "iteration": 0,
+    "action": "tune",
+    "target": "unknown",
+    "reasoning": "Could not parse JSON decision; inferred from code.",
+    "score": 63.36729389531345,
+    "episode_length": 660.4,
+    "success_rate": 0.2,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observations as generic arrays\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement toward stability - penalize large changes in absolute values\n    # This encourages the agent to reduce extreme states\n    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    movement_reward = abs_change * 0.1\n    \n    # Component 2: Smoothness penalty - penalize large jumps in state\n    # This encourages smooth, controlled movements\n    diff_squared = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    smoothness_penalty = -diff_squared * 0.05\n    \n    # Component 3: Action penalty - penalize excessive action usage\n    # Convert action to a small cost\n    action_cost = -0.01 * float(action)\n    \n    # Component 4: Ground contact bonus - encourage stable contact\n    # Using info if available, otherwise from next_obs indices 6 and 7\n    ground_contact_bonus = 0.0\n    if len(n) >= 8:\n        ground_contact_bonus = (n[6] + n[7]) * 0.5\n    \n    # Stage-based weighting\n    # Early training: focus on movement and smoothness\n    # Late training: focus on ground contact and stability\n    early_weight = 1.0 - training_progress\n    late_weight = training_progress\n    \n    # Combine components with stage weights\n    reward = (\n        early_weight * (movement_reward + smoothness_penalty + action_cost) +\n        late_weight * ground_contact_bonus\n    )\n    \n    return reward",
+    "verdict": "failure",
+    "code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_43\\reward_iter_0.py"
+  },
+  {
+    "iteration": 1,
+    "action": "tune",
+    "target": "skeleton",
+    "reasoning": "Phase 1 (iter 0): Only one data point with score 63.4 and episode length 660. The skeleton has 4 components covering movement, smoothness, action cost, and ground contact. Per-step reward is 0.096 which is reasonable. The skeleton is working but can be improved. Need to fix undirected smoothness penalty to directional form, adjust scaling to keep per-step contributions balanced, and add a survival bonus to encourage longer episodes. The ground contact bonus sign should be checked - currently it's positive which is correct for encouraging landing.",
+    "score": -14.209958915602465,
+    "episode_length": 533.6,
+    "success_rate": 0.1,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observations as generic arrays\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement toward stability - penalize large changes in absolute values\n    # This encourages the agent to reduce extreme states\n    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    movement_reward = abs_change * 0.1\n    \n    # Component 2: Smoothness penalty - penalize large jumps in state\n    # This encourages smooth, controlled movements\n    diff_squared = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    smoothness_penalty = -diff_squared * 0.05\n    \n    # Component 3: Action penalty - penalize excessive action usage\n    # Convert action to a small cost\n    action_cost = -0.01 * float(action)\n    \n    # Component 4: Ground contact bonus - encourage stable contact\n    # Using info if available, otherwise from next_obs indices 6 and 7\n    ground_contact_bonus = 0.0\n    if len(n) >= 8:\n        ground_contact_bonus = (n[6] + n[7]) * 0.5\n    \n    # Stage-based weighting\n    # Early training: focus on movement and smoothness\n    # Late training: focus on ground contact and stability\n    early_weight = 1.0 - training_progress\n    late_weight = training_progress\n    \n    # Combine components with stage weights\n    reward = (\n        early_weight * (movement_reward + smoothness_penalty + action_cost) +\n        late_weight * ground_contact_bonus\n    )\n    \n    return reward",
+    "verdict": "failure",
+    "code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_43\\reward_iter_1.py"
+  },
+  {
+    "iteration": 2,
+    "action": "tune",
+    "target": "skeleton",
+    "reasoning": "Phase 1 (iter 1): Only two data points. Score dropped from 63.4 to -14.2, but episode length is still reasonable (534). The skeleton has 4 components covering movement, smoothness, action cost, and ground contact. The per-step reward is -0.027 which is slightly negative. The main issue is that the smoothness penalty is undirected (uses squared differences) and the movement reward may be conflicting with it. Need to fix the smoothness penalty to directional form, adjust scaling to balance components, and add a survival bonus to encourage longer episodes. The skeleton is fundamentally sound - just needs tuning.",
+    "score": 216.82238299285763,
+    "episode_length": 356.45,
+    "success_rate": 0.8,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observations as generic arrays\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement toward stability - penalize large changes in absolute values\n    # This encourages the agent to reduce extreme states\n    abs_change = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    movement_reward = abs_change * 0.1\n    \n    # Component 2: Smoothness penalty - penalize large jumps in state\n    # This encourages smooth, controlled movements\n    diff_squared = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    smoothness_penalty = -diff_squared * 0.05\n    \n    # Component 3: Action penalty - penalize excessive action usage\n    # Convert action to a small cost\n    action_cost = -0.01 * float(action)\n    \n    # Component 4: Ground contact bonus - encourage stable contact\n    # Using info if available, otherwise from next_obs indices 6 and 7\n    ground_contact_bonus = 0.0\n    if len(n) >= 8:\n        ground_contact_bonus = (n[6] + n[7]) * 0.5\n    \n    # Stage-based weighting\n    # Early training: focus on movement and smoothness\n    # Late training: focus on ground contact and stability\n    early_weight = 1.0 - training_progress\n    late_weight = training_progress\n    \n    # Combine components with stage weights\n    reward = (\n        early_weight * (movement_reward + smoothness_penalty + action_cost) +\n        late_weight * ground_contact_bonus\n    )\n    \n    return reward",
+    "verdict": "success",
+    "code_path": "outputs\\lunarlander_10seed_agent_v2\\seed_43\\reward_iter_2.py"
+  }
+]

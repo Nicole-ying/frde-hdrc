@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 2): Only 2 data points exist. Score went from 95.4 to 130.8 to -75.2, but episode length increased from 383 to 733 to 1000. The per-step reward dropped from 0.249 to 0.178 to -0.075, indicating the agent survives longer but is being punished. The skeleton has 5 components but is missing a stability signal (angle/angular velocity) and a survival bonus. The squared_change component is undirected and may conflict with abs_change. Need to: (1) convert squared_change to directional form, (2) add stability penalty for angle and angular velocity, (3) add survival bonus, (4) tune stage weights to reduce punishment in early training."
+}

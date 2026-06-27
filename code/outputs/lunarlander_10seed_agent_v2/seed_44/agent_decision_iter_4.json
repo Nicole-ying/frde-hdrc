@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "Phase 3 (iter 3+): After 4 iterations with the same skeleton, scores remain extremely negative (-632.8, -545.1, -631.0, -636.1) with episode length stuck at ~83 steps. The skeleton has fundamental flaws: (1) smoothness uses undirected (n-o)^2 which rewards ANY change; (2) action_cost uses arbitrary center at 1.5 for discrete actions 0-3; (3) no survival bonus to encourage longer episodes; (4) contact_bonus relies on 'contact' key which may not exist; (5) per-step reward is extremely negative (-7.5), punishing the agent. The skeleton has never produced positive scores or episodes >100 steps after 4 iterations. A complete rebuild with proper directional signals, survival bonus, and appropriate action cost is needed."
+}

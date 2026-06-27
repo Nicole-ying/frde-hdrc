@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 0-2): Only 3 iterations, not enough evidence to rebuild. Score is IMPROVING: -127.1 → -124.5 → -103.7, and episode length increased dramatically from 78 to 927 to 959. The skeleton is fundamentally working - the agent is surviving long episodes. The per-step reward is -0.108 which is reasonable. The skeleton has all necessary signal categories. The main issue is the score is still negative. Need to tune: 1) Reduce smoothness penalty weight in early stage to allow more exploration, 2) Increase movement reward coefficient to better incentivize centering, 3) Reduce angle penalty weight in early stage since agent is surviving long episodes now, 4) Increase survival bonus slightly to maintain long episodes, 5) Increase contact bonus weight to encourage landing. The skeleton is fundamentally sound - just needs coefficient tuning."
+}

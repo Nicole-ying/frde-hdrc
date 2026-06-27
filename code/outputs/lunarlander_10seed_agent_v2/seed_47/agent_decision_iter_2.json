@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 0-2): Only 2 iterations seen. Score dropped from 192.3 to -113.0, but this is still early. The skeleton has 4 components covering movement, directional progress, smoothness, and stability. However, episode length dropped to 69, indicating the agent dies quickly. The stability penalty (-sum(abs(n))) is too aggressive - it penalizes any non-zero state, which is harmful during early exploration. Need to: 1) Remove the harmful stability component that punishes all movement, 2) Add a survival bonus to encourage longer episodes, 3) Fix the smoothness direction (currently negative, punishing all change). The skeleton structure is salvageable with targeted fixes."
+}

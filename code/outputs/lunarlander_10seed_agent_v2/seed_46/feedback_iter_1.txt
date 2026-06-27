@@ -1,0 +1,10 @@
+Score: 130.8 | Success rate: 0.25 | Episode length: 733 | Per-step: 0.178 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Phase 1 (iter 0): Only one data point exists with score 95.4 and episode length 383. The skeleton has 5 components covering transition, smoothness, action cost, velocity, and contact. The per-step reward is 0.249, which is positive but low. The episode length of 383 suggests the agent dies too quickly. The main issues are: (1) squared_change is undirected (rewards ANY change), (2) action_cost uses a constant 0.01 instead of being scaled, (3) ground_contact is not stage-appropriate for early training, (4) the velocity change signal may be conflicting with abs_change. I will fix the undirected squared_change to a directional form, adjust action_cost scaling, and tune stage weights to better balance exploration vs stability.

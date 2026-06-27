@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Phase 1 (iter 0-2): Only one data point exists (score=-221.7, len=152). The skeleton has 4 signal categories (transition progress, smoothness, action cost, contact). Missing stability signal (angle/angular velocity) which likely causes short episodes. Per-step reward is -1.458, indicating the reward is punishing the agent. Will add a stability component and adjust signs/directions to make rewards more positive for desirable behavior. Not rebuilding yet - need to give this skeleton at least 3 iterations."
+}
