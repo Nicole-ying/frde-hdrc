@@ -1,0 +1,99 @@
+```json
+{
+  "inventory": [
+    "abs_diff: measures movement toward zero (stability)",
+    "change_penalty: penalizes large state changes (smoothness)",
+    "action_cost: penalizes higher action indices",
+    "leg_contact_bonus: rewards ground contact"
+  ],
+  "missing": [
+    "velocity penalty: no component penalizes high velocity, which is critical for landing",
+    "survival bonus: no component rewards staying alive longer"
+  ],
+  "harmful": [
+    "abs_diff: uses undirected form sum(abs(o)-abs(n)) which can be positive when moving away from zero if signs flip; should be directional",
+    "change_penalty: squared changes penalize all movement equally, including beneficial movement toward target"
+  ],
+  "action": "mix",
+  "target": "skeleton",
+  "reasoning": "The skeleton has 4 components but is missing velocity penalty and survival bonus. abs_diff is harmful because it rewards moving away from zero when signs change. change_penalty penalizes all movement including beneficial. Need to add velocity penalty and survival bonus, delete abs_diff and change_penalty, and replace with directional stability and smoothness components."
+}
+```
+
+```python
+def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+    # Extract generic arrays
+    o = obs
+    n = next_obs
+    
+    # Component 1: Directional stability - reward reducing absolute values
+    # Only positive when absolute values actually decrease
+    stability = 0.0
+    for i in range(len(o)):
+        if abs(n[i]) < abs(o[i]):
+            stability += abs(o[i]) - abs(n[i])
+    
+    # Component 2: Smoothness - penalize large changes but allow beneficial ones
+    # Use absolute difference instead of squared to be less harsh
+    smoothness = 0.0
+    for i in range(len(o)):
+        diff = abs(n[i] - o[i])
+        if diff > 0.1:  # Only penalize significant changes
+            smoothness -= diff
+    
+    # Component 3: Action cost - penalize high action indices
+    action_cost = -0.01 * float(action)
+    
+    # Component 4: Ground contact bonus
+    leg_contact_bonus = 0.0
+    if len(o) >= 8:
+        leg1_contact = o[6]
+        leg2_contact = o[7]
+        leg_contact_bonus = 0.5 * (leg1_contact + leg2_contact)
+    
+    # Component 5: Velocity penalty - penalize high velocity (indices 2 and 3)
+    velocity_penalty = 0.0
+    if len(o) >= 4:
+        vel_x = abs(o[2])
+        vel_y = abs(o[3])
+        velocity_penalty = -0.5 * (vel_x + vel_y)
+    
+    # Component 6: Survival bonus - reward staying alive
+    survival_bonus = 0.1
+    
+    # Stage weights based on training_progress
+    if training_progress < 0.3:
+        # Early: focus on stability and smoothness
+        w1 = 1.0  # stability
+        w2 = 0.5  # smoothness
+        w3 = 0.1  # action_cost
+        w4 = 0.2  # leg_contact
+        w5 = 0.3  # velocity_penalty
+        w6 = 0.1  # survival
+    elif training_progress < 0.7:
+        # Middle: balance all components
+        w1 = 0.8
+        w2 = 0.6
+        w3 = 0.2
+        w4 = 0.5
+        w5 = 0.5
+        w6 = 0.2
+    else:
+        # Late: emphasize ground contact and stability
+        w1 = 0.6
+        w2 = 0.3
+        w3 = 0.1
+        w4 = 1.0
+        w5 = 0.4
+        w6 = 0.3
+    
+    # Combine components
+    reward = (w1 * stability + 
+              w2 * smoothness + 
+              w3 * action_cost + 
+              w4 * leg_contact_bonus +
+              w5 * velocity_penalty +
+              w6 * survival_bonus)
+    
+    return reward
+```

@@ -186,30 +186,17 @@ def build_refine_prompt(
 
         ```json
         {{
-          "inventory": ["comp_name: what it measures", ...],
-          "missing": ["signal_category_not_present", ...],
-          "harmful": ["comp_name: why harmful", ...],
           "action": "add" | "delete" | "tune" | "mix" | "rebuild",
-          "target": "specific_component_name",
-          "reasoning": "Based on inventory/missing/harmful analysis"
+          "reasoning": "Walk through your analysis: what components exist, what (if anything) is genuinely missing or harmful, and why you chose this action."
         }}
         ```
-        MINIMALIST PRINCIPLE — do NOT over-engineer the reward:
-        - Only ADD when a signal category is GENUINELY missing and needed.
-        - Only DELETE when a component is PROVEN harmful or redundant.
-        - If the skeleton is already complete with 5+ adequate signal types,
-          use TUNE even if you can think of more things to add.
-        - "missing" and "harmful" fields must be EMPTY [] when there are
-          no genuine issues. Do NOT invent problems to fill these fields.
-        - A simple, clean reward with 5-6 components that works is BETTER
-          than a bloated one with 8-9 components.
-
-        ACTION RULES for the \"action\" field:
-        - If you only ADDED missing signals → use \"add\".
-        - If you only DELETED harmful components → use \"delete\".
-        - If you only TUNED coefficients → use \"tune\".
-        - If you did TWO OR MORE → use \"mix\".
-        - REBUILD only after 2+ iterations of proven failure.
+        ACTIONS:
+        - "add"    = you added genuinely missing signal categories
+        - "delete" = you removed proven harmful or redundant components
+        - "tune"   = you adjusted coefficients/signals only, no component changes
+        - "mix"    = you did two or more of add/delete/tune
+        - "rebuild"= LAST RESORT. Skeleton tried 2+ iterations, still flat/declining.
+                     Discard memory, start fresh as iter0.
 
         ```python
         def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):

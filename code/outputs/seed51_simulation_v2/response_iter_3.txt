@@ -1,0 +1,96 @@
+Looking at the Agent Memory, I see a clear pattern: the same skeleton has been tried for 3 iterations (initial + 2 mixes) with consistently poor scores (-221.7, -121.5, -124.1) and 0% success rate. The "mix" actions claimed to add stability and velocity signals and delete the harmful sq_change, but the actual code never changed - it still contains the same 4 components (abs_diff, sq_change, action_cost, ground_contact). The JSON decisions were not properly executed in the code.
+
+This is a case where the skeleton has been tried for 2+ iterations with proven failure, and the proposed fixes were never actually implemented. I need to REBUILD with a fundamentally different approach that actually includes the missing signals.
+
+```json
+{
+  "inventory": [
+    "abs_diff: encourages movement toward states with smaller absolute values",
+    "sq_change: penalizes large sudden changes (smoothness) - HARMFUL",
+    "action_cost: discourages excessive engine usage",
+    "ground_contact: rewards being on the ground"
+  ],
+  "missing": [
+    "stability: no signal for angle or angular velocity control",
+    "velocity_penalty: no signal to penalize high horizontal/vertical velocity",
+    "survival: no time-based reward to encourage longer episodes"
+  ],
+  "harmful": [
+    "sq_change: undirected squared change penalizes all movement equally, including beneficial movement toward the target. This is harmful because it discourages the agent from moving at all."
+  ],
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "The same skeleton has been tried for 3 iterations (initial + 2 mixes) with consistently poor scores (-221.7, -121.5, -124.1) and 0% success rate. The JSON decisions claimed to add stability/velocity signals and delete sq_change, but the actual code never changed. The skeleton is fundamentally flawed. Need to rebuild from scratch with proper stability signals (angle, angular velocity), velocity penalties, survival bonus, and action cost - without the harmful sq_change component."
+}
+```
+
+```python
+def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+    # Extract observations: [pos_x, pos_y, vel_x, vel_y, angle, angular_vel, leg1_contact, leg2_contact]
+    o = obs
+    n = next_obs
+    
+    # Component 1: Stability - penalize angle and angular velocity
+    # Angle should be close to 0 (upright), angular velocity should be small
+    angle_penalty = abs(o[4])  # angle
+    angular_vel_penalty = abs(o[5])  # angular velocity
+    
+    # Component 2: Velocity penalty - penalize high horizontal/vertical velocity
+    # For landing, we want controlled descent (negative y velocity is downward)
+    vel_x_penalty = abs(o[2])  # horizontal velocity
+    vel_y_penalty = abs(o[3])  # vertical velocity
+    
+    # Component 3: Ground contact reward
+    ground_contact = o[6] + o[7]  # sum of leg contact indicators
+    
+    # Component 4: Action cost - penalize engine usage
+    if action == 2:  # Main engine
+        action_cost = 1.0
+    elif action in [1, 3]:  # Side engines
+        action_cost = 0.5
+    else:  # No engine (action == 0)
+        action_cost = 0.0
+    
+    # Component 5: Survival bonus - reward for staying alive longer
+    survival_bonus = 1.0
+    
+    # Stage-based weights
+    if training_progress < 0.3:
+        # Early: focus on stability and exploration, small survival bonus
+        w_angle = -0.5
+        w_ang_vel = -0.3
+        w_vel_x = -0.2
+        w_vel_y = -0.2
+        w_contact = 1.0
+        w_action = -0.3
+        w_survival = 0.1
+    elif training_progress < 0.7:
+        # Middle: balance stability with landing preparation
+        w_angle = -1.0
+        w_ang_vel = -0.5
+        w_vel_x = -0.5
+        w_vel_y = -0.3
+        w_contact = 2.0
+        w_action = -0.5
+        w_survival = 0.2
+    else:
+        # Late: precision landing, strong penalties for instability
+        w_angle = -2.0
+        w_ang_vel = -1.0
+        w_vel_x = -1.0
+        w_vel_y = -0.5
+        w_contact = 3.0
+        w_action = -0.8
+        w_survival = 0.3
+    
+    # Combine components
+    reward = (w_angle * angle_penalty +
+              w_ang_vel * angular_vel_penalty +
+              w_vel_x * vel_x_penalty +
+              w_vel_y * vel_y_penalty +
+              w_contact * ground_contact +
+              w_action * action_cost +
+              w_survival * survival_bonus)
+    
+    return reward
+```
