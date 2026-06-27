@@ -15,10 +15,11 @@ from typing import Any, Dict, List, Optional
 # ── Agent Actions ──────────────────────────────────────────────
 
 class AgentAction(str, Enum):
-    REBUILD = "rebuild"   # 推倒重建：骨架太烂，从零生成简单结构
-    DELETE  = "delete"    # 删除组件：某个组件被证明有害或冗余
-    ADD     = "add"       # 添加组件：缺某类信号，补上
-    TUNE    = "tune"      # 微调系数：骨架对，调权重/阶段/方向
+    ADD     = "add"       # 添加缺失的信号类别
+    DELETE  = "delete"    # 删除有害/冗余的组件
+    TUNE    = "tune"      # 微调系数（不增删组件类型）
+    MIX     = "mix"       # 同时做了 ADD + DELETE + TUNE 中的多种
+    REBUILD = "rebuild"   # 骨架经2+轮迭代仍无改善，彻底抛弃重建
 
 
 # ── Agent Decision ─────────────────────────────────────────────

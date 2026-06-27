@@ -189,34 +189,38 @@ def build_refine_prompt(
           "inventory": ["comp_name: what it measures", ...],
           "missing": ["signal_category_not_present", ...],
           "harmful": ["comp_name: why harmful", ...],
-          "action": "add" | "delete" | "tune" | "rebuild",
+          "action": "add" | "delete" | "tune" | "mix" | "rebuild",
           "target": "specific_component_name",
           "reasoning": "Based on inventory/missing/harmful analysis"
         }}
         ```
         ACTION RULES for the \"action\" field:
-        - If your new code keeps 2+ components from the current code → use \"add\", \"delete\", or \"tune\".
-          You CANNOT use \"rebuild\" if the skeleton structure is partially preserved.
-        - Only use \"rebuild\" if you COMPLETELY replaced everything — zero components reused.
-        FILLING \"inventory\", \"missing\", \"harmful\" IS MANDATORY.
+        - If you only ADDED missing signals → use \"add\".
+        - If you only DELETED harmful components → use \"delete\".
+        - If you only TUNED coefficients → use \"tune\".
+        - If you did TWO OR MORE of the above (e.g. added velocity AND deleted sq_change
+          AND tuned contact weight) → use \"mix\". This is the most common case when
+          the skeleton needs significant but not total restructuring.
+        - Only use \"rebuild\" when this skeleton has been tried for 2+ iterations
+          (your current skeleton appears 2+ times in Agent Memory as a parent)
+          AND scores are flat or declining — proving the skeleton itself cannot work.
+          REBUILD means: discard all memory of this skeleton, generate a completely
+          new design from scratch, as if you are starting from iter0.
 
         ```python
         def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
             ...
         ```
 
-        ACTION MEANINGS — choose the one that BEST describes what you actually did:
-        - "add": you added one or more missing signal categories to the EXISTING skeleton.
-          The original skeleton's core structure is preserved.
-        - "delete": you removed one or more harmful/redundant components from the EXISTING skeleton.
-        - "tune": you adjusted coefficients, fixed signal directions, or rebalanced weights
-          within the EXISTING skeleton, without adding or removing component types.
-        - "rebuild": you COMPLETELY replaced the skeleton with a fundamentally different design.
-          None of the original component structure is reused. Use this ONLY when the skeleton
-          has been given 2+ iterations of genuine improvement attempts and scores are
-          flat or declining — proving the skeleton itself is the problem.
-          IMPORTANT: if you keep 2+ components from the original skeleton, it is NOT a rebuild —
-          it is ADD, DELETE, or TUNE.
+        ACTION MEANINGS:
+        - "add": you added missing signal categories. Skeleton preserved.
+        - "delete": you removed harmful/redundant components. Skeleton preserved.
+        - "tune": you adjusted coefficients/signs/weights only. No component type changes.
+        - "mix": you did multiple kinds of changes (add+delete, add+tune, delete+tune, etc.).
+          This is the most common action when improving a skeleton.
+        - "rebuild": LAST RESORT. The skeleton has been tried for 2+ iterations and
+          proven unfixable. Discard it entirely, clear memory context, and generate
+          a fresh design from scratch as if at iter0. Use sparingly.
 
         Keep the same signature.
 
@@ -228,9 +232,8 @@ def build_refine_prompt(
         - {structure_rule}
         - Fix the failure mode described by the feedback.
         - {reward_rule}
-        - Follow the SKELETON QUALITY DIAGNOSIS above to decide whether to rebuild or tune.
-        - If the diagnosis says REBUILD, add missing signal categories freely — do not be conservative.
-        - If the diagnosis says TUNE, make targeted coefficient/sign/stage-weight adjustments.
+        - Follow the HOW TO IMPROVE analysis process above to decide your action.
+        - If adding missing signal categories, use ADD. If removing harmful ones, use DELETE.
         - Do not manually clamp the reward inside compute_reward; the training framework performs final clipping.
         - Avoid undefined variables. Before returning, check that every variable has been assigned.
         - For discrete actions, treat action as a scalar integer, not an array.

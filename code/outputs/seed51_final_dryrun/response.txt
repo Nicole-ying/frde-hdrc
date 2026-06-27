@@ -1,0 +1,98 @@
+```json
+{
+  "inventory": [
+    "abs_diff: measures change in absolute observation values (encourages movement toward desirable states)",
+    "sq_change: penalizes large sudden changes (encourages smooth transitions)",
+    "action_cost: penalizes main/side engine usage",
+    "ground_contact: rewards ground contact from last two observation elements"
+  ],
+  "missing": [
+    "velocity_penalty: no signal to penalize high velocity which leads to crashes",
+    "angle_stability: no signal to encourage upright orientation",
+    "angular_velocity_penalty: no signal to discourage spinning",
+    "survival_bonus: no reward for staying alive longer"
+  ],
+  "harmful": [
+    "abs_diff: encourages movement in wrong direction (abs(o)-abs(n) rewards moving away from zero, which for velocity means speeding up)",
+    "ground_contact: rewards contact but agent crashes immediately upon contact (episode length 71), so this encourages early termination"
+  ],
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "The current skeleton has fundamental flaws: abs_diff encourages moving away from zero (bad for velocity), ground_contact rewards early crashes, and critical signals like velocity penalty, angle stability, and survival are missing. Episode length is only 71 (very short), and score is -221.7. The skeleton structure itself is problematic - it rewards the wrong directions and lacks essential survival signals. A complete rebuild is needed to add proper velocity penalties, angle stability, and survival bonuses."
+}
+```
+
+```python
+def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+    # Extract observations
+    o = obs
+    n = next_obs
+    
+    # Observation structure (from env step source):
+    # [0]: x position, [1]: y position, [2]: x velocity, [3]: y velocity,
+    # [4]: angle, [5]: angular velocity, [6]: leg1 contact, [7]: leg2 contact
+    
+    # Component 1: Survival bonus (reward for staying alive)
+    survival = 1.0
+    
+    # Component 2: Velocity penalty (discourage high speed - causes crashes)
+    x_vel = o[2]
+    y_vel = o[3]
+    speed_penalty = -(x_vel**2 + y_vel**2)
+    
+    # Component 3: Angle stability (encourage upright orientation)
+    angle = abs(o[4])  # angle in radians, 0 is upright
+    angle_penalty = -angle
+    
+    # Component 4: Angular velocity penalty (discourage spinning)
+    ang_vel = abs(o[5])
+    ang_vel_penalty = -ang_vel
+    
+    # Component 5: Ground contact bonus (only when stable)
+    leg1 = o[6]
+    leg2 = o[7]
+    ground_contact = leg1 + leg2
+    
+    # Component 6: Action cost (penalize fuel usage)
+    action_cost = 0.0
+    if action == 2:  # Main engine
+        action_cost = -0.3
+    elif action in [1, 3]:  # Side engines
+        action_cost = -0.1
+    
+    # Stage-based weights
+    if training_progress < 0.3:
+        # Early: focus on survival and reducing speed
+        w_survival = 2.0
+        w_speed = 0.5
+        w_angle = 0.3
+        w_ang_vel = 0.2
+        w_contact = 0.0
+        w_action = -0.1
+    elif training_progress < 0.7:
+        # Middle: balance stability and landing
+        w_survival = 1.5
+        w_speed = 0.8
+        w_angle = 0.6
+        w_ang_vel = 0.4
+        w_contact = 0.5
+        w_action = -0.2
+    else:
+        # Late: emphasize precision landing
+        w_survival = 1.0
+        w_speed = 1.0
+        w_angle = 1.0
+        w_ang_vel = 0.6
+        w_contact = 1.0
+        w_action = -0.3
+    
+    # Combine components
+    reward = (w_survival * survival +
+              w_speed * speed_penalty +
+              w_angle * angle_penalty +
+              w_ang_vel * ang_vel_penalty +
+              w_contact * ground_contact +
+              w_action * action_cost)
+    
+    return reward
+```

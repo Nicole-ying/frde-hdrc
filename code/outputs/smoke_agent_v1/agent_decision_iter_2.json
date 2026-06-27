@@ -1,5 +1,0 @@
-{
-  "action": "rebuild",
-  "target": "skeleton",
-  "reasoning": "The skeleton is fundamentally broken across 2 iterations with scores -136.4 and -168.7, episode length only 69, and per-step reward around -2.0. The trend is flat/declining with no improvement. The skeleton is missing critical signals: survival bonus to keep agent alive, stability signal (angle/angular velocity), and contact/landing signal. The current components are too punishing and undirected. A complete rebuild with simpler, more balanced design is needed."
-}
