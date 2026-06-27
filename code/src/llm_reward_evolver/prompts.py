@@ -103,15 +103,15 @@ def build_refine_prompt(
             "form like (n-o)^2, it must be replaced with directional form abs(o)-abs(n).\n"
             "\n"
             "2. DECIDE WHAT TO DO:\n"
-            "   - If a signal category is MISSING: use ADD to fill it.\n"
-            "   - If a component is REDUNDANT or HARMFUL: use DELETE to remove it.\n"
-            "   - If the skeleton is COMPLETE but poorly calibrated: use TUNE to adjust "
-            "coefficients, fix signal directions, or rebalance stage weights.\n"
-            "   - If the skeleton has been given at least 2 iterations of genuine "
-            "improvement attempts (the parent skeleton has 2+ child iterations in "
-            "Memory) AND scores are flat or declining despite those attempts: REBUILD.\n"
-            "   - If scores show a clear upward trend across iterations, do NOT "
-            "rebuild — keep improving with ADD/DELETE/TUNE.\n"
+            "   - If a signal category is MISSING AND a component is HARMFUL: use MIX.\n"
+            "     Example: add stability+velocity+survival AND delete undirected sq_change = MIX.\n"
+            "   - If ONLY missing signals → use ADD. If ONLY harmful/redundant → use DELETE.\n"
+            "   - If the skeleton is COMPLETE but poorly calibrated: use TUNE.\n"
+            "   - REBUILD is the LAST RESORT. Only use it when this skeleton has been "
+            "tried for 2+ iterations AND scores are flat/declining. In ALL other cases, "
+            "use MIX, ADD, DELETE, or TUNE. When in doubt, choose MIX — it preserves "
+            "the good parts while fixing the bad.\n"
+            "   - If scores show a clear upward trend, do NOT rebuild.\n"
             "\n"
             "3. OUTPUT YOUR DECISION as JSON with your component analysis, "
             "then generate the improved code. Your changes must be justified "
@@ -216,8 +216,14 @@ def build_refine_prompt(
         - "add": you added missing signal categories. Skeleton preserved.
         - "delete": you removed harmful/redundant components. Skeleton preserved.
         - "tune": you adjusted coefficients/signs/weights only. No component type changes.
-        - "mix": you did multiple kinds of changes (add+delete, add+tune, delete+tune, etc.).
-          This is the most common action when improving a skeleton.
+        - "mix": you did BOTH adding missing signals AND removing harmful ones (or tuning).
+          Example: the skeleton has 4 components, you add 3 new signal types (stability,
+          velocity, survival) AND delete 1 harmful component (undirected sq_change) AND
+          tune coefficients. This is MIX — you are improving the existing skeleton, not
+          discarding it. MIX is the most common action, especially in early iterations.
+          When in doubt between MIX and REBUILD: if you are building ON TOP of the
+          existing skeleton concept, it's MIX. Only if you are starting a fundamentally
+          different design philosophy is it REBUILD.
         - "rebuild": LAST RESORT. The skeleton has been tried for 2+ iterations and
           proven unfixable. Discard it entirely, clear memory context, and generate
           a fresh design from scratch as if at iter0. Use sparingly.

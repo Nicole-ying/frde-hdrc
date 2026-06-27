@@ -62,21 +62,15 @@ class RewardEvolver:
         for iteration in range(self.config.max_iterations):
             restart = self._should_restart(records)
             if restart:
-                pool_code = self._best_shared_pool_code()
-                if pool_code:
-                    current_code = pool_code
-                    feedback = (
-                        "Shared-memory restart: a previous seed found a high-scoring reward. "
-                        "Use it as the new base and make only evidence-driven generic refinements.\n"
-                    )
-                else:
-                    current_code = None
-                    if best_score < self.config.rollback_min_score:
-                        best_code = None
-                    feedback = (
-                        "Structural restart: recent iterations stayed below the failure threshold. "
-                        "Generate a fresh reward structure rather than making small local edits.\n"
-                    )
+                current_code = None
+                if best_score < self.config.rollback_min_score:
+                    best_code = None
+                feedback = (
+                    "Structural restart: the skeleton has been tried for multiple iterations "
+                    "and proven unfixable. Generate a completely new design from scratch."
+                )
+                # 🆕 清空 Memory：旧骨架已抛弃，不保留
+                agent_memory = AgentMemory(self.output_dir / "agent_memory.json")
 
             if current_code is None:
                 prompt = build_initial_prompt(
