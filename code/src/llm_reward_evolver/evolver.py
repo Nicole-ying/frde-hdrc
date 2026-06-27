@@ -73,16 +73,33 @@ class RewardEvolver:
                 agent_memory = AgentMemory(self.output_dir / "agent_memory.json")
 
             if current_code is None:
-                prompt = build_initial_prompt(
-                    self.config.env_name,
-                    self.config.task_description,
-                    observation_desc,
-                    action_desc,
-                    self.config.reward_structure,
-                    self.config.expose_env_name_to_llm,
-                    eureka_prompt_block,
-                    self.config.allow_original_reward_in_reward,
-                )
+                if iteration == 0 or not agent_memory.entries:
+                    # 真正的 iter0：没有任何历史
+                    prompt = build_initial_prompt(
+                        self.config.env_name,
+                        self.config.task_description,
+                        observation_desc,
+                        action_desc,
+                        self.config.reward_structure,
+                        self.config.expose_env_name_to_llm,
+                        eureka_prompt_block,
+                        self.config.allow_original_reward_in_reward,
+                    )
+                else:
+                    # 🆕 REBUILD：保留 memory + 骨架诊断，但不传旧代码
+                    prompt = build_refine_prompt(
+                        self.config.env_name,
+                        self.config.task_description,
+                        "",  # 无 current_code
+                        feedback,
+                        "",  # 无 best_code
+                        self.config.reward_structure,
+                        self.config.expose_env_name_to_llm,
+                        eureka_prompt_block,
+                        agent_memory.render(),
+                        self.config.allow_original_reward_in_reward,
+                        use_agent=self.config.agent_mode,
+                    )
             else:
                 prompt = build_refine_prompt(
                     self.config.env_name,
@@ -105,9 +122,6 @@ class RewardEvolver:
             reward_path = self._write_text(f"reward_iter_{iteration}.py", current_code)
             # 🆕 提取 Agent 决策
             agent_decision = parse_agent_decision(llm_response, current_code)
-            # 🆕 LLM 选择 rebuild → 清空 Memory，从头开始
-            if agent_decision.action == AgentAction.REBUILD:
-                agent_memory = AgentMemory(self.output_dir / "agent_memory.json")
             self._write_text(f"agent_decision_iter_{iteration}.json",
                 json.dumps(agent_decision.to_dict(), ensure_ascii=False, indent=2))
             reward_program = RewardProgram(
