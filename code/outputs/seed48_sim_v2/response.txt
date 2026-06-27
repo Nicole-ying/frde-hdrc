@@ -1,0 +1,86 @@
+```json
+{
+  "action": "mix",
+  "reasoning": "Analyzing the current skeleton: It has 4 components - abs_diff (directional stability), change_penalty (smoothness), action_cost, and leg_contact_bonus. Score is 165.5 with only 0.25 success rate and 872 episode length. The environment is a Lunar Lander variant (from the masked step code). Key missing signals: 1) No velocity penalty - the lander needs to land softly, so vertical/horizontal velocity should be penalized. 2) No angle penalty - the lander should be upright (angle close to 0). 3) The change_penalty uses undirected squared changes which can be harmful because it penalizes all changes equally, even beneficial ones toward stability. 4) The leg_contact bonus is good but should be a terminal/sparse reward rather than per-step. 5) No survival bonus for staying alive. I'll ADD: velocity penalty (using obs indices 2,3 for vel x,y), angle penalty (obs index 4), and survival bonus. I'll DELETE: the undirected change_penalty (redundant and harmful) and replace with a directed smoothness signal. I'll TUNE: coefficients and stage weights. This is a MIX action because I'm adding missing signals, removing harmful components, and tuning coefficients."
+}
+```
+
+```python
+def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+    # Extract generic arrays
+    o = obs
+    n = next_obs
+    
+    # Component 1: Movement toward stability (reducing absolute values)
+    # Positive when absolute values decrease - directional signal
+    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))
+    
+    # Component 2: Velocity penalty - penalize high speeds (indices 2,3 are vel_x, vel_y)
+    # Lower velocity is better for landing
+    vel_penalty = 0.0
+    if len(o) >= 4:
+        vel_x = abs(o[2])
+        vel_y = abs(o[3])
+        vel_penalty = - (vel_x + vel_y)
+    
+    # Component 3: Angle penalty - penalize being tilted (index 4 is angle)
+    # Angle should be close to 0 (upright)
+    angle_penalty = 0.0
+    if len(o) >= 5:
+        angle_penalty = -abs(o[4])
+    
+    # Component 4: Action cost (prefer smaller action indices)
+    # Actions are 0,1,2,3 - penalize higher indices slightly
+    action_cost = -0.01 * float(action)
+    
+    # Component 5: Ground contact bonus from info
+    # Check if legs have ground contact (indices 6 and 7 in obs)
+    leg_contact_bonus = 0.0
+    if len(o) >= 8:
+        leg1_contact = o[6]
+        leg2_contact = o[7]
+        leg_contact_bonus = 0.5 * (leg1_contact + leg2_contact)
+    
+    # Component 6: Survival bonus - small positive reward for staying alive
+    survival_bonus = 0.1
+    
+    # Stage weights based on training_progress
+    # Early stage: focus on reducing absolute values and velocity
+    # Middle stage: balance all components
+    # Late stage: emphasize ground contact and angle stability
+    
+    if training_progress < 0.3:
+        # Early exploration - learn to reduce movement and stay alive
+        w1 = 1.0   # abs_diff
+        w2 = 0.8   # vel_penalty
+        w3 = 0.3   # angle_penalty
+        w4 = 0.1   # action_cost
+        w5 = 0.2   # leg_contact
+        w6 = 0.5   # survival
+    elif training_progress < 0.7:
+        # Middle refinement - balance all signals
+        w1 = 0.6
+        w2 = 1.0
+        w3 = 0.6
+        w4 = 0.2
+        w5 = 0.5
+        w6 = 0.3
+    else:
+        # Late optimization - focus on landing (contact + angle + low velocity)
+        w1 = 0.3
+        w2 = 1.2
+        w3 = 0.8
+        w4 = 0.1
+        w5 = 1.0
+        w6 = 0.2
+    
+    # Combine components
+    reward = (w1 * abs_diff + 
+              w2 * vel_penalty + 
+              w3 * angle_penalty + 
+              w4 * action_cost + 
+              w5 * leg_contact_bonus +
+              w6 * survival_bonus)
+    
+    return reward
+```
