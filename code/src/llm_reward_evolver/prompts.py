@@ -1,323 +1,176 @@
+"""FDRE-HRDC prompt templates — Eureka-inspired clean structure + agent innovations."""
 from __future__ import annotations
-
 from textwrap import dedent
 from typing import Optional
 
 
 def build_initial_prompt(
-    env_name: str,
-    task_description: str,
-    observation_description: str,
-    action_description: str,
-    reward_structure: str = "hrdc",
-    expose_env_name: bool = False,
+    env_name: str, task_description: str,
+    observation_description: str, action_description: str,
+    reward_structure: str = "hrdc", expose_env_name: bool = False,
     eureka_context: str = "",
     allow_original_reward: bool = False,
 ) -> str:
-    structure_rule = _structure_rule(reward_structure)
-    visible_env = env_name if expose_env_name else "BlackBoxControlEnv"
-    reward_rule = _official_reward_rule(allow_original_reward)
-    allowed_inputs = (
-        "obs, action, next_obs, original_reward, info, and training_progress"
-        if allow_original_reward
-        else "obs, action, next_obs, info, and training_progress"
-    )
-    signal_rule = (
-        "Search for reusable signals from obs, next_obs, action, original_reward, info, and training_progress only."
-        if allow_original_reward
-        else "Search for reusable signals from obs, next_obs, action, info, and training_progress only."
-    )
-    return dedent(
-        f"""
-        You are an autonomous reinforcement-learning reward-search agent.
-        Generate one Python function named compute_reward with this exact signature:
+    hrdc_rule = _hrdc_rule(reward_structure)
+    reward_rule = _reward_rule(allow_original_reward)
+    return dedent(f"""
+    You are a reward engineer writing reward functions for RL tasks.
+    Create a reward function to help the agent learn the task.
+    Use only the provided observation and action variables.
 
-        def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
-            ...
+    Task description:
+    {task_description}
 
-        Requirements:
-        - Return a single float reward.
-        - Do not import modules.
-        - Do not use try/except, classes, lambdas, file I/O, eval, exec, or external libraries.
-        - Use only {allowed_inputs}.
-        - {structure_rule}
-        - {reward_rule}
-        - Keep the reward numerically stable.
-        - Use only information present in the task description and the masked step source.
-        - Do not reconstruct, approximate, or copy the masked official reward formula.
-        - {signal_rule}
-        - A good black-box pattern is to create generic arrays o and n, then use dimension-agnostic
-          transition features such as sum(abs(o[i]) - abs(n[i])), sum((n[i] - o[i]) ** 2),
-          small action cost, and stage weights. Keep variable names generic.
-        - Do not manually clamp the reward inside compute_reward; the training framework performs final clipping.
-        - Output only Python code.
+    Environment step source (shows how observations are constructed
+    from the physics engine — the official reward is masked):
+    {eureka_context}
 
-        Environment: {visible_env}
-        Observation interface: {observation_description}
-        Action interface: {action_description}
-        Task: {task_description}
+    Write a Python function with this EXACT signature:
 
-        Eureka-style context:
-        {eureka_context}
-        """
-    ).strip()
+    def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+        ...
+        return total_reward
+
+    Coding rules:
+    - Return a single float reward.
+    - Use generic variable names (o=obs, n=next_obs).
+    - Keep rewards numerically stable. Prefer smooth transformations.
+    - {hrdc_rule}
+    - {reward_rule}
+    - Do not import modules. No try/except, classes, lambdas, file I/O, eval, exec.
+    - Use only: obs, action, next_obs, info, training_progress.
+    - Do not manually clamp the reward.
+    - Output only the Python code.
+    """).strip()
 
 
 def build_refine_prompt(
-    env_name: str,
-    task_description: str,
-    current_code: str,
-    feedback: str,
+    env_name: str, task_description: str,
+    current_code: str, feedback: str,
     previous_best_code: Optional[str] = None,
-    reward_structure: str = "hrdc",
-    expose_env_name: bool = False,
-    eureka_context: str = "",
-    memory_context: str = "",
+    reward_structure: str = "hrdc", expose_env_name: bool = False,
+    eureka_context: str = "", memory_context: str = "",
     allow_original_reward: bool = False,
     use_agent: bool = True,
 ) -> str:
-    best_block = f"\nPrevious best reward code:\n{previous_best_code}\n" if previous_best_code else ""
-    structure_rule = _structure_rule(reward_structure)
     visible_env = env_name if expose_env_name else "BlackBoxControlEnv"
-    reward_rule = _official_reward_rule(allow_original_reward)
-    allowed_inputs = (
-        "obs, action, next_obs, original_reward, info, and training_progress"
-        if allow_original_reward
-        else "obs, action, next_obs, info, and training_progress"
-    )
-    def _analysis_task(memory_ctx: str, feedback_text: str) -> str:
-        """Build skeleton-quality diagnosis and component analysis instructions."""
-        skeleton_diagnosis = (
-            "\n\n"
-            "SKELETON QUALITY DIAGNOSIS (do this BEFORE writing code):\n"
-            "\n"
-            "AGENT SEARCH STRATEGY — your search has phases, just like HRDC:\n"
-            "\n"
-            "  PHASE 1 (Exploration, iter 0-2): Give this skeleton a fair chance. "
-            "Many great rewards started at -400 and climbed. Your PRIORITY in this "
-            "phase is to get the skeleton to a COMPLETE state — make sure it has "
-            "all necessary signal categories (Steps 1-2 below). "
-            "Step 1 asks: what components exist? Step 2 asks: what is MISSING? "
-            "If stability is missing → ADD angle_penalty. If contact is missing → "
-            "ADD contact_bonus. If a signal is undirected → TUNE to directional form. "
-            "If a component is clearly harmful → DELETE it. "
-            "Only after the skeleton has 5+ adequate signal categories should you "
-            "focus purely on TUNE. Do NOT REBUILD — you don't have enough evidence yet.\n"
-            "\n"
-            "  PHASE 2 (Judgment, iter 3-5): You now have 3+ data points. You CAN "
-            "judge the skeleton. If scores are IMPROVING (even -400→-200→-100): "
-            "the skeleton WORKS — keep tuning. If scores are FLAT or DECLINING "
-            "despite coefficient changes: REBUILD. If the agent still cannot "
-            "survive past 200 steps after 3+ iterations of trying: REBUILD.\n"
-            "\n"
-            "  PHASE 3 (Decisive, iter 6+): Trust the accumulated evidence. "
-            "If the skeleton has never produced positive scores or long episodes, "
-            "REBUILD aggressively. If scores are climbing toward the target, "
-            "REFINE with small adjustments.\n"
-            "\n"
-            "  KEY PRINCIPLE: Never REBUILD in Phase 1. You don't have enough "
-            "data yet. The score might be terrible, but you've only seen ONE "
-            "configuration of this skeleton — that's not evidence, that's a "
-            "single sample. Give every skeleton 3 iterations of genuine tuning "
-            "before deciding it's broken.\n"
-            "\n"
-            "Step 1 — Inventory the skeleton. List EVERY component in the current reward function "
-            "and what physical signal it captures:\n"
-            "  - Transition signal (e.g. abs_change, movement): does the agent move toward desirable states?\n"
-            "  - Smoothness penalty: does it prevent jerky/jumpy behavior?\n"
-            "  - Action cost: does it penalize unnecessary engine use?\n"
-            "  - Stability signal (angle, angular velocity): does it prevent tumbling/spinning?\n"
-            "  - Contact/landing signal (leg contact, height): does it reward successful touchdown?\n"
-            "  - Velocity penalty: does it discourage crashing at high speed?\n"
-            "  - Survival bonus: does it reward staying alive longer?\n"
-            "\n"
-            "Step 2 — Identify what is MISSING. Look at the feedback metrics:\n"
-            "  - Compute per-step reward: mean_score / mean_episode_length. "
-            "If this is very negative (< -0.5 per step), your reward signal is "
-            "fundamentally punishing the agent. Check all signs and directions.\n"
-            "  - If episode_length is short (< 200): the agent dies quickly. "
-            "You are likely MISSING a stability signal (angle/angular-velocity penalty) "
-            "or your transition signal is undirected (rewarding chaotic movement).\n"
-            "  - If episode_length is max (1000) but score is very negative (< -50): "
-            "the agent survives but does the WRONG thing. Your directional signals "
-            "likely point the wrong way (e.g. rewarding movement away from center).\n"
-            "  - If score oscillates wildly between iterations: "
-            "your components may CONFLICT or your reward scale per step is too large.\n"
-            "\n"
-            "Step 3 — Check signal DIRECTION, SCALE, and REDUNDANCY (MANDATORY — do NOT skip):\n"
-            "  - DIRECTION: Each component must point toward desirable behavior. "
-            "abs(o[i])-abs(n[i]) is directional (toward zero). (n[i]-o[i])**2 is UNDIRECTED "
-            "(rewards ANY change). If a component uses an undirected form, replace it with "
-            "a directional one.\n"
-            "  - SCALE: Estimate per-step contribution. A constant survival_bonus of 0.5 "
-            "gives +500 over 1000 steps, drowning all other signals. Keep per-component "
-            "per-step contribution in ±0.05 to ±2.0. Total per-step reward should be ±5 max.\n"
-            "  - REDUNDANCY (CRITICAL): Compare EVERY pair of components. If two components "
-            "measure the SAME physical quantity, you MUST merge them into one. Examples:\n"
-            "    * abs_change = sum(abs(o)-abs(n)) AND progress_signal = sum(abs(o)-abs(n)) "
-            "→ IDENTICAL, merge.\n"
-            "    * vel_change = sum(|n-o|) AND sq_change = sum((n-o)^2) → both measure "
-            "state-change magnitude (L1 vs L2), redundant. Keep the one that correlates "
-            "better with scores.\n"
-            "    * Many reward functions succeed with 7-9 components. Count alone is NOT "
-            "a problem — only TRUE redundancy is. Compare every pair carefully.\n"
-            "  - HARMFUL SIGNS: Does a component appear with a NEGATIVE sign in late training? "
-            "That may be punishing desirable behavior.\n"
-            "  - DELETE AUTHORITY: You CAN and SHOULD delete components. If a component was "
-            "added in the previous iteration and the score dropped significantly, DELETE it "
-            "— do NOT just reduce its weight to zero or near-zero. Actually remove it from "
-            "the code. If a component provides no unique signal, DELETE it. If a component "
-            "consistently correlates with worse scores, DELETE it. A cleaner reward function "
-            "with fewer well-chosen components is better than a bloated one.\n"
-            "  - When deciding between lowering a weight and deleting a component: if the "
-            "component measures something that SHOULD matter (e.g. contact for landing), "
-            "tune the weight. If the component is REDUNDANT with another, HARMFUL based on "
-            "score evidence, or conceptually WRONG, DELETE it.\n"
-            "\n"
-            "SIMPLE-FIRST PRINCIPLE:\n"
-            "  - Start every new skeleton with the SIMPLEST design that covers the "
-            "necessary signal categories. 4-6 clean components with clear stage "
-            "weights is better than 7-9 components with subtle interactions.\n"
-            "  - Only add a new component when there is clear evidence the skeleton "
-            "needs it (scores flat despite coefficient tuning across 2+ iterations).\n"
-            "  - Simple skeletons are easy to debug and improve. Complex skeletons "
-            "have too many interacting parameters — hard to tell what works.\n"
-            "  - CRITICAL: If the current iteration scored WELL (close to or above "
-            "the target), make ONLY one small coefficient adjustment. Do NOT add "
-            "new components, do NOT add new penalties to early training. A score "
-            "near the target means the skeleton is RIGHT — don't break it.\n"
-            "  - Early training stage (stage 1 / early_weight) MUST keep penalties "
-            "LOW. The agent needs freedom to explore before precision matters. "
-            "Never add new penalty terms to the early stage of a working reward.\n"
-            "\n"
-            "DECISION AUTHORITY — after completing Steps 0-3, make your choice:\n"
-            "  - The AGENT SEARCH STRATEGY (Step 0) tells you which phase you're in. "
-            "Phase 1 (iter 0-2): tune/add/delete only. Phase 2-3 (iter 3+): you "
-            "may REBUILD if the trend evidence supports it.\n"
-            "  - In ANY phase: if the code has undirected signals like (n-o)^2, "
-            "fix them to directional forms (abs(o)-abs(n)) — but don't use that "
-            "as an excuse to REBUILD. Fixing undirected signals is a TUNE action.\n"
-            "  - Trend examples: -200→-150→-100 = IMPROVING (keep tuning). "
-            "-100→-110→-105→-115 = STUCK (REBUILD if in Phase 2+).\n"
-            "\n"
-            "Step 5 — Output the improved reward function. Your changes must be justified "
-            "by the skeleton diagnosis above. If the skeleton is insufficient, ADD components. "
-            "If it is adequate, TUNE components."
-        )
+    hrdc_rule = _hrdc_rule(reward_structure)
+    reward_rule = _reward_rule(allow_original_reward)
+    best_block = f"\nBest reward code from previous iterations:\n{previous_best_code}\n" if previous_best_code else ""
 
-        if not memory_ctx or "no previous experience" in memory_ctx:
-            return (
-                skeleton_diagnosis
-                + "\n\n"
-                "Since this is the first refinement with no historical comparison yet, "
-                "focus on Step 1-2: inventory the current skeleton and add any missing "
-                "signal categories based on the feedback failure mode."
-            )
+    # ── 消融版：纯代码输出 ──
+    if not use_agent:
+        return dedent(f"""
+        Improve this RL reward function. Output ONLY Python code.
 
-        return (
-            skeleton_diagnosis
-            + "\n\n"
-            "CROSS-ITERATION EVIDENCE:\n"
-            "Study the Agent Memory section below. For each past iteration, note its "
-            "components and its score. If the same skeleton was tried with different "
-            "coefficients and scores stayed bad → the skeleton is the problem, not the coefficients. "
-            "If adding a component made scores worse → that component is harmful, remove it. "
-            "If simplifying the skeleton made scores better → the original skeleton was over-engineered."
-        )
-
-    analysis_task = _analysis_task(memory_context, feedback)
-    return dedent(
-        f"""
-        You are an Autonomous Reward Design Agent. You operate in a perceive→plan→act loop.
-        Your Agent Memory stores every reward function you've ever generated and its score.
-
-        ## Your Task
-
-        Study the Agent Memory below. Execute the SKELETON QUALITY DIAGNOSIS.
-        Then output your decision in this EXACT format — first a JSON decision block,
-        then the Python code:
-
-        ```json
-        {{
-          "action": "rebuild" | "delete" | "add" | "tune",
-          "target": "skeleton" or the specific component name,
-          "reasoning": "Why you chose this action, based on evidence from Memory"
-        }}
-        ```
-
-        ```python
-        def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
-            ...
-        ```
-
-        ACTION MEANINGS:
-        - "rebuild": skeleton is broken → generate a fresh simple design from scratch
-        - "delete": a specific component is harmful/redundant → remove it
-        - "add": a signal category is missing → add the needed component
-        - "tune": skeleton is working → adjust coefficients/stage-weights
-
-        Keep the same signature.
-
-        Rules:
-        - Output only Python code.
-        - Do not import modules.
-        - Do not use try/except, classes, lambdas, file I/O, eval, exec, or external libraries.
-        - Use only {allowed_inputs}.
-        - {structure_rule}
-        - Fix the failure mode described by the feedback.
-        - {reward_rule}
-        - Follow the SKELETON QUALITY DIAGNOSIS above to decide whether to rebuild or tune.
-        - If the diagnosis says REBUILD, add missing signal categories freely — do not be conservative.
-        - If the diagnosis says TUNE, make targeted coefficient/sign/stage-weight adjustments.
-        - Do not manually clamp the reward inside compute_reward; the training framework performs final clipping.
-        - Avoid undefined variables. Before returning, check that every variable has been assigned.
-        - For discrete actions, treat action as a scalar integer, not an array.
-        - Do not introduce rules not justified by task description, masked step source, feedback, or memory.
-        - Prefer generic reward-search patterns: transition progress, smoothness, action cost, stage weights,
-          and numerical safety.
-        - If reward leakage guard failed, remove any use of masked official reward variables or original_reward.{analysis_task}
+        Rules: Output only code. No import. No try/except. No classes.
+        Use only obs, action, next_obs, info, training_progress.
+        {hrdc_rule} {reward_rule}
 
         Environment: {visible_env}
         Task: {task_description}
 
-        Current reward code:
+        Current code:
         {current_code}
         {best_block}
-        FDRE feedback / diagnostic report:
+        Feedback:
         {feedback}
 
-        Eureka-style context:
         {eureka_context}
 
-        Agent memory:
+        History:
         {memory_context}
-        """
-    ).strip()
+        """).strip()
+
+    # ── Agent 版：JSON 决策 + 骨架分析 ──
+    return dedent(f"""
+    You are a reward design agent. Your Agent Memory stores every reward function
+    you've generated and its training outcome.
+
+    ## Agent Memory
+    {memory_context}
+
+    ## Feedback
+    {feedback}
+
+    ## Current reward code
+    {current_code}
+    {best_block}
+
+    ## Environment
+    {visible_env}
+    {task_description}
+    {eureka_context}
+
+    ## How to improve the reward
+
+    SKELETON DIAGNOSIS — analyze before acting:
+
+    1. INVENTORY: List every component and what physical signal it captures.
+       Signal categories: transition progress, smoothness, action cost,
+       stability (angle/angular velocity), velocity penalty, contact/landing, survival.
+
+    2. MISSING SIGNALS: What is genuinely missing? Only flag a signal if the
+       agent's poor performance directly points to it.
+       - Episode < 200: likely missing stability or velocity signals, or undirected transition.
+       - Episode max but score negative: directional signals point the wrong way.
+       - If the skeleton already works (score > 100, episode > 500), do NOT add new components.
+
+    3. REDUNDANCY & DIRECTION: Are two components measuring the same thing? Merge them.
+       Is a component using undirected form (n-o)^2? Replace with abs(o)-abs(n).
+       Is a component provably harmful (score dropped when it was added)? Delete it.
+
+    4. STAGE WEIGHTS: Components should use training_progress for stage-based weights.
+       Early training: low penalties (agent needs freedom to explore).
+       Late training: high precision weights (contact, stability).
+
+    5. DECIDE YOUR ACTION:
+       - "add": genuinely missing signal(s) → add them.
+       - "delete": harmful or redundant component(s) → remove them.
+       - "tune": skeleton is adequate → adjust coefficients/directions/weights only.
+       - "mix": multiple operations (add+delete, add+tune, delete+tune).
+       - "rebuild": skeleton has been tried 2+ iterations and scores are flat/declining.
+         This is a LAST RESORT. Only use when the skeleton is proven broken.
+
+    ## Output format — first JSON, then code:
+
+    ```json
+    {{
+      "action": "add" | "delete" | "tune" | "mix" | "rebuild",
+      "reasoning": "Why this action? What did the skeleton diagnosis reveal?"
+    }}
+    ```
+
+    ```python
+    def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+        ...
+        return total_reward
+    ```
+
+    Rules: Output only code. No import. No try/except. No classes.
+    Use only: obs, action, next_obs, info, training_progress.
+    {hrdc_rule} {reward_rule}
+    Do not manually clamp the reward.
+    """).strip()
 
 
-def _structure_rule(reward_structure: str) -> str:
+def _hrdc_rule(reward_structure: str) -> str:
     if reward_structure == "static":
-        return (
-            "Use decomposed reward components with fixed weights only; do not change weights "
-            "based on training_progress or state. This is an ablation without dynamic weighting."
-        )
+        return "Use fixed weights, do not vary with training_progress."
     if reward_structure == "flat":
-        return "Use a single flat reward expression without HRDC decomposition. This is an ablation."
+        return "Use a single flat reward expression."
     return (
-        "Use an HRDC-style structure: propose generic reward components from observed "
-        "transition signals, then combine them with stage weights based on training_progress. "
-        "Each component should have its own weight that evolves across training stages."
+        "Use HRDC: each reward component has its own weight that evolves "
+        "with training_progress. Early training (progress<0.3): prioritize exploration, "
+        "keep penalties low. Middle (0.3-0.7): balance. Late (>=0.7): prioritize "
+        "precision (contact, stability)."
     )
 
 
-def _official_reward_rule(allow_original_reward: bool) -> str:
+def _reward_rule(allow_original_reward: bool) -> str:
     if allow_original_reward:
-        return (
-            "Preserve the original task objective: use original_reward directly as the dominant, "
-            "unscaled anchor term; do not multiply original_reward by a coefficient smaller than 0.5."
-        )
+        return "You may use original_reward as an anchor."
     return (
-        "The official reward is masked and must not be used. Do not reference original_reward in "
-        "the generated reward code; derive the training reward only from obs, action, next_obs, "
-        "info, and training_progress."
+        "Do NOT reference original_reward. Derive the reward only from obs, action, "
+        "next_obs, info, and training_progress."
     )

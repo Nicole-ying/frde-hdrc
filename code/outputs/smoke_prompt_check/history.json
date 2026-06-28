@@ -1,0 +1,28 @@
+[
+  {
+    "iteration": 0,
+    "score": -126.39378750661326,
+    "success_rate": 0.0,
+    "mean_episode_length": 72.1,
+    "converged": false,
+    "failure_mode": "",
+    "reward_code_path": "outputs\\smoke_prompt_check\\reward_iter_0.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  },
+  {
+    "iteration": 1,
+    "score": -118.59076719213218,
+    "success_rate": 0.0,
+    "mean_episode_length": 73.25,
+    "converged": false,
+    "failure_mode": "",
+    "reward_code_path": "outputs\\smoke_prompt_check\\reward_iter_1.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  }
+]

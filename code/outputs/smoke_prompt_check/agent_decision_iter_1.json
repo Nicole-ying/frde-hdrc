@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "Phase 2 (iter 0-2) but with strong evidence: episode length is only 72 steps, per-step reward is -1.753, and score is -126.4. The current skeleton has only 3 components (state_change, abs_reduction, action_penalty), missing critical stability signals (angle/angular velocity), contact signals, and survival bonus. The undirected state_change (L2 norm) and weak abs_reduction are insufficient to keep the agent alive. A complete rebuild with 5+ signal categories is needed."
+}

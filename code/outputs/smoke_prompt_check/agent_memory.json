@@ -1,0 +1,26 @@
+[
+  {
+    "iteration": 0,
+    "action": "tune",
+    "target": "unknown",
+    "reasoning": "Could not parse JSON decision; inferred from code.",
+    "score": -126.39378750661326,
+    "episode_length": 72.1,
+    "success_rate": 0.0,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation components\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Movement magnitude (how much the state changed)\n    state_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Absolute value reduction (encourages moving toward zero)\n    abs_reduction = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Action penalty (small cost for taking actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights\n    # Early training: focus on exploration and state changes\n    # Late training: focus on convergence and stability\n    early_weight = max(0.0, 1.0 - training_progress)\n    late_weight = min(1.0, training_progress)\n    \n    # Reward components\n    exploration_bonus = early_weight * 0.1 * state_change\n    convergence_bonus = late_weight * 0.5 * abs_reduction\n    action_penalty = -action_cost * (1.0 - 0.5 * training_progress)\n    \n    # Combine components\n    reward = exploration_bonus + convergence_bonus + action_penalty\n    \n    return reward",
+    "verdict": "failure",
+    "code_path": "outputs\\smoke_prompt_check\\reward_iter_0.py"
+  },
+  {
+    "iteration": 1,
+    "action": "rebuild",
+    "target": "skeleton",
+    "reasoning": "Phase 2 (iter 0-2) but with strong evidence: episode length is only 72 steps, per-step reward is -1.753, and score is -126.4. The current skeleton has only 3 components (state_change, abs_reduction, action_penalty), missing critical stability signals (angle/angular velocity), contact signals, and survival bonus. The undirected state_change (L2 norm) and weak abs_reduction are insufficient to keep the agent alive. A complete rebuild with 5+ signal categories is needed.",
+    "score": -118.59076719213218,
+    "episode_length": 73.25,
+    "success_rate": 0.0,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation components\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Movement magnitude (how much the state changed)\n    state_change = sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # Absolute value reduction (encourages moving toward zero)\n    abs_reduction = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # Action penalty (small cost for taking actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights\n    # Early training: focus on exploration and state changes\n    # Late training: focus on convergence and stability\n    early_weight = max(0.0, 1.0 - training_progress)\n    late_weight = min(1.0, training_progress)\n    \n    # Reward components\n    exploration_bonus = early_weight * 0.1 * state_change\n    convergence_bonus = late_weight * 0.5 * abs_reduction\n    action_penalty = -action_cost * (1.0 - 0.5 * training_progress)\n    \n    # Combine components\n    reward = exploration_bonus + convergence_bonus + action_penalty\n    \n    return reward",
+    "verdict": "failure",
+    "code_path": "outputs\\smoke_prompt_check\\reward_iter_1.py"
+  }
+]
