@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "Score is -133.3 with episode length 302 and per-step -0.442. The skeleton has been tried twice with identical code and scores are flat/declining (from -156.5 to -133.3, still very negative). Episode length is short (302), indicating the agent dies quickly. The current skeleton lacks a stability signal (angle/angular velocity penalty) which is critical for survival. The movement component uses undirected abs change which rewards ANY movement, not directed movement toward zero. Need to rebuild with: (1) directional movement toward zero, (2) stability signal for angle/angular velocity, (3) survival bonus, (4) proper action cost, (5) contact bonus for landing. The skeleton is fundamentally insufficient for this task."
+}

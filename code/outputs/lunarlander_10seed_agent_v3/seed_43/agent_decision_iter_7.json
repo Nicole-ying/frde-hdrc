@@ -1,0 +1,5 @@
+{
+  "action": "mix",
+  "target": "skeleton",
+  "reasoning": "[OVERRIDE: rebuild blocked, skeleton_age=1<2] The skeleton has been tried for 6 iterations with scores -141.3, -136.3, -135.9, -128.9, -133.7, -4.1, -14.1. The last two iterations (score=-4.1 and -14.1, len=1000) show the agent survives to max steps but with negative scores, meaning it survives but does the wrong thing. The previous skeleton was fundamentally broken - it used undirected signals (abs() comparisons), punished all movement with squared velocity penalties, and had no proper survival bonus. The per-step reward was too negative. I need to rebuild with: 1) A survival bonus to encourage living longer, 2) Directional movement signals toward center, 3) Gentle velocity penalties that don't punish all movement, 4) Angle stability that preserves direction, 5) Ground contact reward for landing, 6) Minimal action penalty. The stage weights should keep early training penalties very low."
+}

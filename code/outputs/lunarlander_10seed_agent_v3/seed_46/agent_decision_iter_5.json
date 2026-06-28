@@ -1,0 +1,5 @@
+{
+  "action": "mix",
+  "target": "skeleton",
+  "reasoning": "[OVERRIDE: rebuild blocked, skeleton_age=1<2] The skeleton has been tried for 4 iterations with the same components and coefficients, and scores show no improvement trend: -249.7 → 5.6 → -265.0 → -240.2 → -283.3. Episode length remains very short (124-154), and per-step reward is very negative (~-1.9). The current components are fundamentally broken: abs_change and sq_change are redundant (both measure state-change magnitude), action_cost is too high, and ground_contact_bonus may not be available. The agent dies quickly, indicating the reward is fundamentally punishing. A rebuild is warranted to create a simpler, more effective skeleton with proper directional signals and lower early-stage penalties."
+}

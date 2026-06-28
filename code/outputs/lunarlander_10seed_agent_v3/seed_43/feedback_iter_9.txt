@@ -1,0 +1,10 @@
+Score: -0.6 | Success rate: 0.05 | Episode length: 956 | Per-step: -0.001 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: [OVERRIDE: rebuild blocked, skeleton_age=1<2] The skeleton has been tried for 8 iterations with flat/declining scores. The last 3 iterations used an extremely simple reward (sum of abs differences) that achieved episode length 1000 but scores around -4 to -14, meaning the agent survives but does the wrong thing. The per-step reward is too negative and the signal is undirected. Need a complete rebuild with: 1) survival bonus, 2) directional movement toward center, 3) gentle velocity penalty, 4) angle stability, 5) ground contact reward, 6) action cost. Stage weights should keep early penalties low.

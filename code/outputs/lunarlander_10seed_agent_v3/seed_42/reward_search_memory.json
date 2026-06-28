@@ -1,0 +1,102 @@
+[
+  {
+    "iteration": 0,
+    "score": -136.43419822541892,
+    "success_rate": 0.0,
+    "mean_episode_length": 68.85,
+    "verdict": "failure",
+    "lesson": "score=-136.4, survived 69 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_42\\reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features (dimension-agnostic)\n    # Feature 1: Movement toward center - sum of absolute position changes\n    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(min(4, len(o))))\n    \n    # Feature 2: Velocity reduction - sum of squared velocity differences\n    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, min(6, len(o))))\n    \n    # Feature 3: Angular stability - change in angular components\n    ang_change = sum(abs(o[i]) - abs(n[i]) for i in range(4, min(6, len(o))))\n    \n    # Feature 4: Contact bonus - ground contact signals\n    contact_bonus = 0.0\n    if len(o) >= 8:\n        contact_bonus = sum(n[6:8]) - sum(o[6:8])\n    \n    # Feature 5: Action cost (penalize large actions)\n    action_cost = 0.0\n    if action == 2:  # Main engine\n        action_cost = -0.5\n    elif action in [1, 3]:  # Side engines\n        action_cost = -0.2\n    \n    # Stage-based weights that evolve with training_progress\n    # Early stage: focus on movement and exploration\n    # Middle stage: balance stability and control\n    # Late stage: refine precision and contacts\n    \n    # Sigmoid-like transition for smooth weight evolution\n    early_weight = max(0.0, 1.0 - training_progress * 2.0)\n    mid_weight = max(0.0, 1.0 - abs(training_progress - 0.5) * 2.0)\n    late_weight = max(0.0, (training_progress - 0.5) * 2.0)\n    \n    # Component weights\n    w_pos = 1.0 * early_weight + 0.5 * mid_weight + 0.2 * late_weight\n    w_vel = 0.3 * early_weight + 0.8 * mid_weight + 0.5 * late_weight\n    w_ang = 0.2 * early_weight + 0.6 * mid_weight + 0.8 * late_weight\n    w_contact = 0.0 * early_weight + 0.3 * mid_weight + 1.0 * late_weight\n    w_action = 0.1 * early_weight + 0.2 * mid_weight + 0.3 * late_weight\n    \n    # Combine components\n    reward = (\n        w_pos * pos_change * 0.1 +\n        w_vel * (-vel_change * 0.01) +\n        w_ang * ang_change * 0.05 +\n        w_contact * contact_bonus * 0.5 +\n        w_action * action_cost\n    )\n    \n    # Add small exploration bonus early on\n    exploration_bonus = 0.0\n    if training_progress < 0.3:\n        exploration_bonus = 0.01 * sum(abs(n[i] - o[i]) for i in range(len(o)))\n    \n    reward += exploration_bonus\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": -139.1074792448033,
+    "success_rate": 0.0,
+    "mean_episode_length": 69.45,
+    "verdict": "failure",
+    "lesson": "score=-139.1, survived 69 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_42\\reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features (dimension-agnostic)\n    # Feature 1: Movement toward center - sum of absolute position changes\n    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(min(4, len(o))))\n    \n    # Feature 2: Velocity reduction - sum of squared velocity differences\n    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, min(6, len(o))))\n    \n    # Feature 3: Angular stability - change in angular components\n    ang_change = sum(abs(o[i]) - abs(n[i]) for i in range(4, min(6, len(o))))\n    \n    # Feature 4: Contact bonus - ground contact signals\n    contact_bonus = 0.0\n    if len(o) >= 8:\n        contact_bonus = sum(n[6:8]) - sum(o[6:8])\n    \n    # Feature 5: Action cost (penalize large actions)\n    action_cost = 0.0\n    if action == 2:  # Main engine\n        action_cost = -0.5\n    elif action in [1, 3]:  # Side engines\n        action_cost = -0.2\n    \n    # Stage-based weights that evolve with training_progress\n    # Early stage: focus on movement and exploration\n    # Middle stage: balance stability and control\n    # Late stage: refine precision and contacts\n    \n    # Sigmoid-like transition for smooth weight evolution\n    early_weight = max(0.0, 1.0 - training_progress * 2.0)\n    mid_weight = max(0.0, 1.0 - abs(training_progress - 0.5) * 2.0)\n    late_weight = max(0.0, (training_progress - 0.5) * 2.0)\n    \n    # Component weights\n    w_pos = 1.0 * early_weight + 0.5 * mid_weight + 0.2 * late_weight\n    w_vel = 0.3 * early_weight + 0.8 * mid_weight + 0.5 * late_weight\n    w_ang = 0.2 * early_weight + 0.6 * mid_weight + 0.8 * late_weight\n    w_contact = 0.0 * early_weight + 0.3 * mid_weight + 1.0 * late_weight\n    w_action = 0.1 * early_weight + 0.2 * mid_weight + 0.3 * late_weight\n    \n    # Combine components\n    reward = (\n        w_pos * pos_change * 0.1 +\n        w_vel * (-vel_change * 0.01) +\n        w_ang * ang_change * 0.05 +\n        w_contact * contact_bonus * 0.5 +\n        w_action * action_cost\n    )\n    \n    # Add small exploration bonus early on\n    exploration_bonus = 0.0\n    if training_progress < 0.3:\n        exploration_bonus = 0.01 * sum(abs(n[i] - o[i]) for i in range(len(o)))\n    \n    reward += exploration_bonus\n    \n    return reward"
+  },
+  {
+    "iteration": 2,
+    "score": -136.78914148877195,
+    "success_rate": 0.0,
+    "mean_episode_length": 69.05,
+    "verdict": "failure",
+    "lesson": "score=-136.8, survived 69 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_42\\reward_iter_2.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features (dimension-agnostic)\n    # Feature 1: Movement toward center - sum of absolute position changes\n    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(min(4, len(o))))\n    \n    # Feature 2: Velocity reduction - sum of squared velocity differences\n    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, min(6, len(o))))\n    \n    # Feature 3: Angular stability - change in angular components\n    ang_change = sum(abs(o[i]) - abs(n[i]) for i in range(4, min(6, len(o))))\n    \n    # Feature 4: Contact bonus - ground contact signals\n    contact_bonus = 0.0\n    if len(o) >= 8:\n        contact_bonus = sum(n[6:8]) - sum(o[6:8])\n    \n    # Feature 5: Action cost (penalize large actions)\n    action_cost = 0.0\n    if action == 2:  # Main engine\n        action_cost = -0.5\n    elif action in [1, 3]:  # Side engines\n        action_cost = -0.2\n    \n    # Stage-based weights that evolve with training_progress\n    # Early stage: focus on movement and exploration\n    # Middle stage: balance stability and control\n    # Late stage: refine precision and contacts\n    \n    # Sigmoid-like transition for smooth weight evolution\n    early_weight = max(0.0, 1.0 - training_progress * 2.0)\n    mid_weight = max(0.0, 1.0 - abs(training_progress - 0.5) * 2.0)\n    late_weight = max(0.0, (training_progress - 0.5) * 2.0)\n    \n    # Component weights\n    w_pos = 1.0 * early_weight + 0.5 * mid_weight + 0.2 * late_weight\n    w_vel = 0.3 * early_weight + 0.8 * mid_weight + 0.5 * late_weight\n    w_ang = 0.2 * early_weight + 0.6 * mid_weight + 0.8 * late_weight\n    w_contact = 0.0 * early_weight + 0.3 * mid_weight + 1.0 * late_weight\n    w_action = 0.1 * early_weight + 0.2 * mid_weight + 0.3 * late_weight\n    \n    # Combine components\n    reward = (\n        w_pos * pos_change * 0.1 +\n        w_vel * (-vel_change * 0.01) +\n        w_ang * ang_change * 0.05 +\n        w_contact * contact_bonus * 0.5 +\n        w_action * action_cost\n    )\n    \n    # Add small exploration bonus early on\n    exploration_bonus = 0.0\n    if training_progress < 0.3:\n        exploration_bonus = 0.01 * sum(abs(n[i] - o[i]) for i in range(len(o)))\n    \n    reward += exploration_bonus\n    \n    return reward"
+  },
+  {
+    "iteration": 3,
+    "score": -136.44907705125985,
+    "success_rate": 0.0,
+    "mean_episode_length": 68.65,
+    "verdict": "failure",
+    "lesson": "score=-136.4, survived 69 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_42\\reward_iter_3.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features (dimension-agnostic)\n    # Feature 1: Movement toward center - sum of absolute position changes\n    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(min(4, len(o))))\n    \n    # Feature 2: Velocity reduction - sum of squared velocity differences\n    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, min(6, len(o))))\n    \n    # Feature 3: Angular stability - change in angular components\n    ang_change = sum(abs(o[i]) - abs(n[i]) for i in range(4, min(6, len(o))))\n    \n    # Feature 4: Contact bonus - ground contact signals\n    contact_bonus = 0.0\n    if len(o) >= 8:\n        contact_bonus = sum(n[6:8]) - sum(o[6:8])\n    \n    # Feature 5: Action cost (penalize large actions)\n    action_cost = 0.0\n    if action == 2:  # Main engine\n        action_cost = -0.5\n    elif action in [1, 3]:  # Side engines\n        action_cost = -0.2\n    \n    # Stage-based weights that evolve with training_progress\n    # Early stage: focus on movement and exploration\n    # Middle stage: balance stability and control\n    # Late stage: refine precision and contacts\n    \n    # Sigmoid-like transition for smooth weight evolution\n    early_weight = max(0.0, 1.0 - training_progress * 2.0)\n    mid_weight = max(0.0, 1.0 - abs(training_progress - 0.5) * 2.0)\n    late_weight = max(0.0, (training_progress - 0.5) * 2.0)\n    \n    # Component weights\n    w_pos = 1.0 * early_weight + 0.5 * mid_weight + 0.2 * late_weight\n    w_vel = 0.3 * early_weight + 0.8 * mid_weight + 0.5 * late_weight\n    w_ang = 0.2 * early_weight + 0.6 * mid_weight + 0.8 * late_weight\n    w_contact = 0.0 * early_weight + 0.3 * mid_weight + 1.0 * late_weight\n    w_action = 0.1 * early_weight + 0.2 * mid_weight + 0.3 * late_weight\n    \n    # Combine components\n    reward = (\n        w_pos * pos_change * 0.1 +\n        w_vel * (-vel_change * 0.01) +\n        w_ang * ang_change * 0.05 +\n        w_contact * contact_bonus * 0.5 +\n        w_action * action_cost\n    )\n    \n    # Add small exploration bonus early on\n    exploration_bonus = 0.0\n    if training_progress < 0.3:\n        exploration_bonus = 0.01 * sum(abs(n[i] - o[i]) for i in range(len(o)))\n    \n    reward += exploration_bonus\n    \n    return reward"
+  },
+  {
+    "iteration": 4,
+    "score": -126.765677315655,
+    "success_rate": 0.0,
+    "mean_episode_length": 67.0,
+    "verdict": "failure",
+    "lesson": "score=-126.8, survived 67 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_42\\reward_iter_4.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract generic arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features (dimension-agnostic)\n    # Feature 1: Movement toward center - sum of absolute position changes\n    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(min(4, len(o))))\n    \n    # Feature 2: Velocity reduction - sum of squared velocity differences\n    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, min(6, len(o))))\n    \n    # Feature 3: Angular stability - change in angular components\n    ang_change = sum(abs(o[i]) - abs(n[i]) for i in range(4, min(6, len(o))))\n    \n    # Feature 4: Contact bonus - ground contact signals\n    contact_bonus = 0.0\n    if len(o) >= 8:\n        contact_bonus = sum(n[6:8]) - sum(o[6:8])\n    \n    # Feature 5: Action cost (penalize large actions)\n    action_cost = 0.0\n    if action == 2:  # Main engine\n        action_cost = -0.5\n    elif action in [1, 3]:  # Side engines\n        action_cost = -0.2\n    \n    # Stage-based weights that evolve with training_progress\n    # Early stage: focus on movement and exploration\n    # Middle stage: balance stability and control\n    # Late stage: refine precision and contacts\n    \n    # Sigmoid-like transition for smooth weight evolution\n    early_weight = max(0.0, 1.0 - training_progress * 2.0)\n    mid_weight = max(0.0, 1.0 - abs(training_progress - 0.5) * 2.0)\n    late_weight = max(0.0, (training_progress - 0.5) * 2.0)\n    \n    # Component weights\n    w_pos = 1.0 * early_weight + 0.5 * mid_weight + 0.2 * late_weight\n    w_vel = 0.3 * early_weight + 0.8 * mid_weight + 0.5 * late_weight\n    w_ang = 0.2 * early_weight + 0.6 * mid_weight + 0.8 * late_weight\n    w_contact = 0.0 * early_weight + 0.3 * mid_weight + 1.0 * late_weight\n    w_action = 0.1 * early_weight + 0.2 * mid_weight + 0.3 * late_weight\n    \n    # Combine components\n    reward = (\n        w_pos * pos_change * 0.1 +\n        w_vel * (-vel_change * 0.01) +\n        w_ang * ang_change * 0.05 +\n        w_contact * contact_bonus * 0.5 +\n        w_action * action_cost\n    )\n    \n    # Add small exploration bonus early on\n    exploration_bonus = 0.0\n    if training_progress < 0.3:\n        exploration_bonus = 0.01 * sum(abs(n[i] - o[i]) for i in range(len(o)))\n    \n    reward += exploration_bonus\n    \n    return reward"
+  },
+  {
+    "iteration": 5,
+    "score": 3.7158365617993283,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "score=3.7, survived 1000 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_42\\reward_iter_5.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n"
+  },
+  {
+    "iteration": 6,
+    "score": -4.05369760575153,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "score=-4.1, survived 1000 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_42\\reward_iter_6.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n"
+  },
+  {
+    "iteration": 7,
+    "score": -14.074133964695498,
+    "success_rate": 0.0,
+    "mean_episode_length": 982.3,
+    "verdict": "failure",
+    "lesson": "score=-14.1, survived 982 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_42\\reward_iter_7.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n"
+  },
+  {
+    "iteration": 8,
+    "score": -9.613547791641036,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "score=-9.6, survived 1000 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_42\\reward_iter_8.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n"
+  },
+  {
+    "iteration": 9,
+    "score": 0.33364952990447777,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "score=0.3, survived 1000 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_42\\reward_iter_9.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n"
+  }
+]

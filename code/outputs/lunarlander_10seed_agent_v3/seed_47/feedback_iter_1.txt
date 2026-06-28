@@ -1,0 +1,10 @@
+Score: 173.6 | Success rate: 0.70 | Episode length: 327 | Per-step: 0.530 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: The current skeleton has a score of 188.4 with episode length 781 and per-step reward 0.241, which is positive and reasonable. The agent is surviving well (781 steps) and getting positive per-step reward. The skeleton has 4 components: abs_reduction (movement toward zero), squared_change (smoothness penalty), action_cost (efficiency), and leg_contact (stability). The score is decent but the success rate is only 0.35, suggesting the agent sometimes fails. The main issue is likely that the leg_contact component is too weak in late stages and the abs_reduction component may be too aggressive early on. I'll tune the stage weights to better balance exploration vs precision, increase the leg contact reward in late stages, and slightly reduce the smoothness penalty to avoid punishing necessary movements. No structural changes needed since the skeleton is working.

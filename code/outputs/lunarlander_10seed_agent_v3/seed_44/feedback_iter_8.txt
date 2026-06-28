@@ -1,0 +1,10 @@
+Score: -0.6 | Success rate: 0.05 | Episode length: 956 | Per-step: -0.001 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: The skeleton has been tried 7 times with nearly identical code and scores are flat/declining (from -156.5 to -133.3 to -26.3 to -111.9 to -102.6 to -14.1 to -9.6). The per-step reward is very negative and episode length is short (253-302). The skeleton lacks critical components: (1) no stability signal for angle/angular velocity, (2) movement component uses undirected abs change, (3) no survival bonus, (4) no contact/landing signal, (5) no directed velocity penalty. The skeleton is fundamentally insufficient for this task. Need to rebuild with: directional movement toward zero, stability signal, survival bonus, proper action cost, contact bonus, and velocity penalty.

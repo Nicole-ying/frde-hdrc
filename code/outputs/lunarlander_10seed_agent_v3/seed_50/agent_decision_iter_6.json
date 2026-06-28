@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "The skeleton has been tried for 6 iterations with scores consistently negative (-372 to -517) and episode lengths never exceeding 120 steps. The same core components (movement_reward, smoothness_penalty, action_cost, ground_contact) have been kept across all iterations with no improvement. The skeleton is fundamentally broken: (1) smoothness_penalty is undirected (penalizes ALL change), (2) movement_reward uses abs_diff which can be negative and is too weak, (3) ground_contact uses info key that may not exist, (4) no stability signal for angle/angular velocity. Scores are flat/declining with no improvement trend across 6 iterations. A complete rebuild is warranted with a simpler, more robust design: survival bonus, angle stability, gentle movement encouragement, and action cost."
+}

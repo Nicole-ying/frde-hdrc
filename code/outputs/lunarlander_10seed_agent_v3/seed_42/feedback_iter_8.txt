@@ -1,0 +1,10 @@
+Score: -9.6 | Success rate: 0.00 | Episode length: 1000 | Per-step: -0.010 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: The skeleton has been tried 8 times with scores flat/declining (-136.4, -139.1, -136.8, -136.4, -126.8, 3.7, -4.1, -14.1). The latest iteration (score=-14.1, episode=982) shows the agent survives but does nothing useful (per-step reward is only -0.014). The fundamental design is broken: (1) The current simple sum of abs differences is undirected and can reward moving away from zero, (2) The agent survives but doesn't learn meaningful behavior. Need a complete rebuild with simpler, survival-focused components: survival bonus, gentle movement encouragement toward center, and minimal action penalties.

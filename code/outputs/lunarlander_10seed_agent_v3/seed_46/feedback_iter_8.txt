@@ -1,0 +1,10 @@
+Score: -258.1 | Success rate: 0.00 | Episode length: 167 | Per-step: -1.547 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: The skeleton has been tried for 8 iterations with consistently negative scores (-249.7 to -283.3) and episode lengths never exceeding 154 steps. The same components (abs_change, sq_change, action_cost, ground_contact_bonus) were used throughout with no improvement trend. abs_change and sq_change are redundant (both measure state-change magnitude), action_cost is too punishing, and ground_contact_bonus may not be available in info. The skeleton is fundamentally broken - need a completely new design with proper directional signals, lower early-stage penalties, and a survival bonus to encourage longer episodes.

@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "The skeleton has been tried for 2 iterations with scores -141.3 and -136.3, both with episode length 69. Scores are essentially flat (no improvement), and the agent never survives past 200 steps. Per-step reward is very negative (-1.973 to -2.037), indicating the reward is fundamentally too punishing. The current components have multiple issues: pos_change uses abs() which is undirected, vel_change penalizes all movement (squared), angle_change loses directional info with abs(), and ground_contact is binary with poor gradient. The skeleton is broken and needs a complete rebuild with simpler, more directional signals that encourage survival first."
+}

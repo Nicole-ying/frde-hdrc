@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "The skeleton has been tried 8 times with flat/declining scores and very short episodes (71-75 steps). The agent consistently dies quickly, indicating the reward is fundamentally punishing. The skeleton has redundant components (diff_sq and stability both measure state-change magnitude), undirected signals (diff_sq rewards ANY change), and harsh action penalties that prevent exploration. Per-step reward is far too negative. Need a complete rebuild with simpler, safer components: survival bonus to keep agent alive, gentle directional movement encouragement, and very mild action costs."
+}

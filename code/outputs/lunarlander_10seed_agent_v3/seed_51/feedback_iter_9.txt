@@ -1,0 +1,10 @@
+Score: 2.8 | Success rate: 0.00 | Episode length: 1000 | Per-step: 0.003 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: [OVERRIDE: rebuild blocked, skeleton_age=1<2] The skeleton has been tried for 8 iterations with scores showing a clear pattern: first 5 iterations were flat at ~-124 with episode length ~70, then iterations 5-7 showed improvement to episode length 1000 but scores remain near zero (-13.9, 4.6, 0.9). The current skeleton is just sum(abs(o)-abs(n)) which is undirected and lacks any survival incentive, stability signals, or action guidance. The agent survives 1000 steps but scores near zero, meaning it's not learning the right behavior. Per-step reward is ~0.001, essentially zero. A complete rebuild is needed with: (1) strong survival bonus to maintain episode length, (2) directional stability signals rewarding movement toward zero for position/velocity/angle, (3) proper stage weighting that starts with exploration and transitions to precision, (4) action penalty that scales with training progress.

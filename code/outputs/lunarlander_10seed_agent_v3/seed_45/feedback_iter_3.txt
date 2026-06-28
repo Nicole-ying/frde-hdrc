@@ -1,0 +1,10 @@
+Score: 264.9 | Success rate: 0.95 | Episode length: 299 | Per-step: 0.885 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: The skeleton has 4 components: movement toward stability (directional), smoothness penalty (undirected), action cost, and contact bonus. Scores went from 176.2 to 188.4 to 132.9. The drop to 132.9 is concerning, but episode length increased to 1000 (max) and per-step reward is positive (0.133). The agent survives but does not achieve high scores. The smoothness_penalty penalizes ALL changes (including beneficial ones toward stability), conflicting with movement_reward. I'll make it directional: only penalize changes that increase absolute values (bad changes), and reward changes that decrease absolute values (good changes). This removes the conflict with movement_reward. I'll also slightly increase contact_bonus weight and adjust stage weights to emphasize movement and contact more in early stages. This is a tune, not a rebuild, because the skeleton shows potential (agent survives to max length, positive per-step reward).

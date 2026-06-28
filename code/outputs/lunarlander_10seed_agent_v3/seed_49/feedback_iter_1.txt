@@ -1,0 +1,10 @@
+Score: 6.9 | Success rate: 0.00 | Episode length: 817 | Per-step: 0.008 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: The current skeleton has a score of 132.4 with episode length 722 and per-step reward 0.183, which is positive and reasonable. The skeleton has 4 components: stability_progress (directional), transition_smoothness (undirected - replace with directional), action_cost, and ground_contact. The score is decent but success rate is only 0.25, suggesting the agent sometimes succeeds but often fails. The main issues are: (1) transition_smoothness uses undirected squared change which rewards ANY change - replace with directional smoothness that penalizes deviation from stability; (2) ground_contact bonus may be too aggressive in late stage (weight 2.0) causing the agent to prioritize contact over stability; (3) action_cost coefficient is very small (-0.01) making it negligible. Since the skeleton is working (positive score, decent episode length), I'll tune by replacing the undirected smoothness with a directional version, adjusting coefficients, and keeping the same structure.

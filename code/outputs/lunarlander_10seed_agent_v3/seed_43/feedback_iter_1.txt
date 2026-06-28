@@ -1,0 +1,10 @@
+Score: -136.3 | Success rate: 0.00 | Episode length: 69 | Per-step: -1.973 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: [OVERRIDE: rebuild blocked, skeleton_age=1<2] The current skeleton has only one iteration with a score of -141.3 and episode length of 69. The per-step reward is -2.037, which is very punishing. The agent never survives past 200 steps (episode length 69). The skeleton has fundamental issues: pos_change uses abs(o[i]) - abs(n[i]) which is undirected (rewards any change in absolute value), vel_change is squared and penalizes all movement, angle_change and ang_vel_change use abs() which loses directional information, and ground_contact is a binary signal that may not provide useful gradient. The agent dies quickly, indicating the reward is too punishing for exploration. Need to rebuild with simpler, more directional signals that encourage survival and gentle movement.

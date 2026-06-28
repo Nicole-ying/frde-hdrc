@@ -1,0 +1,102 @@
+[
+  {
+    "iteration": 0,
+    "score": -156.54081071492965,
+    "success_rate": 0.0,
+    "mean_episode_length": 167.85,
+    "verdict": "failure",
+    "lesson": "score=-156.5, survived 168 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_44\\reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # 1. Movement magnitude - encourage movement toward target\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # 2. Smoothness - penalize large changes\n    smoothness = -sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # 3. Action penalty - discourage excessive action\n    action_cost = -0.01 * abs(action - 1.5)  # Center action around 1.5 for discrete 0-3\n    \n    # Stage-based weights\n    if training_progress < 0.3:\n        # Early stage: focus on movement and exploration\n        w_movement = 1.0\n        w_smoothness = 0.1\n        w_action = 0.01\n    elif training_progress < 0.7:\n        # Middle stage: balance movement with smoothness\n        w_movement = 0.8\n        w_smoothness = 0.5\n        w_action = 0.05\n    else:\n        # Late stage: refine control\n        w_movement = 0.5\n        w_smoothness = 1.0\n        w_action = 0.1\n    \n    # Combine components\n    reward = (w_movement * movement + \n              w_smoothness * smoothness + \n              w_action * action_cost)\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": -133.27807179905935,
+    "success_rate": 0.0,
+    "mean_episode_length": 301.5,
+    "verdict": "failure",
+    "lesson": "score=-133.3, survived 302 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_44\\reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # 1. Movement magnitude - encourage movement toward target\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # 2. Smoothness - penalize large changes\n    smoothness = -sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # 3. Action penalty - discourage excessive action\n    action_cost = -0.01 * abs(action - 1.5)  # Center action around 1.5 for discrete 0-3\n    \n    # Stage-based weights\n    if training_progress < 0.3:\n        # Early stage: focus on movement and exploration\n        w_movement = 1.0\n        w_smoothness = 0.1\n        w_action = 0.01\n    elif training_progress < 0.7:\n        # Middle stage: balance movement with smoothness\n        w_movement = 0.8\n        w_smoothness = 0.5\n        w_action = 0.05\n    else:\n        # Late stage: refine control\n        w_movement = 0.5\n        w_smoothness = 1.0\n        w_action = 0.1\n    \n    # Combine components\n    reward = (w_movement * movement + \n              w_smoothness * smoothness + \n              w_action * action_cost)\n    \n    return reward"
+  },
+  {
+    "iteration": 2,
+    "score": -26.33092685365234,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "score=-26.3, survived 1000 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_44\\reward_iter_2.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # 1. Movement magnitude - encourage movement toward target\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # 2. Smoothness - penalize large changes\n    smoothness = -sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # 3. Action penalty - discourage excessive action\n    action_cost = -0.01 * abs(action - 1.5)  # Center action around 1.5 for discrete 0-3\n    \n    # Stage-based weights\n    if training_progress < 0.3:\n        # Early stage: focus on movement and exploration\n        w_movement = 1.0\n        w_smoothness = 0.1\n        w_action = 0.01\n    elif training_progress < 0.7:\n        # Middle stage: balance movement with smoothness\n        w_movement = 0.8\n        w_smoothness = 0.5\n        w_action = 0.05\n    else:\n        # Late stage: refine control\n        w_movement = 0.5\n        w_smoothness = 1.0\n        w_action = 0.1\n    \n    # Combine components\n    reward = (w_movement * movement + \n              w_smoothness * smoothness + \n              w_action * action_cost)\n    \n    return reward"
+  },
+  {
+    "iteration": 3,
+    "score": -111.91622593780384,
+    "success_rate": 0.0,
+    "mean_episode_length": 261.4,
+    "verdict": "failure",
+    "lesson": "score=-111.9, survived 261 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_44\\reward_iter_3.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # 1. Movement magnitude - encourage movement toward target\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # 2. Smoothness - penalize large changes\n    smoothness = -sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # 3. Action penalty - discourage excessive action\n    action_cost = -0.01 * abs(action - 1.5)  # Center action around 1.5 for discrete 0-3\n    \n    # Stage-based weights\n    if training_progress < 0.3:\n        # Early stage: focus on movement and exploration\n        w_movement = 1.0\n        w_smoothness = 0.1\n        w_action = 0.01\n    elif training_progress < 0.7:\n        # Middle stage: balance movement with smoothness\n        w_movement = 0.8\n        w_smoothness = 0.5\n        w_action = 0.05\n    else:\n        # Late stage: refine control\n        w_movement = 0.5\n        w_smoothness = 1.0\n        w_action = 0.1\n    \n    # Combine components\n    reward = (w_movement * movement + \n              w_smoothness * smoothness + \n              w_action * action_cost)\n    \n    return reward"
+  },
+  {
+    "iteration": 4,
+    "score": -102.58964102090742,
+    "success_rate": 0.0,
+    "mean_episode_length": 252.6,
+    "verdict": "failure",
+    "lesson": "score=-102.6, survived 253 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_44\\reward_iter_4.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # 1. Movement magnitude - encourage movement toward target\n    movement = sum(abs(o[i]) - abs(n[i]) for i in range(len(o)))\n    \n    # 2. Smoothness - penalize large changes\n    smoothness = -sum((n[i] - o[i]) ** 2 for i in range(len(o)))\n    \n    # 3. Action penalty - discourage excessive action\n    action_cost = -0.01 * abs(action - 1.5)  # Center action around 1.5 for discrete 0-3\n    \n    # Stage-based weights\n    if training_progress < 0.3:\n        # Early stage: focus on movement and exploration\n        w_movement = 1.0\n        w_smoothness = 0.1\n        w_action = 0.01\n    elif training_progress < 0.7:\n        # Middle stage: balance movement with smoothness\n        w_movement = 0.8\n        w_smoothness = 0.5\n        w_action = 0.05\n    else:\n        # Late stage: refine control\n        w_movement = 0.5\n        w_smoothness = 1.0\n        w_action = 0.1\n    \n    # Combine components\n    reward = (w_movement * movement + \n              w_smoothness * smoothness + \n              w_action * action_cost)\n    \n    return reward"
+  },
+  {
+    "iteration": 5,
+    "score": -14.074133964695498,
+    "success_rate": 0.0,
+    "mean_episode_length": 982.3,
+    "verdict": "failure",
+    "lesson": "score=-14.1, survived 982 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_44\\reward_iter_5.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n"
+  },
+  {
+    "iteration": 6,
+    "score": -9.613547791641036,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "score=-9.6, survived 1000 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_44\\reward_iter_6.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n"
+  },
+  {
+    "iteration": 7,
+    "score": 0.33364952990447777,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "score=0.3, survived 1000 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_44\\reward_iter_7.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n"
+  },
+  {
+    "iteration": 8,
+    "score": -0.6393328208771039,
+    "success_rate": 0.05,
+    "mean_episode_length": 955.5,
+    "verdict": "failure",
+    "lesson": "score=-0.6, survived 956 steps, success_rate=0.05",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_44\\reward_iter_8.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n"
+  },
+  {
+    "iteration": 9,
+    "score": -0.4939317570012504,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "score=-0.5, survived 1000 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_44\\reward_iter_9.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n"
+  }
+]

@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "Score 176.2 with episode length 770 and per-step 0.229 is a decent starting point. The skeleton has 4 components: movement toward stability (directional), smoothness penalty (undirected), action cost, and contact bonus. The agent survives well (770 steps) but success rate is only 0.25. The main issue is likely conflicting signals: the movement_reward rewards reducing absolute values (good for stability) but the smoothness_penalty penalizes ALL changes (including beneficial ones). The contact_bonus is positive for ground contact, which is good. The action_cost is very small. I'll tune by: 1) Making smoothness_penalty directional - only penalize changes that increase absolute values (bad changes), reward changes that decrease absolute values (good changes). 2) Increasing contact_bonus weight slightly. 3) Adjusting stage weights to emphasize movement and contact more in early stages, smoothness more in late stages. This is a tune, not a rebuild, because the skeleton shows potential (agent survives, positive per-step reward)."
+}

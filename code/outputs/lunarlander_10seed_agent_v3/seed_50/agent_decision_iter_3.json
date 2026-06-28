@@ -1,0 +1,5 @@
+{
+  "action": "mix",
+  "target": "skeleton",
+  "reasoning": "[OVERRIDE: rebuild blocked, skeleton_age=1<2] The skeleton has been tried for 3 iterations with scores of -372.2, -352.5, and -446.2, episode lengths consistently around 114-117, and per-step rewards around -3.1 to -3.8. The agent never survives past 200 steps. The skeleton is fundamentally broken: (1) smoothness_penalty is undirected (penalizes ALL change, encouraging no movement), (2) movement_reward is too weak and uses abs_diff which can be negative, (3) ground_contact uses info key that may not exist, (4) no stability signal for angle/angular velocity. Scores are flat/declining with no improvement trend. A rebuild is warranted with a simpler, more robust design: survival bonus, angle stability, gentle movement encouragement, and action cost."
+}

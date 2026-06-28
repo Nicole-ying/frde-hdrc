@@ -91,17 +91,35 @@ def build_refine_prompt(
             "\n\n"
             "SKELETON QUALITY DIAGNOSIS (do this BEFORE writing code):\n"
             "\n"
-            "Step 0 — Is this skeleton worth fixing? Look at the TREND, not the level:\n"
-            "  - Good rewards often start from very negative scores and climb. "
-            "If scores are IMPROVING (even from -400 to -200 to -100), the skeleton "
-            "is working — keep tuning. The trend matters more than the current value.\n"
-            "  - If scores are FLAT or DECLINING across 3+ iterations despite "
-            "coefficient changes: the skeleton is stuck. REBUILD with a different "
-            "design. Don't waste more iterations on it.\n"
-            "  - If the agent NEVER survives past 200 steps in any iteration: the "
-            "reward is too punishing. REBUILD with lower early-stage penalties.\n"
-            "  - If there was at least ONE iteration with episode > 500 or score "
-            "positive: the skeleton CAN work. It just needs calibration.\n"
+            "AGENT SEARCH STRATEGY — your search has phases, just like HRDC:\n"
+            "\n"
+            "  PHASE 1 (Exploration, iter 0-2): Give this skeleton a fair chance. "
+            "Many great rewards started at -400 and climbed. Your PRIORITY in this "
+            "phase is to get the skeleton to a COMPLETE state — make sure it has "
+            "all necessary signal categories (Steps 1-2 below). "
+            "Step 1 asks: what components exist? Step 2 asks: what is MISSING? "
+            "If stability is missing → ADD angle_penalty. If contact is missing → "
+            "ADD contact_bonus. If a signal is undirected → TUNE to directional form. "
+            "If a component is clearly harmful → DELETE it. "
+            "Only after the skeleton has 5+ adequate signal categories should you "
+            "focus purely on TUNE. Do NOT REBUILD — you don't have enough evidence yet.\n"
+            "\n"
+            "  PHASE 2 (Judgment, iter 3-5): You now have 3+ data points. You CAN "
+            "judge the skeleton. If scores are IMPROVING (even -400→-200→-100): "
+            "the skeleton WORKS — keep tuning. If scores are FLAT or DECLINING "
+            "despite coefficient changes: REBUILD. If the agent still cannot "
+            "survive past 200 steps after 3+ iterations of trying: REBUILD.\n"
+            "\n"
+            "  PHASE 3 (Decisive, iter 6+): Trust the accumulated evidence. "
+            "If the skeleton has never produced positive scores or long episodes, "
+            "REBUILD aggressively. If scores are climbing toward the target, "
+            "REFINE with small adjustments.\n"
+            "\n"
+            "  KEY PRINCIPLE: Never REBUILD in Phase 1. You don't have enough "
+            "data yet. The score might be terrible, but you've only seen ONE "
+            "configuration of this skeleton — that's not evidence, that's a "
+            "single sample. Give every skeleton 3 iterations of genuine tuning "
+            "before deciding it's broken.\n"
             "\n"
             "Step 1 — Inventory the skeleton. List EVERY component in the current reward function "
             "and what physical signal it captures:\n"
@@ -172,27 +190,15 @@ def build_refine_prompt(
             "LOW. The agent needs freedom to explore before precision matters. "
             "Never add new penalty terms to the early stage of a working reward.\n"
             "\n"
-            "MIX vs REBUILD — when to improve, when to start over:\n"
-            "\n"
-            "  MIX means: this skeleton has potential but needs changes. You add "
-            "missing signals, delete harmful ones, tune coefficients — all while "
-            "keeping the skeleton's core structure. Use MIX by default. Even if "
-            "the score is terrible, give the skeleton a chance to improve.\n"
-            "\n"
-            "  REBUILD means: this skeleton has been tried and proven unfixable. "
-            "Its memory will be CLEARED — all past iterations of this skeleton "
-            "are discarded. A new 2-iteration protection period begins. Use REBUILD "
-            "ONLY when scores are flat or declining across 2+ iterations despite "
-            "genuine improvement attempts. Do NOT rebuild after just one bad score.\n"
-            "\n"
-            "  Decision guide:\n"
-            "  - Scores trending up (even -400→-200→-100): MIX. Keep improving.\n"
-            "  - Scores flat for 2+ iterations despite trying add/delete/tune: REBUILD.\n"
-            "  - Scores declining for 2+ iterations: REBUILD. The skeleton is broken.\n"
-            "  - Episode never > 200 for 3+ iterations: REBUILD. Agent can't survive.\n"
-            "  - In doubt between MIX and REBUILD: choose MIX. REBUILD is a last resort.\n"
-            "  - But when REBUILD IS warranted, use it decisively. Don't waste "
-            "iterations on a skeleton that has proven it cannot work.\n"
+            "DECISION AUTHORITY — after completing Steps 0-3, make your choice:\n"
+            "  - The AGENT SEARCH STRATEGY (Step 0) tells you which phase you're in. "
+            "Phase 1 (iter 0-2): tune/add/delete only. Phase 2-3 (iter 3+): you "
+            "may REBUILD if the trend evidence supports it.\n"
+            "  - In ANY phase: if the code has undirected signals like (n-o)^2, "
+            "fix them to directional forms (abs(o)-abs(n)) — but don't use that "
+            "as an excuse to REBUILD. Fixing undirected signals is a TUNE action.\n"
+            "  - Trend examples: -200→-150→-100 = IMPROVING (keep tuning). "
+            "-100→-110→-105→-115 = STUCK (REBUILD if in Phase 2+).\n"
             "\n"
             "Step 5 — Output the improved reward function. Your changes must be justified "
             "by the skeleton diagnosis above. If the skeleton is insufficient, ADD components. "
@@ -220,57 +226,37 @@ def build_refine_prompt(
         )
 
     analysis_task = _analysis_task(memory_context, feedback)
-    if not use_agent:
-        return dedent(
-            f"""
-            Improve this RL reward function. Execute the skeleton diagnosis steps.
-            Output ONLY Python code — no JSON, no explanation.
-
-            Rules: Output only Python code. Do not import modules.
-            No try/except, classes, lambdas, file I/O, eval, exec.
-            Use only {allowed_inputs}. {structure_rule} {reward_rule}
-            Do not manually clamp. Discrete action = scalar integer.{analysis_task}
-
-            Environment: {visible_env}
-            Task: {task_description}
-
-            Current code:
-            {current_code}
-            {best_block}
-            Feedback:
-            {feedback}
-
-            Eureka context:
-            {eureka_context}
-
-            Memory:
-            {memory_context}
-            """
-        ).strip()
-
     return dedent(
         f"""
-        You are an autonomous reward-search agent improving an RL reward function from training evidence.
-        Use the historical reward functions and their scores in Agent Memory to make evidence-driven
-        improvements. Do NOT guess — let the score history guide which components to keep or discard.
+        You are an Autonomous Reward Design Agent. You operate in a perceive→plan→act loop.
+        Your Agent Memory stores every reward function you've ever generated and its score.
 
-        Output format — first a JSON decision, then Python code:
+        ## Your Task
+
+        Study the Agent Memory below. Execute the SKELETON QUALITY DIAGNOSIS.
+        Then output your decision in this EXACT format — first a JSON decision block,
+        then the Python code:
 
         ```json
         {{
-          "action": "add" | "delete" | "tune" | "mix" | "rebuild",
-          "reasoning": "What components exist? What is missing? Why this action?"
+          "action": "rebuild" | "delete" | "add" | "tune",
+          "target": "skeleton" or the specific component name,
+          "reasoning": "Why you chose this action, based on evidence from Memory"
         }}
         ```
-
-        add=add missing. delete=remove harmful. tune=adjust coefficients only.
-        mix=multiple operations (add+delete+tune). rebuild=proven broken after 2+
-        flat iterations — discard and start fresh.
 
         ```python
         def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
             ...
         ```
+
+        ACTION MEANINGS:
+        - "rebuild": skeleton is broken → generate a fresh simple design from scratch
+        - "delete": a specific component is harmful/redundant → remove it
+        - "add": a signal category is missing → add the needed component
+        - "tune": skeleton is working → adjust coefficients/stage-weights
+
+        Keep the same signature.
 
         Rules:
         - Output only Python code.

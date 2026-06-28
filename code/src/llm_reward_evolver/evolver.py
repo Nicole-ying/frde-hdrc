@@ -57,7 +57,6 @@ class RewardEvolver:
         current_code: Optional[str] = None
         best_code: Optional[str] = None
         best_score = float("-inf")
-        skeleton_age = 0  # 🆕 当前骨架存活了几轮
         feedback = ""
 
         for iteration in range(self.config.max_iterations):
@@ -123,21 +122,6 @@ class RewardEvolver:
             reward_path = self._write_text(f"reward_iter_{iteration}.py", current_code)
             # 🆕 提取 Agent 决策
             agent_decision = parse_agent_decision(llm_response, current_code)
-            # 🆕 REBUILD 处理：保护期内禁止，允许后才清 memory
-            if agent_decision.action == AgentAction.REBUILD:
-                if skeleton_age < 2:
-                    # 保护期：强制改为 MIX
-                    agent_decision = AgentDecision(
-                        action=AgentAction.MIX,
-                        target=agent_decision.target,
-                        reasoning=f"[OVERRIDE: rebuild blocked, skeleton_age={skeleton_age}<2] "
-                            + agent_decision.reasoning,
-                        code=current_code, raw_response=llm_response,
-                    )
-                else:
-                    # 允许 REBUILD：清空旧骨架 memory，重置 age
-                    agent_memory = AgentMemory(self.output_dir / "agent_memory.json")
-                    skeleton_age = 0
             self._write_text(f"agent_decision_iter_{iteration}.json",
                 json.dumps(agent_decision.to_dict(), ensure_ascii=False, indent=2))
             reward_program = RewardProgram(
@@ -213,7 +197,6 @@ class RewardEvolver:
                 code_path=str(reward_path),
                 target_score=self.config.target_score,
             )
-            skeleton_age += 1  # 🆕 骨架存活轮数
 
             feedback = self._build_feedback(stats, current_code)
             # 🆕 附加上一轮 LLM 的诊断

@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "The skeleton has been tried for 4 iterations with scores of -124.8, -123.7, -124.1, -123.5 — all essentially flat with episode lengths of ~70 steps. The agent never survives past 200 steps. Per-step reward is very negative (~-1.7), indicating the reward is fundamentally punishing. The skeleton has multiple issues: (1) movement_quality = sum(abs(o)-abs(n)) is undirected and may not be correct for all state dimensions; (2) smoothness_reward uses squared changes which penalizes any change regardless of direction; (3) action_cost is a flat penalty that doesn't scale; (4) terminal_bonus from info is unreliable. The scores are flat across 4 iterations despite attempted improvements — the skeleton is proven broken. REBUILD with a simpler design: strong survival bonus, directional stability signal, and small action penalty with proper stage weighting."
+}

@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "The skeleton has 4 components: movement toward stability (directional), smoothness penalty (undirected), action cost, and contact bonus. Scores improved from 176.2 to 188.4, episode length increased from 770 to 784, and per-step reward is positive (0.240). The trend is improving, so the skeleton is working. The main issue is the smoothness_penalty penalizes ALL changes (including beneficial ones toward stability). I'll make it directional: only penalize changes that increase absolute values (bad changes), and reward changes that decrease absolute values (good changes). This removes the conflict with movement_reward. I'll also slightly increase contact_bonus weight and adjust stage weights to emphasize movement and contact more in early stages. This is a tune, not a rebuild."
+}

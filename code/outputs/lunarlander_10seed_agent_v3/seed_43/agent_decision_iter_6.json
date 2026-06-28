@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "The skeleton has been tried for 6 iterations with scores -141.3, -136.3, -135.9, -128.9, -133.7, -4.1. The last iteration (score=-4.1, len=1000) shows a dramatic improvement but the agent survived to 1000 steps with a negative score, meaning it's surviving but doing the wrong thing. The previous skeleton was fundamentally broken - it used undirected signals (abs() comparisons), punished all movement with squared velocity penalties, and had no survival bonus. The per-step reward was too negative. I need to rebuild with: 1) A survival bonus to encourage living longer, 2) Directional movement signals toward center, 3) Gentle velocity penalties that don't punish all movement, 4) Angle stability that preserves direction, 5) Ground contact reward for landing, 6) Minimal action penalty. The stage weights should keep early training penalties very low."
+}

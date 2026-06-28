@@ -1,0 +1,42 @@
+[
+  {
+    "iteration": 0,
+    "score": 176.17223521803663,
+    "success_rate": 0.25,
+    "mean_episode_length": 770.45,
+    "verdict": "failure",
+    "lesson": "score=176.2, survived 770 steps, success_rate=0.25",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_45\\reward_iter_0.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement toward stability - reward reduction in absolute values\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(min(len(o), len(n))))\n    movement_reward = abs_diff * 0.1\n    \n    # Component 2: Smoothness - penalize large changes\n    squared_diff = sum((n[i] - o[i]) ** 2 for i in range(min(len(o), len(n))))\n    smoothness_penalty = -squared_diff * 0.05\n    \n    # Component 3: Action cost - penalize taking actions\n    action_cost = -0.01 * float(action)\n    \n    # Component 4: Contact bonus - reward ground contact (indices 6 and 7 in observation)\n    contact_bonus = 0.0\n    if len(o) >= 8 and len(n) >= 8:\n        contact_bonus = (n[6] + n[7]) * 0.5\n    \n    # Stage weights based on training_progress\n    stage1_weight = max(0.0, 1.0 - training_progress * 2.0)\n    stage2_weight = 1.0 - abs(training_progress - 0.5) * 2.0\n    stage3_weight = max(0.0, training_progress * 2.0 - 1.0)\n    \n    # Combine components with stage-adaptive weights\n    reward = (\n        movement_reward * (stage1_weight * 0.6 + stage2_weight * 0.3 + stage3_weight * 0.1) +\n        smoothness_penalty * (stage1_weight * 0.2 + stage2_weight * 0.4 + stage3_weight * 0.4) +\n        action_cost * (stage1_weight * 0.1 + stage2_weight * 0.1 + stage3_weight * 0.1) +\n        contact_bonus * (stage1_weight * 0.1 + stage2_weight * 0.2 + stage3_weight * 0.4)\n    )\n    \n    return reward"
+  },
+  {
+    "iteration": 1,
+    "score": 188.35076197279596,
+    "success_rate": 0.3,
+    "mean_episode_length": 784.1,
+    "verdict": "failure",
+    "lesson": "score=188.4, survived 784 steps, success_rate=0.30",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_45\\reward_iter_1.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement toward stability - reward reduction in absolute values\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(min(len(o), len(n))))\n    movement_reward = abs_diff * 0.1\n    \n    # Component 2: Smoothness - penalize large changes\n    squared_diff = sum((n[i] - o[i]) ** 2 for i in range(min(len(o), len(n))))\n    smoothness_penalty = -squared_diff * 0.05\n    \n    # Component 3: Action cost - penalize taking actions\n    action_cost = -0.01 * float(action)\n    \n    # Component 4: Contact bonus - reward ground contact (indices 6 and 7 in observation)\n    contact_bonus = 0.0\n    if len(o) >= 8 and len(n) >= 8:\n        contact_bonus = (n[6] + n[7]) * 0.5\n    \n    # Stage weights based on training_progress\n    stage1_weight = max(0.0, 1.0 - training_progress * 2.0)\n    stage2_weight = 1.0 - abs(training_progress - 0.5) * 2.0\n    stage3_weight = max(0.0, training_progress * 2.0 - 1.0)\n    \n    # Combine components with stage-adaptive weights\n    reward = (\n        movement_reward * (stage1_weight * 0.6 + stage2_weight * 0.3 + stage3_weight * 0.1) +\n        smoothness_penalty * (stage1_weight * 0.2 + stage2_weight * 0.4 + stage3_weight * 0.4) +\n        action_cost * (stage1_weight * 0.1 + stage2_weight * 0.1 + stage3_weight * 0.1) +\n        contact_bonus * (stage1_weight * 0.1 + stage2_weight * 0.2 + stage3_weight * 0.4)\n    )\n    \n    return reward"
+  },
+  {
+    "iteration": 2,
+    "score": 132.87285270387153,
+    "success_rate": 0.0,
+    "mean_episode_length": 1000.0,
+    "verdict": "failure",
+    "lesson": "score=132.9, survived 1000 steps, success_rate=0.00",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_45\\reward_iter_2.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement toward stability - reward reduction in absolute values\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(min(len(o), len(n))))\n    movement_reward = abs_diff * 0.1\n    \n    # Component 2: Smoothness - penalize large changes\n    squared_diff = sum((n[i] - o[i]) ** 2 for i in range(min(len(o), len(n))))\n    smoothness_penalty = -squared_diff * 0.05\n    \n    # Component 3: Action cost - penalize taking actions\n    action_cost = -0.01 * float(action)\n    \n    # Component 4: Contact bonus - reward ground contact (indices 6 and 7 in observation)\n    contact_bonus = 0.0\n    if len(o) >= 8 and len(n) >= 8:\n        contact_bonus = (n[6] + n[7]) * 0.5\n    \n    # Stage weights based on training_progress\n    stage1_weight = max(0.0, 1.0 - training_progress * 2.0)\n    stage2_weight = 1.0 - abs(training_progress - 0.5) * 2.0\n    stage3_weight = max(0.0, training_progress * 2.0 - 1.0)\n    \n    # Combine components with stage-adaptive weights\n    reward = (\n        movement_reward * (stage1_weight * 0.6 + stage2_weight * 0.3 + stage3_weight * 0.1) +\n        smoothness_penalty * (stage1_weight * 0.2 + stage2_weight * 0.4 + stage3_weight * 0.4) +\n        action_cost * (stage1_weight * 0.1 + stage2_weight * 0.1 + stage3_weight * 0.1) +\n        contact_bonus * (stage1_weight * 0.1 + stage2_weight * 0.2 + stage3_weight * 0.4)\n    )\n    \n    return reward"
+  },
+  {
+    "iteration": 3,
+    "score": 264.8906608618532,
+    "success_rate": 0.95,
+    "mean_episode_length": 299.35,
+    "verdict": "success",
+    "lesson": "solved (score=264.9 >= 200)",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_45\\reward_iter_3.py",
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    o = obs\n    n = next_obs\n    \n    # Component 1: Movement toward stability - reward reduction in absolute values\n    abs_diff = sum(abs(o[i]) - abs(n[i]) for i in range(min(len(o), len(n))))\n    movement_reward = abs_diff * 0.1\n    \n    # Component 2: Smoothness - penalize large changes\n    squared_diff = sum((n[i] - o[i]) ** 2 for i in range(min(len(o), len(n))))\n    smoothness_penalty = -squared_diff * 0.05\n    \n    # Component 3: Action cost - penalize taking actions\n    action_cost = -0.01 * float(action)\n    \n    # Component 4: Contact bonus - reward ground contact (indices 6 and 7 in observation)\n    contact_bonus = 0.0\n    if len(o) >= 8 and len(n) >= 8:\n        contact_bonus = (n[6] + n[7]) * 0.5\n    \n    # Stage weights based on training_progress\n    stage1_weight = max(0.0, 1.0 - training_progress * 2.0)\n    stage2_weight = 1.0 - abs(training_progress - 0.5) * 2.0\n    stage3_weight = max(0.0, training_progress * 2.0 - 1.0)\n    \n    # Combine components with stage-adaptive weights\n    reward = (\n        movement_reward * (stage1_weight * 0.6 + stage2_weight * 0.3 + stage3_weight * 0.1) +\n        smoothness_penalty * (stage1_weight * 0.2 + stage2_weight * 0.4 + stage3_weight * 0.4) +\n        action_cost * (stage1_weight * 0.1 + stage2_weight * 0.1 + stage3_weight * 0.1) +\n        contact_bonus * (stage1_weight * 0.1 + stage2_weight * 0.2 + stage3_weight * 0.4)\n    )\n    \n    return reward"
+  }
+]

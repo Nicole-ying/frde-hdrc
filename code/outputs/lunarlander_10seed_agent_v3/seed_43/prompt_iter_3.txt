@@ -1,0 +1,575 @@
+You are an autonomous reward-search agent improving an RL reward function from training evidence.
+        Use the historical reward functions and their scores in Agent Memory to make evidence-driven
+        improvements. Do NOT guess — let the score history guide which components to keep or discard.
+
+        Output format — first a JSON decision, then Python code:
+
+        ```json
+        {
+          "action": "add" | "delete" | "tune" | "mix" | "rebuild",
+          "reasoning": "What components exist? What is missing? Why this action?"
+        }
+        ```
+
+        add=add missing. delete=remove harmful. tune=adjust coefficients only.
+        mix=multiple operations (add+delete+tune). rebuild=proven broken after 2+
+        flat iterations — discard and start fresh.
+
+        ```python
+        def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+            ...
+        ```
+
+        Rules:
+        - Output only Python code.
+        - Do not import modules.
+        - Do not use try/except, classes, lambdas, file I/O, eval, exec, or external libraries.
+        - Use only obs, action, next_obs, info, and training_progress.
+        - Use an HRDC-style structure: propose generic reward components from observed transition signals, then combine them with stage weights based on training_progress. Each component should have its own weight that evolves across training stages.
+        - Fix the failure mode described by the feedback.
+        - The official reward is masked and must not be used. Do not reference original_reward in the generated reward code; derive the training reward only from obs, action, next_obs, info, and training_progress.
+        - Follow the SKELETON QUALITY DIAGNOSIS above to decide whether to rebuild or tune.
+        - If the diagnosis says REBUILD, add missing signal categories freely — do not be conservative.
+        - If the diagnosis says TUNE, make targeted coefficient/sign/stage-weight adjustments.
+        - Do not manually clamp the reward inside compute_reward; the training framework performs final clipping.
+        - Avoid undefined variables. Before returning, check that every variable has been assigned.
+        - For discrete actions, treat action as a scalar integer, not an array.
+        - Do not introduce rules not justified by task description, masked step source, feedback, or memory.
+        - Prefer generic reward-search patterns: transition progress, smoothness, action cost, stage weights,
+          and numerical safety.
+        - If reward leakage guard failed, remove any use of masked official reward variables or original_reward.
+
+SKELETON QUALITY DIAGNOSIS (do this BEFORE writing code):
+
+Step 0 — Is this skeleton worth fixing? Look at the TREND, not the level:
+  - Good rewards often start from very negative scores and climb. If scores are IMPROVING (even from -400 to -200 to -100), the skeleton is working — keep tuning. The trend matters more than the current value.
+  - If scores are FLAT or DECLINING across 3+ iterations despite coefficient changes: the skeleton is stuck. REBUILD with a different design. Don't waste more iterations on it.
+  - If the agent NEVER survives past 200 steps in any iteration: the reward is too punishing. REBUILD with lower early-stage penalties.
+  - If there was at least ONE iteration with episode > 500 or score positive: the skeleton CAN work. It just needs calibration.
+
+Step 1 — Inventory the skeleton. List EVERY component in the current reward function and what physical signal it captures:
+  - Transition signal (e.g. abs_change, movement): does the agent move toward desirable states?
+  - Smoothness penalty: does it prevent jerky/jumpy behavior?
+  - Action cost: does it penalize unnecessary engine use?
+  - Stability signal (angle, angular velocity): does it prevent tumbling/spinning?
+  - Contact/landing signal (leg contact, height): does it reward successful touchdown?
+  - Velocity penalty: does it discourage crashing at high speed?
+  - Survival bonus: does it reward staying alive longer?
+
+Step 2 — Identify what is MISSING. Look at the feedback metrics:
+  - Compute per-step reward: mean_score / mean_episode_length. If this is very negative (< -0.5 per step), your reward signal is fundamentally punishing the agent. Check all signs and directions.
+  - If episode_length is short (< 200): the agent dies quickly. You are likely MISSING a stability signal (angle/angular-velocity penalty) or your transition signal is undirected (rewarding chaotic movement).
+  - If episode_length is max (1000) but score is very negative (< -50): the agent survives but does the WRONG thing. Your directional signals likely point the wrong way (e.g. rewarding movement away from center).
+  - If score oscillates wildly between iterations: your components may CONFLICT or your reward scale per step is too large.
+
+Step 3 — Check signal DIRECTION, SCALE, and REDUNDANCY (MANDATORY — do NOT skip):
+  - DIRECTION: Each component must point toward desirable behavior. abs(o[i])-abs(n[i]) is directional (toward zero). (n[i]-o[i])**2 is UNDIRECTED (rewards ANY change). If a component uses an undirected form, replace it with a directional one.
+  - SCALE: Estimate per-step contribution. A constant survival_bonus of 0.5 gives +500 over 1000 steps, drowning all other signals. Keep per-component per-step contribution in ±0.05 to ±2.0. Total per-step reward should be ±5 max.
+  - REDUNDANCY (CRITICAL): Compare EVERY pair of components. If two components measure the SAME physical quantity, you MUST merge them into one. Examples:
+    * abs_change = sum(abs(o)-abs(n)) AND progress_signal = sum(abs(o)-abs(n)) → IDENTICAL, merge.
+    * vel_change = sum(|n-o|) AND sq_change = sum((n-o)^2) → both measure state-change magnitude (L1 vs L2), redundant. Keep the one that correlates better with scores.
+    * Many reward functions succeed with 7-9 components. Count alone is NOT a problem — only TRUE redundancy is. Compare every pair carefully.
+  - HARMFUL SIGNS: Does a component appear with a NEGATIVE sign in late training? That may be punishing desirable behavior.
+  - DELETE AUTHORITY: You CAN and SHOULD delete components. If a component was added in the previous iteration and the score dropped significantly, DELETE it — do NOT just reduce its weight to zero or near-zero. Actually remove it from the code. If a component provides no unique signal, DELETE it. If a component consistently correlates with worse scores, DELETE it. A cleaner reward function with fewer well-chosen components is better than a bloated one.
+  - When deciding between lowering a weight and deleting a component: if the component measures something that SHOULD matter (e.g. contact for landing), tune the weight. If the component is REDUNDANT with another, HARMFUL based on score evidence, or conceptually WRONG, DELETE it.
+
+SIMPLE-FIRST PRINCIPLE:
+  - Start every new skeleton with the SIMPLEST design that covers the necessary signal categories. 4-6 clean components with clear stage weights is better than 7-9 components with subtle interactions.
+  - Only add a new component when there is clear evidence the skeleton needs it (scores flat despite coefficient tuning across 2+ iterations).
+  - Simple skeletons are easy to debug and improve. Complex skeletons have too many interacting parameters — hard to tell what works.
+  - CRITICAL: If the current iteration scored WELL (close to or above the target), make ONLY one small coefficient adjustment. Do NOT add new components, do NOT add new penalties to early training. A score near the target means the skeleton is RIGHT — don't break it.
+  - Early training stage (stage 1 / early_weight) MUST keep penalties LOW. The agent needs freedom to explore before precision matters. Never add new penalty terms to the early stage of a working reward.
+
+MIX vs REBUILD — when to improve, when to start over:
+
+  MIX means: this skeleton has potential but needs changes. You add missing signals, delete harmful ones, tune coefficients — all while keeping the skeleton's core structure. Use MIX by default. Even if the score is terrible, give the skeleton a chance to improve.
+
+  REBUILD means: this skeleton has been tried and proven unfixable. Its memory will be CLEARED — all past iterations of this skeleton are discarded. A new 2-iteration protection period begins. Use REBUILD ONLY when scores are flat or declining across 2+ iterations despite genuine improvement attempts. Do NOT rebuild after just one bad score.
+
+  Decision guide:
+  - Scores trending up (even -400→-200→-100): MIX. Keep improving.
+  - Scores flat for 2+ iterations despite trying add/delete/tune: REBUILD.
+  - Scores declining for 2+ iterations: REBUILD. The skeleton is broken.
+  - Episode never > 200 for 3+ iterations: REBUILD. Agent can't survive.
+  - In doubt between MIX and REBUILD: choose MIX. REBUILD is a last resort.
+  - But when REBUILD IS warranted, use it decisively. Don't waste iterations on a skeleton that has proven it cannot work.
+
+Step 5 — Output the improved reward function. Your changes must be justified by the skeleton diagnosis above. If the skeleton is insufficient, ADD components. If it is adequate, TUNE components.
+
+CROSS-ITERATION EVIDENCE:
+Study the Agent Memory section below. For each past iteration, note its components and its score. If the same skeleton was tried with different coefficients and scores stayed bad → the skeleton is the problem, not the coefficients. If adding a component made scores worse → that component is harmful, remove it. If simplifying the skeleton made scores better → the original skeleton was over-engineered.
+
+        Environment: BlackBoxControlEnv
+        Task: Black-box control task. Maximize the original environment return and reach the target evaluation score without using hand-written environment semantics.
+
+        Current reward code:
+        def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+    # Extract observation arrays
+    o = obs
+    n = next_obs
+
+    # Generic transition features
+    # Feature 1: Movement towards center - sum of absolute position changes
+    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(4))
+
+    # Feature 2: Velocity change - squared differences
+    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, 4))
+
+    # Feature 3: Angular stability - angle and angular velocity changes
+    angle_change = abs(n[4]) - abs(o[4])
+    ang_vel_change = abs(n[5]) - abs(o[5])
+
+    # Feature 4: Ground contact bonus
+    ground_contact = sum(n[6:8]) - sum(o[6:8])
+
+    # Feature 5: Action penalty (small cost to encourage efficient actions)
+    action_cost = 0.01 * action
+
+    # Stage-based weights that evolve with training_progress
+    # Early stage: focus on reaching center and stability
+    # Middle stage: balance movement and stability
+    # Late stage: fine-tune landing with ground contact
+
+    # Sigmoid-like transition based on training_progress
+    early_weight = max(0.0, 1.0 - 2.0 * training_progress)
+    mid_weight = 1.0 - abs(2.0 * training_progress - 1.0)
+    late_weight = max(0.0, 2.0 * training_progress - 1.0)
+
+    # Component rewards with stage-adaptive weights
+    reward = 0.0
+
+    # Position reward (early focus)
+    reward += early_weight * 0.5 * pos_change
+
+    # Velocity penalty (constant throughout)
+    reward += -0.1 * vel_change
+
+    # Angle stability (mid focus)
+    reward += mid_weight * 0.3 * (-angle_change - 0.1 * ang_vel_change)
+
+    # Ground contact bonus (late focus)
+    reward += late_weight * 2.0 * ground_contact
+
+    # Small action penalty (always present)
+    reward += -action_cost
+
+    return reward
+
+Previous best reward code:
+def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+    # Extract observation arrays
+    o = obs
+    n = next_obs
+
+    # Generic transition features
+    # Feature 1: Movement towards center - sum of absolute position changes
+    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(4))
+
+    # Feature 2: Velocity change - squared differences
+    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, 4))
+
+    # Feature 3: Angular stability - angle and angular velocity changes
+    angle_change = abs(n[4]) - abs(o[4])
+    ang_vel_change = abs(n[5]) - abs(o[5])
+
+    # Feature 4: Ground contact bonus
+    ground_contact = sum(n[6:8]) - sum(o[6:8])
+
+    # Feature 5: Action penalty (small cost to encourage efficient actions)
+    action_cost = 0.01 * action
+
+    # Stage-based weights that evolve with training_progress
+    # Early stage: focus on reaching center and stability
+    # Middle stage: balance movement and stability
+    # Late stage: fine-tune landing with ground contact
+
+    # Sigmoid-like transition based on training_progress
+    early_weight = max(0.0, 1.0 - 2.0 * training_progress)
+    mid_weight = 1.0 - abs(2.0 * training_progress - 1.0)
+    late_weight = max(0.0, 2.0 * training_progress - 1.0)
+
+    # Component rewards with stage-adaptive weights
+    reward = 0.0
+
+    # Position reward (early focus)
+    reward += early_weight * 0.5 * pos_change
+
+    # Velocity penalty (constant throughout)
+    reward += -0.1 * vel_change
+
+    # Angle stability (mid focus)
+    reward += mid_weight * 0.3 * (-angle_change - 0.1 * ang_vel_change)
+
+    # Ground contact bonus (late focus)
+    reward += late_weight * 2.0 * ground_contact
+
+    # Small action penalty (always present)
+    reward += -action_cost
+
+    return reward
+
+        FDRE feedback / diagnostic report:
+        Score: -135.9 | Success rate: 0.00 | Episode length: 69 | Per-step: -1.978 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: The skeleton has been tried for 2 iterations with scores -141.3 and -136.3, both with episode length 69. Scores are essentially flat (no improvement), and the agent never survives past 200 steps. Per-step reward is very negative (-1.973 to -2.037), indicating the reward is fundamentally too punishing. The current components have multiple issues: pos_change uses abs() which is undirected, vel_change penalizes all movement (squared), angle_change loses directional info with abs(), and ground_contact is binary with poor gradient. The skeleton is broken and needs a complete rebuild with simpler, more directional signals that encourage survival first.
+
+        Eureka-style context:
+        Task description file:
+Black-box control task. The agent receives observations from the environment and must learn a training reward from the masked environment source. The official reward formula is intentionally hidden from the reward-generation model. Generate a training reward that uses generic transition signals from obs, action, next_obs, info, and training_progress, and avoids hand-written task semantics or any reconstruction of the masked official reward.
+
+Environment step source with official reward masked:
+def step(self, action):
+        assert self.lander is not None
+
+        # Update wind and apply to the lander
+        assert self.lander is not None, "You forgot to call reset()"
+        if self.enable_wind and not (
+            self.legs[0].ground_contact or self.legs[1].ground_contact
+        ):
+            # the function used for wind is tanh(sin(2 k x) + sin(pi k x)),
+            # which is proven to never be periodic, k = 0.01
+            wind_mag = (
+                math.tanh(
+                    math.sin(0.02 * self.wind_idx)
+                    + (math.sin(math.pi * 0.01 * self.wind_idx))
+                )
+                * self.wind_power
+            )
+            self.wind_idx += 1
+            self.lander.ApplyForceToCenter(
+                (wind_mag, 0.0),
+                True,
+            )
+
+            # the function used for torque is tanh(sin(2 k x) + sin(pi k x)),
+            # which is proven to never be periodic, k = 0.01
+            torque_mag = (
+                math.tanh(
+                    math.sin(0.02 * self.torque_idx)
+                    + (math.sin(math.pi * 0.01 * self.torque_idx))
+                )
+                * self.turbulence_power
+            )
+            self.torque_idx += 1
+            self.lander.ApplyTorque(
+                torque_mag,
+                True,
+            )
+
+        if self.continuous:
+            action = np.clip(action, -1, +1).astype(np.float64)
+        else:
+            assert self.action_space.contains(
+                action
+            ), f"{action!r} ({type(action)}) invalid "
+
+        # Apply Engine Impulses
+
+        # Tip is the (X and Y) components of the rotation of the lander.
+        tip = (math.sin(self.lander.angle), math.cos(self.lander.angle))
+
+        # Side is the (-Y and X) components of the rotation of the lander.
+        side = (-tip[1], tip[0])
+
+        # Generate two random numbers between -1/SCALE and 1/SCALE.
+        dispersion = [self.np_random.uniform(-1.0, +1.0) / SCALE for _ in range(2)]
+
+        m_power = 0.0
+        if (self.continuous and action[0] > 0.0) or (
+            not self.continuous and action == 2
+        ):
+            # Main engine
+            if self.continuous:
+                m_power = (np.clip(action[0], 0.0, 1.0) + 1.0) * 0.5  # 0.5..1.0
+                assert m_power >= 0.5 and m_power <= 1.0
+            else:
+                m_power = 1.0
+
+            # 4 is move a bit downwards, +-2 for randomness
+            # The components of the impulse to be applied by the main engine.
+            ox = (
+                tip[0] * (MAIN_ENGINE_Y_LOCATION / SCALE + 2 * dispersion[0])
+                + side[0] * dispersion[1]
+            )
+            oy = (
+                -tip[1] * (MAIN_ENGINE_Y_LOCATION / SCALE + 2 * dispersion[0])
+                - side[1] * dispersion[1]
+            )
+
+            impulse_pos = (self.lander.position[0] + ox, self.lander.position[1] + oy)
+            if self.render_mode is not None:
+                # particles are just a decoration, with no impact on the physics, so don't add them when not rendering
+                p = self._create_particle(
+                    3.5,  # 3.5 is here to make particle speed adequate
+                    impulse_pos[0],
+                    impulse_pos[1],
+                    m_power,
+                )
+                p.ApplyLinearImpulse(
+                    (
+                        ox * MAIN_ENGINE_POWER * m_power,
+                        oy * MAIN_ENGINE_POWER * m_power,
+                    ),
+                    impulse_pos,
+                    True,
+                )
+            self.lander.ApplyLinearImpulse(
+                (-ox * MAIN_ENGINE_POWER * m_power, -oy * MAIN_ENGINE_POWER * m_power),
+                impulse_pos,
+                True,
+            )
+
+        s_power = 0.0
+        if (self.continuous and np.abs(action[1]) > 0.5) or (
+            not self.continuous and action in [1, 3]
+        ):
+            # Orientation/Side engines
+            if self.continuous:
+                direction = np.sign(action[1])
+                s_power = np.clip(np.abs(action[1]), 0.5, 1.0)
+                assert s_power >= 0.5 and s_power <= 1.0
+            else:
+                # action = 1 is left, action = 3 is right
+                direction = action - 2
+                s_power = 1.0
+
+            # The components of the impulse to be applied by the side engines.
+            ox = tip[0] * dispersion[0] + side[0] * (
+                3 * dispersion[1] + direction * SIDE_ENGINE_AWAY / SCALE
+            )
+            oy = -tip[1] * dispersion[0] - side[1] * (
+                3 * dispersion[1] + direction * SIDE_ENGINE_AWAY / SCALE
+            )
+
+            # The constant 17 is a constant, that is presumably meant to be SIDE_ENGINE_HEIGHT.
+            # However, SIDE_ENGINE_HEIGHT is defined as 14
+            # This causes the position of the thrust on the body of the lander to change, depending on the orientation of the lander.
+            # This in turn results in an orientation dependent torque being applied to the lander.
+            impulse_pos = (
+                self.lander.position[0] + ox - tip[0] * 17 / SCALE,
+                self.lander.position[1] + oy + tip[1] * SIDE_ENGINE_HEIGHT / SCALE,
+            )
+            if self.render_mode is not None:
+                # particles are just a decoration, with no impact on the physics, so don't add them when not rendering
+                p = self._create_particle(0.7, impulse_pos[0], impulse_pos[1], s_power)
+                p.ApplyLinearImpulse(
+                    (
+                        ox * SIDE_ENGINE_POWER * s_power,
+                        oy * SIDE_ENGINE_POWER * s_power,
+                    ),
+                    impulse_pos,
+                    True,
+                )
+            self.lander.ApplyLinearImpulse(
+                (-ox * SIDE_ENGINE_POWER * s_power, -oy * SIDE_ENGINE_POWER * s_power),
+                impulse_pos,
+                True,
+            )
+
+        self.world.Step(1.0 / FPS, 6 * 30, 2 * 30)
+
+        pos = self.lander.position
+        vel = self.lander.linearVelocity
+
+        state = [
+            (pos.x - VIEWPORT_W / SCALE / 2) / (VIEWPORT_W / SCALE / 2),
+            (pos.y - (self.helipad_y + LEG_DOWN / SCALE)) / (VIEWPORT_H / SCALE / 2),
+            vel.x * (VIEWPORT_W / SCALE / 2) / FPS,
+            vel.y * (VIEWPORT_H / SCALE / 2) / FPS,
+            self.lander.angle,
+            20.0 * self.lander.angularVelocity / FPS,
+            1.0 if self.legs[0].ground_contact else 0.0,
+            1.0 if self.legs[1].ground_contact else 0.0,
+        ]
+        assert len(state) == 8
+
+        # Official reward computation is intentionally masked.
+        # Official reward computation is intentionally masked.
+        masked_reward = <OFFICIAL_REWARD_MASKED>
+        return np.array(state, dtype=np.float32), masked_reward, terminated, False, {}
+
+
+        Agent memory:
+        === Agent Memory ===
+
+## Evolution Summary
+| iter | action | target | score | len | verdict | diagnosis (LLM-generated) |
+|------|--------|--------|-------|-----|---------|---------------------------|
+| 0 | tune | unknown | -141.3 | 69 | failure | Could not parse JSON decision; inferred from code. |
+| 1 | mix | skeleton | -136.3 | 69 | failure | [OVERRIDE: rebuild blocked, skeleton_age=1<2] The current skeleton has only one ... |
+| 2 | rebuild | skeleton | -135.9 | 69 | failure | The skeleton has been tried for 2 iterations with scores -141.3 and -136.3, both... |
+
+## Iteration 0 — TUNE on unknown (score=-141.3, verdict=failure)
+Decision reasoning: Could not parse JSON decision; inferred from code.
+```python
+def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+    # Extract observation arrays
+    o = obs
+    n = next_obs
+
+    # Generic transition features
+    # Feature 1: Movement towards center - sum of absolute position changes
+    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(4))
+
+    # Feature 2: Velocity change - squared differences
+    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, 4))
+
+    # Feature 3: Angular stability - angle and angular velocity changes
+    angle_change = abs(n[4]) - abs(o[4])
+    ang_vel_change = abs(n[5]) - abs(o[5])
+
+    # Feature 4: Ground contact bonus
+    ground_contact = sum(n[6:8]) - sum(o[6:8])
+
+    # Feature 5: Action penalty (small cost to encourage efficient actions)
+    action_cost = 0.01 * action
+
+    # Stage-based weights that evolve with training_progress
+    # Early stage: focus on reaching center and stability
+    # Middle stage: balance movement and stability
+    # Late stage: fine-tune landing with ground contact
+
+    # Sigmoid-like transition based on training_progress
+    early_weight = max(0.0, 1.0 - 2.0 * training_progress)
+    mid_weight = 1.0 - abs(2.0 * training_progress - 1.0)
+    late_weight = max(0.0, 2.0 * training_progress - 1.0)
+
+    # Component rewards with stage-adaptive weights
+    reward = 0.0
+
+    # Position reward (early focus)
+    reward += early_weight * 0.5 * pos_change
+
+    # Velocity penalty (constant throughout)
+    reward += -0.1 * vel_change
+
+    # Angle stability (mid focus)
+    reward += mid_weight * 0.3 * (-angle_change - 0.1 * ang_vel_change)
+
+    # Ground contact bonus (late focus)
+    reward += late_weight * 2.0 * ground_contact
+
+    # Small action penalty (always present)
+    reward += -action_cost
+
+    return reward
+```
+
+## Iteration 1 — MIX on skeleton (score=-136.3, verdict=failure)
+Decision reasoning: [OVERRIDE: rebuild blocked, skeleton_age=1<2] The current skeleton has only one iteration with a score of -141.3 and episode length of 69. The per-step reward is -2.037, which is very punishing. The agent never survives past 200 steps (episode length 69). The skeleton has fundamental issues: pos_change uses abs(o[i]) - abs(n[i]) which is undirected (rewards any change in absolute value), vel_change is squared and penalizes all movement, angle_change and ang_vel_change use abs() which loses directional information, and ground_contact is a binary signal that may not provide useful gradient. The agent dies quickly, indicating the reward is too punishing for exploration. Need to rebuild with simpler, more directional signals that encourage survival and gentle movement.
+```python
+def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+    # Extract observation arrays
+    o = obs
+    n = next_obs
+
+    # Generic transition features
+    # Feature 1: Movement towards center - sum of absolute position changes
+    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(4))
+
+    # Feature 2: Velocity change - squared differences
+    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, 4))
+
+    # Feature 3: Angular stability - angle and angular velocity changes
+    angle_change = abs(n[4]) - abs(o[4])
+    ang_vel_change = abs(n[5]) - abs(o[5])
+
+    # Feature 4: Ground contact bonus
+    ground_contact = sum(n[6:8]) - sum(o[6:8])
+
+    # Feature 5: Action penalty (small cost to encourage efficient actions)
+    action_cost = 0.01 * action
+
+    # Stage-based weights that evolve with training_progress
+    # Early stage: focus on reaching center and stability
+    # Middle stage: balance movement and stability
+    # Late stage: fine-tune landing with ground contact
+
+    # Sigmoid-like transition based on training_progress
+    early_weight = max(0.0, 1.0 - 2.0 * training_progress)
+    mid_weight = 1.0 - abs(2.0 * training_progress - 1.0)
+    late_weight = max(0.0, 2.0 * training_progress - 1.0)
+
+    # Component rewards with stage-adaptive weights
+    reward = 0.0
+
+    # Position reward (early focus)
+    reward += early_weight * 0.5 * pos_change
+
+    # Velocity penalty (constant throughout)
+    reward += -0.1 * vel_change
+
+    # Angle stability (mid focus)
+    reward += mid_weight * 0.3 * (-angle_change - 0.1 * ang_vel_change)
+
+    # Ground contact bonus (late focus)
+    reward += late_weight * 2.0 * ground_contact
+
+    # Small action penalty (always present)
+    reward += -action_cost
+
+    return reward
+```
+
+## Iteration 2 — REBUILD on skeleton (score=-135.9, verdict=failure)
+Decision reasoning: The skeleton has been tried for 2 iterations with scores -141.3 and -136.3, both with episode length 69. Scores are essentially flat (no improvement), and the agent never survives past 200 steps. Per-step reward is very negative (-1.973 to -2.037), indicating the reward is fundamentally too punishing. The current components have multiple issues: pos_change uses abs() which is undirected, vel_change penalizes all movement (squared), angle_change loses directional info with abs(), and ground_contact is binary with poor gradient. The skeleton is broken and needs a complete rebuild with simpler, more directional signals that encourage survival first.
+```python
+def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+    # Extract observation arrays
+    o = obs
+    n = next_obs
+
+    # Generic transition features
+    # Feature 1: Movement towards center - sum of absolute position changes
+    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(4))
+
+    # Feature 2: Velocity change - squared differences
+    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, 4))
+
+    # Feature 3: Angular stability - angle and angular velocity changes
+    angle_change = abs(n[4]) - abs(o[4])
+    ang_vel_change = abs(n[5]) - abs(o[5])
+
+    # Feature 4: Ground contact bonus
+    ground_contact = sum(n[6:8]) - sum(o[6:8])
+
+    # Feature 5: Action penalty (small cost to encourage efficient actions)
+    action_cost = 0.01 * action
+
+    # Stage-based weights that evolve with training_progress
+    # Early stage: focus on reaching center and stability
+    # Middle stage: balance movement and stability
+    # Late stage: fine-tune landing with ground contact
+
+    # Sigmoid-like transition based on training_progress
+    early_weight = max(0.0, 1.0 - 2.0 * training_progress)
+    mid_weight = 1.0 - abs(2.0 * training_progress - 1.0)
+    late_weight = max(0.0, 2.0 * training_progress - 1.0)
+
+    # Component rewards with stage-adaptive weights
+    reward = 0.0
+
+    # Position reward (early focus)
+    reward += early_weight * 0.5 * pos_change
+
+    # Velocity penalty (constant throughout)
+    reward += -0.1 * vel_change
+
+    # Angle stability (mid focus)
+    reward += mid_weight * 0.3 * (-angle_change - 0.1 * ang_vel_change)
+
+    # Ground contact bonus (late focus)
+    reward += late_weight * 2.0 * ground_contact
+
+    # Small action penalty (always present)
+    reward += -action_cost
+
+    return reward
+```

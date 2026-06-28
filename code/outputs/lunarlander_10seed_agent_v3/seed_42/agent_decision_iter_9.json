@@ -1,0 +1,5 @@
+{
+  "action": "mix",
+  "target": "skeleton",
+  "reasoning": "[OVERRIDE: rebuild blocked, skeleton_age=1<2] The skeleton has been tried 8 times with scores flat/declining (-136.4, -139.1, -136.8, -136.4, -126.8, 3.7, -4.1, -14.1). The agent survives to 1000 steps but does nothing useful (per-step reward ~0.0). The current simple sum of abs differences is undirected and can reward moving away from zero. The fundamental design is broken. Need a complete rebuild with survival-focused components: survival bonus, gentle movement encouragement toward center, and minimal action penalties."
+}

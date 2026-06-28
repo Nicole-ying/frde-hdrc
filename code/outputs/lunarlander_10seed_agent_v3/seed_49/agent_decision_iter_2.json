@@ -1,0 +1,5 @@
+{
+  "action": "mix",
+  "target": "skeleton",
+  "reasoning": "The skeleton has 4 components: stability_progress (directional), transition_smoothness (undirected), action_cost, and ground_contact. Score dropped from 132.4 to 6.9 despite same code — likely a training seed issue or the skeleton is fragile. The transition_smoothness uses undirected squared change which rewards ANY change — this is harmful. The ground_contact bonus in late stage (weight 2.0) is too aggressive. The action_cost coefficient (-0.01) is negligible. I will: (1) replace undirected transition_smoothness with a directional version that penalizes deviation from stability; (2) reduce late-stage ground_contact weight; (3) increase action_cost coefficient slightly; (4) add a survival bonus to encourage longer episodes. The skeleton has potential (achieved 132.4 once) so I'll MIX rather than rebuild."
+}

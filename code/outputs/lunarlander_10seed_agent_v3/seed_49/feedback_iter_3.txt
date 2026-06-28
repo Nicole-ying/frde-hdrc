@@ -1,0 +1,10 @@
+Score: 191.3 | Success rate: 0.65 | Episode length: 450 | Per-step: 0.425 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: Score improved from 6.9 to 183.1 with the same skeleton, showing the skeleton CAN work. However, the transition_smoothness component uses undirected squared change which rewards ANY change - this is harmful. The ground_contact weight of 2.0 in late stage is too aggressive. The action_cost coefficient (-0.01) is negligible. I will: (1) replace undirected transition_smoothness with a directional version that penalizes deviation from stability; (2) reduce late-stage ground_contact weight; (3) increase action_cost coefficient; (4) add a survival bonus to encourage longer episodes. The skeleton has potential (achieved 183.1) so I'll MIX rather than rebuild.

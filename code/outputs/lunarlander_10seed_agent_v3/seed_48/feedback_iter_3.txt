@@ -1,0 +1,10 @@
+Score: -223.1 | Success rate: 0.00 | Episode length: 75 | Per-step: -2.991 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: [OVERRIDE: rebuild blocked, skeleton_age=1<2] The skeleton has been tried three times with identical structure and scores are flat/declining (-230.7, -210.7, -184.8) with very short episodes (72 steps) and extremely negative per-step reward (-2.585 to -3.2). The agent dies quickly, indicating the reward is fundamentally punishing. The skeleton has redundant components (diff_sq and stability both measure state-change magnitude), undirected signals (diff_sq rewards ANY change), and harsh action penalties that prevent exploration. Per-step reward is far too negative. Need a complete rebuild with simpler, safer components: survival bonus to keep agent alive, gentle directional movement encouragement, and very mild action costs. The per-step reward should be near zero or slightly positive.

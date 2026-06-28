@@ -1,0 +1,5 @@
+{
+  "action": "mix",
+  "target": "skeleton",
+  "reasoning": "[OVERRIDE: rebuild blocked, skeleton_age=1<2] Score is -230.7 with episode length 72 and per-step reward -3.198. The agent dies very quickly and the reward is fundamentally punishing. The current skeleton has been tried only once but the per-step reward is extremely negative (-3.198), indicating the reward signal is fundamentally broken. The diff_sq component is undirected (rewards ANY change), abs_change is directional but likely pointing the wrong way, and the action penalties are too harsh for early exploration. The stability penalty is redundant with diff_sq (both measure state-change magnitude). Need a complete rebuild with simpler, safer components: survival bonus, gentle movement encouragement, and very mild action costs. The per-step reward should be near zero or slightly positive to allow the agent to survive longer."
+}

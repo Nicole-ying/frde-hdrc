@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "The skeleton has been tried 4 times with identical code and scores are flat/declining (from -156.5 to -133.3 to -26.3 to -111.9). The per-step reward is very negative (-0.428) and episode length is short (261). The skeleton lacks critical components: (1) no stability signal for angle/angular velocity, (2) movement component uses undirected abs change, (3) no survival bonus, (4) no contact/landing signal. The skeleton is fundamentally insufficient for this task. Need to rebuild with: directional movement toward zero, stability signal, survival bonus, proper action cost, and contact bonus."
+}

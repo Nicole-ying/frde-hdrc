@@ -1,0 +1,10 @@
+Score: -352.5 | Success rate: 0.00 | Episode length: 114 | Per-step: -3.101 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: [OVERRIDE: rebuild blocked, skeleton_age=1<2] The skeleton has only 1 iteration with a score of -372.2, episode length 116, and per-step reward -3.203. The agent dies quickly (116 steps) and the per-step reward is very negative. The current components are: (1) movement_reward (abs_diff * 0.1) - directional but likely too small; (2) smoothness_penalty (-squared_change * 0.5) - undirected and penalizes ALL change; (3) action_cost - small; (4) ground_contact - uses info['ground_contact'] which may not exist. The skeleton is fundamentally broken: the smoothness penalty is undirected (rewards no movement), the movement reward is too weak, and there's no stability signal for angle/angular velocity. The agent never survives past 200 steps. A rebuild is needed with a simpler, more robust design: focus on survival bonus, angle stability, and gentle movement encouragement.

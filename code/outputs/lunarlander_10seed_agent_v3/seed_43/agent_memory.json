@@ -1,0 +1,122 @@
+[
+  {
+    "iteration": 0,
+    "action": "tune",
+    "target": "unknown",
+    "reasoning": "Could not parse JSON decision; inferred from code.",
+    "score": -141.2524237932192,
+    "episode_length": 69.35,
+    "success_rate": 0.0,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Movement towards center - sum of absolute position changes\n    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(4))\n    \n    # Feature 2: Velocity change - squared differences\n    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, 4))\n    \n    # Feature 3: Angular stability - angle and angular velocity changes\n    angle_change = abs(n[4]) - abs(o[4])\n    ang_vel_change = abs(n[5]) - abs(o[5])\n    \n    # Feature 4: Ground contact bonus\n    ground_contact = sum(n[6:8]) - sum(o[6:8])\n    \n    # Feature 5: Action penalty (small cost to encourage efficient actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights that evolve with training_progress\n    # Early stage: focus on reaching center and stability\n    # Middle stage: balance movement and stability\n    # Late stage: fine-tune landing with ground contact\n    \n    # Sigmoid-like transition based on training_progress\n    early_weight = max(0.0, 1.0 - 2.0 * training_progress)\n    mid_weight = 1.0 - abs(2.0 * training_progress - 1.0)\n    late_weight = max(0.0, 2.0 * training_progress - 1.0)\n    \n    # Component rewards with stage-adaptive weights\n    reward = 0.0\n    \n    # Position reward (early focus)\n    reward += early_weight * 0.5 * pos_change\n    \n    # Velocity penalty (constant throughout)\n    reward += -0.1 * vel_change\n    \n    # Angle stability (mid focus)\n    reward += mid_weight * 0.3 * (-angle_change - 0.1 * ang_vel_change)\n    \n    # Ground contact bonus (late focus)\n    reward += late_weight * 2.0 * ground_contact\n    \n    # Small action penalty (always present)\n    reward += -action_cost\n    \n    return reward",
+    "verdict": "failure",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_43\\reward_iter_0.py"
+  },
+  {
+    "iteration": 1,
+    "action": "mix",
+    "target": "skeleton",
+    "reasoning": "[OVERRIDE: rebuild blocked, skeleton_age=1<2] The current skeleton has only one iteration with a score of -141.3 and episode length of 69. The per-step reward is -2.037, which is very punishing. The agent never survives past 200 steps (episode length 69). The skeleton has fundamental issues: pos_change uses abs(o[i]) - abs(n[i]) which is undirected (rewards any change in absolute value), vel_change is squared and penalizes all movement, angle_change and ang_vel_change use abs() which loses directional information, and ground_contact is a binary signal that may not provide useful gradient. The agent dies quickly, indicating the reward is too punishing for exploration. Need to rebuild with simpler, more directional signals that encourage survival and gentle movement.",
+    "score": -136.31286844074418,
+    "episode_length": 69.1,
+    "success_rate": 0.0,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Movement towards center - sum of absolute position changes\n    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(4))\n    \n    # Feature 2: Velocity change - squared differences\n    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, 4))\n    \n    # Feature 3: Angular stability - angle and angular velocity changes\n    angle_change = abs(n[4]) - abs(o[4])\n    ang_vel_change = abs(n[5]) - abs(o[5])\n    \n    # Feature 4: Ground contact bonus\n    ground_contact = sum(n[6:8]) - sum(o[6:8])\n    \n    # Feature 5: Action penalty (small cost to encourage efficient actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights that evolve with training_progress\n    # Early stage: focus on reaching center and stability\n    # Middle stage: balance movement and stability\n    # Late stage: fine-tune landing with ground contact\n    \n    # Sigmoid-like transition based on training_progress\n    early_weight = max(0.0, 1.0 - 2.0 * training_progress)\n    mid_weight = 1.0 - abs(2.0 * training_progress - 1.0)\n    late_weight = max(0.0, 2.0 * training_progress - 1.0)\n    \n    # Component rewards with stage-adaptive weights\n    reward = 0.0\n    \n    # Position reward (early focus)\n    reward += early_weight * 0.5 * pos_change\n    \n    # Velocity penalty (constant throughout)\n    reward += -0.1 * vel_change\n    \n    # Angle stability (mid focus)\n    reward += mid_weight * 0.3 * (-angle_change - 0.1 * ang_vel_change)\n    \n    # Ground contact bonus (late focus)\n    reward += late_weight * 2.0 * ground_contact\n    \n    # Small action penalty (always present)\n    reward += -action_cost\n    \n    return reward",
+    "verdict": "failure",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_43\\reward_iter_1.py"
+  },
+  {
+    "iteration": 2,
+    "action": "rebuild",
+    "target": "skeleton",
+    "reasoning": "The skeleton has been tried for 2 iterations with scores -141.3 and -136.3, both with episode length 69. Scores are essentially flat (no improvement), and the agent never survives past 200 steps. Per-step reward is very negative (-1.973 to -2.037), indicating the reward is fundamentally too punishing. The current components have multiple issues: pos_change uses abs() which is undirected, vel_change penalizes all movement (squared), angle_change loses directional info with abs(), and ground_contact is binary with poor gradient. The skeleton is broken and needs a complete rebuild with simpler, more directional signals that encourage survival first.",
+    "score": -135.87977660534497,
+    "episode_length": 68.7,
+    "success_rate": 0.0,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Movement towards center - sum of absolute position changes\n    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(4))\n    \n    # Feature 2: Velocity change - squared differences\n    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, 4))\n    \n    # Feature 3: Angular stability - angle and angular velocity changes\n    angle_change = abs(n[4]) - abs(o[4])\n    ang_vel_change = abs(n[5]) - abs(o[5])\n    \n    # Feature 4: Ground contact bonus\n    ground_contact = sum(n[6:8]) - sum(o[6:8])\n    \n    # Feature 5: Action penalty (small cost to encourage efficient actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights that evolve with training_progress\n    # Early stage: focus on reaching center and stability\n    # Middle stage: balance movement and stability\n    # Late stage: fine-tune landing with ground contact\n    \n    # Sigmoid-like transition based on training_progress\n    early_weight = max(0.0, 1.0 - 2.0 * training_progress)\n    mid_weight = 1.0 - abs(2.0 * training_progress - 1.0)\n    late_weight = max(0.0, 2.0 * training_progress - 1.0)\n    \n    # Component rewards with stage-adaptive weights\n    reward = 0.0\n    \n    # Position reward (early focus)\n    reward += early_weight * 0.5 * pos_change\n    \n    # Velocity penalty (constant throughout)\n    reward += -0.1 * vel_change\n    \n    # Angle stability (mid focus)\n    reward += mid_weight * 0.3 * (-angle_change - 0.1 * ang_vel_change)\n    \n    # Ground contact bonus (late focus)\n    reward += late_weight * 2.0 * ground_contact\n    \n    # Small action penalty (always present)\n    reward += -action_cost\n    \n    return reward",
+    "verdict": "failure",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_43\\reward_iter_2.py"
+  },
+  {
+    "iteration": 3,
+    "action": "mix",
+    "target": "skeleton",
+    "reasoning": "[OVERRIDE: rebuild blocked, skeleton_age=1<2] The skeleton has been tried for 3 iterations with scores -141.3, -136.3, -135.9 — essentially flat with no improvement. Episode length is stuck at 69, meaning the agent dies very quickly. Per-step reward is ~-2.0, which is fundamentally too punishing. The current components are flawed: pos_change uses abs() which is undirected, vel_change penalizes all movement with squared differences, angle_change loses directional info with abs(), and ground_contact is binary with poor gradient. The skeleton is broken and needs a complete rebuild with simpler, more directional signals that encourage survival first.",
+    "score": -128.93457990028924,
+    "episode_length": 66.6,
+    "success_rate": 0.0,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Movement towards center - sum of absolute position changes\n    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(4))\n    \n    # Feature 2: Velocity change - squared differences\n    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, 4))\n    \n    # Feature 3: Angular stability - angle and angular velocity changes\n    angle_change = abs(n[4]) - abs(o[4])\n    ang_vel_change = abs(n[5]) - abs(o[5])\n    \n    # Feature 4: Ground contact bonus\n    ground_contact = sum(n[6:8]) - sum(o[6:8])\n    \n    # Feature 5: Action penalty (small cost to encourage efficient actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights that evolve with training_progress\n    # Early stage: focus on reaching center and stability\n    # Middle stage: balance movement and stability\n    # Late stage: fine-tune landing with ground contact\n    \n    # Sigmoid-like transition based on training_progress\n    early_weight = max(0.0, 1.0 - 2.0 * training_progress)\n    mid_weight = 1.0 - abs(2.0 * training_progress - 1.0)\n    late_weight = max(0.0, 2.0 * training_progress - 1.0)\n    \n    # Component rewards with stage-adaptive weights\n    reward = 0.0\n    \n    # Position reward (early focus)\n    reward += early_weight * 0.5 * pos_change\n    \n    # Velocity penalty (constant throughout)\n    reward += -0.1 * vel_change\n    \n    # Angle stability (mid focus)\n    reward += mid_weight * 0.3 * (-angle_change - 0.1 * ang_vel_change)\n    \n    # Ground contact bonus (late focus)\n    reward += late_weight * 2.0 * ground_contact\n    \n    # Small action penalty (always present)\n    reward += -action_cost\n    \n    return reward",
+    "verdict": "failure",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_43\\reward_iter_3.py"
+  },
+  {
+    "iteration": 4,
+    "action": "rebuild",
+    "target": "skeleton",
+    "reasoning": "The skeleton has been tried for 4 iterations with scores -141.3, -136.3, -135.9, -128.9 — essentially flat with no meaningful improvement. Episode length is stuck at ~69, meaning the agent dies very quickly. Per-step reward is ~-2.0, which is fundamentally too punishing. The current components are flawed: pos_change uses abs() which is undirected, vel_change penalizes all movement with squared differences, angle_change loses directional info with abs(), and ground_contact is binary with poor gradient. The skeleton is broken and needs a complete rebuild with simpler, more directional signals that encourage survival first. I will rebuild with a survival bonus, gentle movement encouragement, and minimal penalties.",
+    "score": -133.7475563256233,
+    "episode_length": 67.6,
+    "success_rate": 0.0,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    # Extract observation arrays\n    o = obs\n    n = next_obs\n    \n    # Generic transition features\n    # Feature 1: Movement towards center - sum of absolute position changes\n    pos_change = sum(abs(o[i]) - abs(n[i]) for i in range(4))\n    \n    # Feature 2: Velocity change - squared differences\n    vel_change = sum((n[i] - o[i]) ** 2 for i in range(2, 4))\n    \n    # Feature 3: Angular stability - angle and angular velocity changes\n    angle_change = abs(n[4]) - abs(o[4])\n    ang_vel_change = abs(n[5]) - abs(o[5])\n    \n    # Feature 4: Ground contact bonus\n    ground_contact = sum(n[6:8]) - sum(o[6:8])\n    \n    # Feature 5: Action penalty (small cost to encourage efficient actions)\n    action_cost = 0.01 * action\n    \n    # Stage-based weights that evolve with training_progress\n    # Early stage: focus on reaching center and stability\n    # Middle stage: balance movement and stability\n    # Late stage: fine-tune landing with ground contact\n    \n    # Sigmoid-like transition based on training_progress\n    early_weight = max(0.0, 1.0 - 2.0 * training_progress)\n    mid_weight = 1.0 - abs(2.0 * training_progress - 1.0)\n    late_weight = max(0.0, 2.0 * training_progress - 1.0)\n    \n    # Component rewards with stage-adaptive weights\n    reward = 0.0\n    \n    # Position reward (early focus)\n    reward += early_weight * 0.5 * pos_change\n    \n    # Velocity penalty (constant throughout)\n    reward += -0.1 * vel_change\n    \n    # Angle stability (mid focus)\n    reward += mid_weight * 0.3 * (-angle_change - 0.1 * ang_vel_change)\n    \n    # Ground contact bonus (late focus)\n    reward += late_weight * 2.0 * ground_contact\n    \n    # Small action penalty (always present)\n    reward += -action_cost\n    \n    return reward",
+    "verdict": "failure",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_43\\reward_iter_4.py"
+  },
+  {
+    "iteration": 5,
+    "action": "mix",
+    "target": "skeleton",
+    "reasoning": "[OVERRIDE: rebuild blocked, skeleton_age=1<2] The skeleton has been tried for 5 iterations with scores -141.3, -136.3, -135.9, -128.9, -133.7 — essentially flat with no meaningful improvement. Episode length is stuck at ~69, meaning the agent dies very quickly. Per-step reward is ~-2.0, which is fundamentally too punishing. The current components are flawed: pos_change uses abs() which is undirected, vel_change penalizes all movement with squared differences, angle_change loses directional info with abs(), and ground_contact is binary with poor gradient. The skeleton is broken and needs a complete rebuild with simpler, more directional signals that encourage survival first. I will rebuild with a survival bonus, gentle movement encouragement, and minimal penalties.",
+    "score": -4.05369760575153,
+    "episode_length": 1000,
+    "success_rate": 0.0,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n",
+    "verdict": "failure",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_43\\reward_iter_5.py"
+  },
+  {
+    "iteration": 6,
+    "action": "rebuild",
+    "target": "skeleton",
+    "reasoning": "The skeleton has been tried for 6 iterations with scores -141.3, -136.3, -135.9, -128.9, -133.7, -4.1. The last iteration (score=-4.1, len=1000) shows a dramatic improvement but the agent survived to 1000 steps with a negative score, meaning it's surviving but doing the wrong thing. The previous skeleton was fundamentally broken - it used undirected signals (abs() comparisons), punished all movement with squared velocity penalties, and had no survival bonus. The per-step reward was too negative. I need to rebuild with: 1) A survival bonus to encourage living longer, 2) Directional movement signals toward center, 3) Gentle velocity penalties that don't punish all movement, 4) Angle stability that preserves direction, 5) Ground contact reward for landing, 6) Minimal action penalty. The stage weights should keep early training penalties very low.",
+    "score": -14.074133964695498,
+    "episode_length": 982.3,
+    "success_rate": 0.0,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n",
+    "verdict": "failure",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_43\\reward_iter_6.py"
+  },
+  {
+    "iteration": 7,
+    "action": "mix",
+    "target": "skeleton",
+    "reasoning": "[OVERRIDE: rebuild blocked, skeleton_age=1<2] The skeleton has been tried for 6 iterations with scores -141.3, -136.3, -135.9, -128.9, -133.7, -4.1, -14.1. The last two iterations (score=-4.1 and -14.1, len=1000) show the agent survives to max steps but with negative scores, meaning it survives but does the wrong thing. The previous skeleton was fundamentally broken - it used undirected signals (abs() comparisons), punished all movement with squared velocity penalties, and had no proper survival bonus. The per-step reward was too negative. I need to rebuild with: 1) A survival bonus to encourage living longer, 2) Directional movement signals toward center, 3) Gentle velocity penalties that don't punish all movement, 4) Angle stability that preserves direction, 5) Ground contact reward for landing, 6) Minimal action penalty. The stage weights should keep early training penalties very low.",
+    "score": -9.613547791641036,
+    "episode_length": 1000,
+    "success_rate": 0.0,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n",
+    "verdict": "failure",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_43\\reward_iter_7.py"
+  },
+  {
+    "iteration": 8,
+    "action": "rebuild",
+    "target": "skeleton",
+    "reasoning": "The skeleton has been tried for 7 iterations with flat/declining scores. The last 3 iterations used an extremely simple reward (sum of abs differences) that achieved episode length 1000 but scores around -4 to -14, meaning the agent survives but does the wrong thing. The per-step reward is too negative and the signal is undirected. Need a complete rebuild with: 1) survival bonus, 2) directional movement toward center, 3) gentle velocity penalty, 4) angle stability, 5) ground contact reward, 6) action cost. Stage weights should keep early penalties low.",
+    "score": 0.33364952990447777,
+    "episode_length": 1000,
+    "success_rate": 0.0,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n",
+    "verdict": "failure",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_43\\reward_iter_8.py"
+  },
+  {
+    "iteration": 9,
+    "action": "mix",
+    "target": "skeleton",
+    "reasoning": "[OVERRIDE: rebuild blocked, skeleton_age=1<2] The skeleton has been tried for 8 iterations with flat/declining scores. The last 3 iterations used an extremely simple reward (sum of abs differences) that achieved episode length 1000 but scores around -4 to -14, meaning the agent survives but does the wrong thing. The per-step reward is too negative and the signal is undirected. Need a complete rebuild with: 1) survival bonus, 2) directional movement toward center, 3) gentle velocity penalty, 4) angle stability, 5) ground contact reward, 6) action cost. Stage weights should keep early penalties low.",
+    "score": -0.6393328208771039,
+    "episode_length": 955.5,
+    "success_rate": 0.05,
+    "code": "def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):\n    total = 0.0\n    count = min(len(obs), len(next_obs))\n    for i in range(count):\n        total += abs(float(obs[i])) - abs(float(next_obs[i]))\n    return float(total)\n",
+    "verdict": "failure",
+    "code_path": "outputs\\lunarlander_10seed_agent_v3\\seed_43\\reward_iter_9.py"
+  }
+]

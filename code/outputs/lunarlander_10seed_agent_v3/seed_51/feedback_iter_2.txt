@@ -1,0 +1,10 @@
+Score: -124.1 | Success rate: 0.00 | Episode length: 72 | Per-step: -1.722 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: The skeleton has been tried for 2 iterations with scores of -124.8 and -123.7, both with episode lengths of ~70 steps. The scores are essentially flat (no improvement), and the agent never survives past 200 steps. Per-step reward is very negative (~-1.7), indicating the reward is fundamentally punishing. The skeleton has multiple issues: (1) movement_quality = sum(abs(o)-abs(n)) is undirected and may not be correct for all state dimensions; (2) smoothness_reward uses squared changes which penalizes any change regardless of direction; (3) action_cost is a flat penalty that doesn't scale; (4) terminal_bonus from info is unreliable. The agent dies quickly, suggesting the reward is too punishing. I need to rebuild with a simpler, more balanced design that provides a strong survival incentive and proper directional signals.

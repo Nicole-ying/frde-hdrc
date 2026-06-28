@@ -1,0 +1,10 @@
+Score: 240.3 | Success rate: 0.90 | Episode length: 399 | Per-step: 0.602 | Errors: 0
+Rules reminder:
+- No environment-specific semantics. Black-box MDP only.
+- Search for generic transition signals from the visible physics code.
+- If episode length is very short, the reward is unsafe.
+- If latest is worse than best but best is still poor, prefer structural restart.
+
+- official reward leakage guard: original_reward is not used.
+- domain-knowledge guard: no forbidden task-specific terms detected.
+Last agent diagnosis: [OVERRIDE: rebuild blocked, skeleton_age=1<2] The skeleton has been tried for 4 iterations with scores declining from 188.4 to 173.6 to -215.9 to 40.0, and episode length dropping from 781 to 327 to 124 to 785 (recovered but score still poor). The per-step reward is now 0.051, which is barely positive. The skeleton has proven unfixable through tuning - the same 4 components with only coefficient changes have failed to produce consistent improvement. Key issues: (1) The smoothness penalty (squared_change) is undirected and punishes all movement, (2) The abs_reduction component rewards moving toward zero but may conflict with lateral movement needs, (3) The action_cost is too harsh for early exploration, (4) The leg_contact reward is too small to guide landing. I will rebuild with a simpler, more robust design using 5 clean components: directional movement toward zero, velocity damping, angle stability, leg contact bonus, and a small survival bonus. Stage weights will keep early penalties very low.

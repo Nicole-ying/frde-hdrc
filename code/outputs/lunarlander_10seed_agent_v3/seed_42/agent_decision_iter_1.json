@@ -1,0 +1,5 @@
+{
+  "action": "mix",
+  "target": "skeleton",
+  "reasoning": "[OVERRIDE: rebuild blocked, skeleton_age=1<2] Score -136.4 with episode length 69 indicates the agent dies very quickly. Per-step reward is -1.982, which is extremely punishing. The skeleton has only been tried once but the fundamental design is flawed: (1) pos_change and ang_change use abs(o[i])-abs(n[i]) which is undirected and can reward moving away from zero, (2) vel_change uses squared differences which is undirected and penalizes ANY velocity change, (3) contact_bonus uses difference of sums which is noisy, (4) action_cost is too harsh for a discrete action space, (5) exploration_bonus is tiny. The agent cannot survive because the reward is dominated by penalties. Need a complete rebuild with simpler, survival-focused components: survival bonus, gentle movement encouragement, and minimal action penalties."
+}

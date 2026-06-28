@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "The skeleton has 4 components: abs_reduction (movement toward zero), squared_change (smoothness penalty), action_cost (efficiency), and leg_contact (stability). The score dropped from 188.4 to 173.6 and episode length dropped from 781 to 327, indicating the agent is dying sooner. The per-step reward is positive (0.530) but the short episodes suggest the agent is being punished too harshly. The main issue is likely that the smoothness penalty (squared_change) is too aggressive in early stages, causing the agent to avoid necessary movements and crash. I'll reduce the smoothness penalty magnitude in early and middle stages, and slightly increase the leg_contact reward to encourage landing. The skeleton is fundamentally sound - it just needs better coefficient calibration."
+}

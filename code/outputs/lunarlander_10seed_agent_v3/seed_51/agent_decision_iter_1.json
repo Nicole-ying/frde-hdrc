@@ -1,0 +1,5 @@
+{
+  "action": "mix",
+  "target": "skeleton",
+  "reasoning": "[OVERRIDE: rebuild blocked, skeleton_age=1<2] The current skeleton has only 1 iteration with a score of -124.8 and episode length of 70, which is very short. The per-step reward is -1.777, indicating the reward is fundamentally punishing the agent. The skeleton has multiple issues: (1) movement_quality = sum(abs(o)-abs(n)) is undirected - it rewards any movement toward zero, which may not be correct for all state dimensions; (2) smoothness_reward uses squared changes which penalizes any change regardless of direction; (3) action_cost is a flat penalty that doesn't scale with training; (4) terminal_bonus from info is weak and unreliable. The agent dies quickly (70 steps), suggesting the reward is too punishing. I need to rebuild with a simpler, more balanced design that provides a strong survival incentive and proper directional signals."
+}

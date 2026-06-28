@@ -1,0 +1,5 @@
+{
+  "action": "mix",
+  "target": "skeleton",
+  "reasoning": "[OVERRIDE: rebuild blocked, skeleton_age=1<2] The skeleton has only 1 iteration with a score of -249.7, episode length 147, and per-step reward -1.698. The agent dies quickly and the reward is fundamentally punishing. The current components are problematic: abs_change and sq_change are redundant (both measure state-change magnitude), the action_cost is too high, and ground_contact_bonus may not be available. The per-step reward is very negative, indicating the reward signal is fundamentally broken. Since the agent never survives past 200 steps and the score is very negative, a rebuild is warranted to create a simpler, more effective skeleton with proper directional signals and lower early-stage penalties."
+}

@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "The skeleton has been tried for 6 iterations with scores of -124.8, -123.7, -124.1, -123.5, -117.0, -13.9. While iteration 5 showed improvement (score=-13.9, len=1000), the per-step reward is still very negative (-0.0139), and the skeleton has been fundamentally broken across multiple iterations. The core issue is that the skeleton uses undirected signals (sum(abs(o)-abs(n))) and lacks proper directional guidance. The agent survives but doesn't learn the right behavior. A complete rebuild is needed with: (1) a strong survival bonus to keep the agent alive, (2) directional stability signals that reward moving toward zero for position/velocity/angle, (3) proper stage weighting that starts with exploration and transitions to precision, (4) action penalty that scales with training progress."
+}

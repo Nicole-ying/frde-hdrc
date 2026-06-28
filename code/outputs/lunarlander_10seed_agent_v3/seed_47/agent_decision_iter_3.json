@@ -1,0 +1,5 @@
+{
+  "action": "rebuild",
+  "target": "skeleton",
+  "reasoning": "The skeleton has been tried for 3 iterations with scores declining from 188.4 to 173.6 to -215.9, and episode length dropping from 781 to 327 to 124. The per-step reward is now -1.737, indicating the reward signal is fundamentally punishing the agent. The same skeleton with only coefficient tuning has failed to reverse the decline. The skeleton is stuck and needs a complete rebuild with a simpler, more robust design. Key issues: (1) The smoothness penalty (squared_change) is undirected and punishes all movement, (2) The abs_reduction component rewards moving toward zero but may conflict with the need to move laterally, (3) The action_cost is too harsh for early exploration, (4) The leg_contact reward is too small to guide landing. I will rebuild with 5 clean components: directional movement toward zero, velocity damping, angle stability, leg contact bonus, and a small survival bonus. Stage weights will keep early penalties very low."
+}
