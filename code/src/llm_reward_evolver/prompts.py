@@ -15,13 +15,12 @@ def build_initial_prompt(
     reward_rule = _reward_rule(allow_original_reward)
     return dedent(f"""
     You are a reward engineer writing reward functions for RL tasks.
-    Create a reward function to help the agent learn the task.
-    Use only the provided observation and action variables.
+    Your goal is to create a reward function to help the agent learn the task.
 
     Task description:
     {task_description}
 
-    Environment step source (shows how observations are constructed
+    Environment code (the step function shows how observations are constructed
     from the physics engine — the official reward is masked):
     {eureka_context}
 
@@ -31,16 +30,18 @@ def build_initial_prompt(
         ...
         return total_reward
 
-    Coding rules:
+    Coding rules, adapted from Eureka:
     - Return a single float reward.
-    - Use generic variable names (o=obs, n=next_obs).
-    - Keep rewards numerically stable. Prefer smooth transformations.
+    - Normalize rewards using smooth transformations (e.g. exp, tanh, sqrt).
+      Introduce temperature/scale parameters for each component.
     - {hrdc_rule}
     - {reward_rule}
+    - Keep rewards numerically stable. Try to make everything smooth.
+    - Use generic names: o=obs, n=next_obs.
     - Do not import modules. No try/except, classes, lambdas, file I/O, eval, exec.
-    - Use only: obs, action, next_obs, info, training_progress.
+    - Only create the reward function, do not create more functions.
     - Do not manually clamp the reward.
-    - Output only the Python code.
+    - Output only the Python code, followed by a brief explanation.
     """).strip()
 
 
