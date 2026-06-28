@@ -1,0 +1,28 @@
+[
+  {
+    "iteration": 0,
+    "score": -112.45018498414659,
+    "success_rate": 0.0,
+    "mean_episode_length": 70.45,
+    "converged": false,
+    "failure_mode": "",
+    "reward_code_path": "outputs\\smoke_eureka_v3\\reward_iter_0.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  },
+  {
+    "iteration": 1,
+    "score": -114.17632274849454,
+    "success_rate": 0.0,
+    "mean_episode_length": 71.55,
+    "converged": false,
+    "failure_mode": "",
+    "reward_code_path": "outputs\\smoke_eureka_v3\\reward_iter_1.py",
+    "interrupted": false,
+    "error_message": "",
+    "reward_error_count": 0,
+    "reward_last_error": ""
+  }
+]

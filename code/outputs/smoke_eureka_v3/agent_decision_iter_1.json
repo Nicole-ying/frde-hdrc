@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "The current reward function has a reasonable skeleton but the score is very poor (-112.5) with short episodes (70 steps). The main issues are: 1) The progress reward is too aggressive and may encourage risky behavior. 2) The velocity penalties are too harsh for early exploration. 3) The landing/crash rewards are too sparse and may not provide enough learning signal. 4) The fuel penalty is unnecessary and may discourage the agent from using engines when needed. I'll simplify the reward to focus on: distance to pad (directional), velocity (smoothness), angle stability, and a simple survival bonus. I'll remove the complex landing/crash logic and fuel penalty, and use a more balanced weighting scheme."
+}
