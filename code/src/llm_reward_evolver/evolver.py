@@ -69,8 +69,6 @@ class RewardEvolver:
                     "Structural restart: the skeleton has been tried for multiple iterations "
                     "and proven unfixable. Generate a completely new design from scratch."
                 )
-                # 🆕 清空 Memory：旧骨架已抛弃，不保留
-                agent_memory = AgentMemory(self.output_dir / "agent_memory.json")
 
             if current_code is None:
                 if iteration == 0 or not agent_memory.entries:
