@@ -51,6 +51,7 @@ class RewardEvolver:
             self.config.mask_official_reward,
         )
         eureka_prompt_block = eureka_context.to_prompt_block()
+        task_desc = eureka_context.task_description or task_desc
         memory = RewardSearchMemory(self.output_dir / "reward_search_memory.json")
         agent_memory = AgentMemory(self.output_dir / "agent_memory.json")  # 🆕
         records: List[IterationRecord] = []
@@ -75,7 +76,7 @@ class RewardEvolver:
                     # 真正的 iter0：没有任何历史
                     prompt = build_initial_prompt(
                         self.config.env_name,
-                        self.config.task_description,
+                        task_desc,
                         observation_desc,
                         action_desc,
                         self.config.reward_structure,
@@ -87,7 +88,7 @@ class RewardEvolver:
                     # 🆕 REBUILD：保留 memory + 骨架诊断，但不传旧代码
                     prompt = build_refine_prompt(
                         self.config.env_name,
-                        self.config.task_description,
+                        task_desc,
                         "",  # 无 current_code
                         feedback,
                         "",  # 无 best_code
@@ -101,7 +102,7 @@ class RewardEvolver:
             else:
                 prompt = build_refine_prompt(
                     self.config.env_name,
-                    self.config.task_description,
+                    task_desc,
                     current_code,
                     feedback,
                     best_code,

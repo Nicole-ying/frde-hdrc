@@ -1,0 +1,5 @@
+{
+  "action": "tune",
+  "target": "skeleton",
+  "reasoning": "The skeleton is adequate but the agent is failing to learn. The main issues are: 1) survival_reward is too binary and harsh (-10 for crashing), 2) progress_reward is too small compared to penalties, 3) stability penalties are too aggressive early on, 4) landing_bonus is too large and sparse. The agent needs a smoother reward landscape with better balance between components."
+}

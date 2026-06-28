@@ -1,36 +1,26 @@
-You are an autonomous reinforcement-learning reward-search agent.
-        Generate one Python function named compute_reward with this exact signature:
+You are a reward engineer writing reward functions for RL tasks.
+    Create a reward function to help the agent learn the task.
+    Use only the provided observation and action variables.
 
-        def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
-            ...
+    Task description:
+    Keep the agent alive and solve the task.
 
-        Requirements:
-        - Return a single float reward.
-        - Do not import modules.
-        - Do not use try/except, classes, lambdas, file I/O, eval, exec, or external libraries.
-        - Use only obs, action, next_obs, info, and training_progress.
-        - Use an HRDC-style structure: propose generic reward components from observed transition signals, then combine them with stage weights based on training_progress. Each component should have its own weight that evolves across training stages.
-        - The official reward is masked and must not be used. Do not reference original_reward in the generated reward code; derive the training reward only from obs, action, next_obs, info, and training_progress.
-        - Keep the reward numerically stable.
-        - Use only information present in the task description and the masked step source.
-        - Do not reconstruct, approximate, or copy the masked official reward formula.
-        - Search for reusable signals from obs, next_obs, action, info, and training_progress only.
-        - A good black-box pattern is to create generic arrays o and n, then use dimension-agnostic
-          transition features such as sum(abs(o[i]) - abs(n[i])), sum((n[i] - o[i]) ** 2),
-          small action cost, and stage weights. Keep variable names generic.
-        - Do not manually clamp the reward inside compute_reward; the training framework performs final clipping.
-        - Output only Python code.
-
-        Environment: BlackBoxControlEnv
-        Observation interface: Box([ -2.5        -2.5       -10.        -10.         -6.2831855 -10.
-  -0.         -0.       ], [ 2.5        2.5       10.        10.         6.2831855 10.
-  1.         1.       ], (8,), float32)
-        Action interface: Discrete(4)
-        Task: Black-box control task.
-
-        Eureka-style context:
-        Task description file:
-Black-box control task. The agent receives observations from the environment and must learn a training reward from the masked environment source. The official reward formula is intentionally hidden from the reward-generation model. Generate a training reward that uses generic transition signals from obs, action, next_obs, info, and training_progress, and avoids hand-written task semantics or any reconstruction of the masked official reward.
+    Environment step source (shows how observations are constructed
+    from the physics engine — the official reward is masked):
+    Task description file:
+This environment is a classic rocket trajectory optimization problem. It is optimal to fire the engine at full throttle or turn it off. This is the reason why this environment has discrete actions: engine on or off.
+The landing pad is always at coordinates (0,0). The coordinates are the first two numbers in the state vector. Landing outside of the landing pad is possible. Fuel is infinite, so an agent can learn to fly and then land on its first attempt.
+The goal is to land at the pad in the middle of the two flags, as fast as possible, with the least fuel spent. The lander starts at the top center of the viewport with a random initial force applied to its center of mass.
+Action Space: There are four discrete actions available:
+    0: do nothing
+    1: fire left orientation engine
+    2: fire main engine
+    3: fire right orientation engine
+Observation Space: The state is an 8-dimensional vector: the coordinates of the lander in x & y, its linear velocities in x & y, its angle, its angular velocity, and two booleans that represent whether each leg is in contact with the ground or not.
+The episode finishes if:
+    1) the lander crashes (the lander body gets in contact with the moon);
+    2) the lander gets outside of the viewport (`x` coordinate is greater than 1);
+    3) the lander is not awake.
 
 Environment step source with official reward masked:
 def step(self, action):
@@ -202,3 +192,21 @@ def step(self, action):
         # Official reward computation is intentionally masked.
         masked_reward = <OFFICIAL_REWARD_MASKED>
         return np.array(state, dtype=np.float32), masked_reward, terminated, False, {}
+
+
+    Write a Python function with this EXACT signature:
+
+    def compute_reward(obs, action, next_obs, original_reward, info, training_progress=0.0):
+        ...
+        return total_reward
+
+    Coding rules:
+    - Return a single float reward.
+    - Use generic variable names (o=obs, n=next_obs).
+    - Keep rewards numerically stable. Prefer smooth transformations.
+    - Use HRDC: each reward component has its own weight that evolves with training_progress. Early training (progress<0.3): prioritize exploration, keep penalties low. Middle (0.3-0.7): balance. Late (>=0.7): prioritize precision (contact, stability).
+    - Do NOT reference original_reward. Derive the reward only from obs, action, next_obs, info, and training_progress.
+    - Do not import modules. No try/except, classes, lambdas, file I/O, eval, exec.
+    - Use only: obs, action, next_obs, info, training_progress.
+    - Do not manually clamp the reward.
+    - Output only the Python code.
